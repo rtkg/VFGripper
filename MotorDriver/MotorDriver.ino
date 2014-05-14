@@ -3,8 +3,9 @@
 
 int M1_IN1=24; //Motor input 1
 int M1_IN2=25; //Motor input 2
-int M1_SF=26; // Motor status flag
-int M1_D2=6;  // PWM pin
+int M1_SF=26;  // Motor status flag
+int EN =27;    //Driver board enable pin
+int M1_D2=6;   // PWM pin
 
 int count = 0;
  
@@ -12,11 +13,14 @@ void setup() {
   pinMode(M1_IN1,OUTPUT);
   pinMode(M1_IN2,OUTPUT);
   pinMode(M1_SF,INPUT);
+  pinMode(EN,OUTPUT);
   pinMode(M1_D2,OUTPUT);
   
   analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
   
   Serial.begin(9600); //open a serial connection
+  
+  digitalWrite(EN,HIGH); //Enable the driver board
 }
 
 void loop() 

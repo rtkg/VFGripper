@@ -41,11 +41,11 @@ void loop()
     digitalWrite(M1_IN2,LOW);  
   }  
   
+  delay(2000); //wait 2 seconds
+  
   analogWrite(M1_D2, map(control_value, 0, 1023, 0, 4095)); //map the control value in the PWM range
   Serial.print(" , 12-bit PWM value : ");
   Serial.print(map(control_value, 0, 1023, 0, 4095));
-  
-  delay(2000); //wait 2 seconds
   
   count++;
 }

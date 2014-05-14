@@ -4,7 +4,7 @@
 int M1_IN1=24; //Motor input 1
 int M1_IN2=25; //Motor input 2
 int M1_SF=26;  // Motor status flag
-int M1_FB=A0; //54;  //Analog input A0 for current sensing on Motor 1
+int M1_FB=A0;  //Analog input A0 for current sensing on Motor 1
 int EN =27;    //Driver board enable pin
 int M1_D2=6;   // PWM pin
 

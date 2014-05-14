@@ -4,7 +4,7 @@
 int M1_IN1=24; //Motor input 1
 int M1_IN2=25; //Motor input 2
 int M1_SF=26;  // Motor status flag
-int M1_FB=54;  //Analog input A0 for current sensing on Motor 1
+int M1_FB=A0; //54;  //Analog input A0 for current sensing on Motor 1
 int EN =27;    //Driver board enable pin
 int M1_D2=6;   // PWM pin
 
@@ -21,6 +21,7 @@ void setup() {
   pinMode(M1_D2,OUTPUT);
   
   analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
+  analogReadResolution(12); //sets the resolution of the analogRead(...) function to 12 bit, i.e., between 0 - 4095
   
   Serial.begin(9600); //open a serial connection
   
@@ -29,7 +30,7 @@ void setup() {
 
 void loop() 
 {
-  float control_value=200;
+  float control_value=500;
   
   //M1_IN1 and M1_IN2 set the direction
   if (count%2 == 0)

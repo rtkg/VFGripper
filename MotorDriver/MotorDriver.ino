@@ -15,6 +15,8 @@ void setup() {
   pinMode(M1_D2,OUTPUT);
   
   analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
+  
+  Serial.begin(9600); //open a serial connection
 }
 
 void loop() 

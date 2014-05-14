@@ -9,6 +9,8 @@ int EN =27;    //Driver board enable pin
 int M1_D2=6;   // PWM pin
 
 int count = 0;
+
+int cs_m1 = 0; //value of the current sensor for motor 1 
  
 void setup() {
   pinMode(M1_IN1,OUTPUT);
@@ -41,11 +43,15 @@ void loop()
     digitalWrite(M1_IN2,LOW);  
   }  
   
-  delay(2000); //wait 2 seconds
-  
   analogWrite(M1_D2, map(control_value, 0, 1023, 0, 4095)); //map the control value in the PWM range
   Serial.print(" , 12-bit PWM value : ");
   Serial.print(map(control_value, 0, 1023, 0, 4095));
+  
+  delay(2000); //wait 2 seconds
+  
+  cs_m1 = analogRead(M1_FB);    // read the current sensor
+  Serial.print(" , CS value : ");
+  Serial.println(cs_m1);    
   
   count++;
 }

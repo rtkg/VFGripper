@@ -15,7 +15,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   processMessage();
   Serial.println(target_val, DEC);  
-  //Serial.println(mode, DEC);
+  Serial.println(mode, DEC);
   delay(100);
 }
 

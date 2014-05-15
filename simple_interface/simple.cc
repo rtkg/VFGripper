@@ -30,7 +30,9 @@ set_interface_attribs (int fd, int speed, int parity)
     tty.c_cflag &= ~CSTOPB;
     tty.c_cflag &= ~CSIZE;
     tty.c_cflag |= CS8;
-   
+  
+    tty.c_lflag |= ICANON;
+#if 0 
     /* no hardware flow control */
     tty.c_cflag &= ~CRTSCTS;
     /* enable receiver, ignore status lines */
@@ -43,17 +45,9 @@ set_interface_attribs (int fd, int speed, int parity)
     tty.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     /* disable output processing */
     tty.c_oflag &= ~OPOST;
-    //tty.c_cc[VMIN]  = 20;
-    //tty.c_cc[VTIME] = 1;
-    
-    // no flow control
-    /*tty.c_cflag &= ~CRTSCTS;
-    tty.c_cflag |= CREAD | CLOCAL;  // turn on READ & ignore ctrl lines
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // turn off s/w flow ctrl
-    tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // make raw
-    tty.c_oflag &= ~OPOST; // make raw
-    tty.c_cc[VMIN]  = 0;
-    tty.c_cc[VTIME] = 20;*/
+    tty.c_cc[VMIN]  = 20;
+    tty.c_cc[VTIME] = 20;
+#endif
 
     if (tcsetattr (fd, TCSANOW, &tty) != 0)
     {
@@ -83,7 +77,7 @@ int main(int argc, char* argv[]) {
     }	
     std::cout<<"connecting to "<<portname<<" sending "<<comm<<" "<<pos<<std::endl;
 
-    int fd = open (portname, O_RDWR | O_NOCTTY);
+    int fd = open (portname, O_RDWR | O_NOCTTY | O_NDELAY);
     if (fd < 0)
     {
 	printf("error %d opening %s: %s", errno, portname, strerror (errno));
@@ -91,7 +85,7 @@ int main(int argc, char* argv[]) {
     }
     sleep(2);
 
-    set_interface_attribs (fd, B9600, 0);  // set speed to 9600 bps, 8n1 (no parity)
+    set_interface_attribs (fd, B19200, 0);  // set speed to 9600 bps, 8n1 (no parity)
     tcflush(fd, 0);
 
     short msg_size = sizeof(short) + 3; 
@@ -113,22 +107,31 @@ int main(int argc, char* argv[]) {
     FD_SET(fd, &rfds);
 
     /* Wait up to five seconds. */
-    tv.tv_sec = 1;
+    tv.tv_sec = 5;
     tv.tv_usec = 0;
+    
+    char buf [1000];
+    int sofar=0;
 
-    retval = select(fd+1, &rfds, NULL, NULL, &tv);
-    /* Don't rely on the value of tv now! */
-
-    if (retval == -1)
-	perror("select()");
-    else if (retval)
-	printf("Data is available now.\n");
-    else
-	printf("No data within five seconds.\n");
-
-    char buf [100];
-    int n = read (fd, buf, sizeof(buf));  // read up to 100 characters if ready to read
-    std::cout<<n<<" read "<<buf<<std::endl;
-
+    while(1) {
+	retval = select(fd+1, &rfds, NULL, NULL, NULL); //&tv);
+	/* Don't rely on the value of tv now! */
+/*
+	if (retval == -1)
+	    perror("select()");
+	else if (retval)
+	    printf("Data is available now.\n");
+	else
+	    printf("No data within five seconds.\n");
+*/
+	if(sofar > 500) {
+	    cout<<buf;
+	    sofar=0;
+	}
+	int n = read (fd, buf+sofar, sizeof(buf)-sofar);  // read up to 100 characters if ready to read
+	if ( n>0) {
+	    sofar+=n;
+	}
+    }
     close(fd);
 }

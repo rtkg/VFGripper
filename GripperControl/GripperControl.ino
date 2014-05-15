@@ -1,6 +1,11 @@
 //Low-level gripper control
 //Robert Krug, Todor Stoyanov 13/06/2014
 
+#define POSITION_MODE 0
+#define CURRENT_MODE 1
+#define BELT_MODE 2
+#define NO_MODE 3
+
 //======================= Struct Definitions ======================
 struct MotorControlPins{
   int IN1_; //Motor input 1 pin
@@ -35,6 +40,7 @@ struct PIDParameters{
 struct SensorStates
 {
   int reading_; //raw sensor value
+  int offset_;
   float v_;     //sensor value
   float dv_;    //time-derivative of the sensor value
   
@@ -43,21 +49,31 @@ struct SensorStates
 
 struct ControlStates
 {
-  float r_; //setpoint value
+  float r_; //setpoint value at current iteration
+  float rf_; //final setpoint value
+  float ri_; //initial setpoint value
   float e_; //error 
   float de_; //error derivative
+
+  float ti_; //time when we initialized motion (seconds)
+  float T_; //time for executing the loop
   
-  ControlStates(float r, float e, float de) : r_(r), e_(e), de_(de) {};
+  ControlStates(float r, float e, float de, float T) : r_(r), e_(e), de_(de), T_(T){};
 };
 //======================= Global Variables ========================
 MotorControlPins* m1_pins=new MotorControlPins(24, 25, 26, 27, A0, 6);     //Motor 1 Arduino pins
-PIDParameters* pid_m1_pc=new PIDParameters(0.0, 0.0, 0.0, 4095.0, -4095.0, 0.0); //Position controller PID parameters for Motor 1
-ControlStates* cs1=new ControlStates(0.0, 0.0, 0.0); //Setpoint and error for drive 1
+PIDParameters* pid_m1_pc=new PIDParameters(50.0, 0.0, 0.0, 4095.0, -4095.0, 0.0); //Position controller PID parameters for Motor 1
+ControlStates* cs1=new ControlStates(0.0, 0.0, 0.0, 0.0); //Setpoint and error for drive 1
 
 SensorPins* e1_pins=new SensorPins(31, 33, 35); //Encoder 1 pins
 SensorStates* e1_s=new SensorStates(0, 0.0 ,0.0); //Sensor states for encoder 1
 
-int dT = 1000; //Sample time in microseconds
+int dT = 10000; //Sample time in microseconds
+int t_old, t_new;
+int mode = NO_MODE;
+
+bool beltsInited = false;
+
 
 //======================= Initialization ==========================
 void setup() {
@@ -80,6 +96,8 @@ void setup() {
   analogReadResolution(12); //sets the resolution of the analogRead(...) function to 12 bit, i.e., between 0 - 4095
   
   Serial.begin(19200); //open a serial connection
+  Serial.println("setup done");
+  t_old = micros();
 }
 //====================  Function Declarations ===========================
 void update(); //Simple state machine which reads sensors, computes and sets controls
@@ -92,20 +110,30 @@ byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta 
 //============================== Loop ===================================
 void loop() 
 {
+  t_new = micros();
   //Do nothing if the sampling period didn't pass yet   
-  if(micros()%dT != 0) 
+  if(abs(t_new - t_old) < dT) 
     return;
-   
-  update(); //Read sensors, compute and send controls
-
+  t_old = t_new;
+  
+  processMessage();
+  if (mode == POSITION_MODE) {
+    update(); //Read sensors, compute and send controls
+  } else {
+    delay(100);
+  }
+  
+  
   //TODO: write stuff to the output serial connection ... could be done with a lower frequency or only when triggering a request
-
+  
 }
 //====================  Function Implementations =========================
 void update()
 {
   computeEncoderStates(e1_s, e1_pins); //Compute angle + velocity of encoder 1
-  float r1=0;  //update the setpoint for drive 1 
+  float r1=minimumJerk((*cs1).ti_,(float)millis()/1000, (*cs1).T_, (*cs1).ri_, (*cs1).rf_);  //update the setpoint for drive 1 
+  Serial.println("current setpoint:");
+  Serial.println(r1, 4);
   float e1=r1-(*e1_s).v_; //position error for drive 1
   float de1= (e1-(*cs1).e_)/((float)dT); //derivative of the position error for drive 1
 
@@ -113,6 +141,8 @@ void update()
   
   float u1= pid(e1, de1, pid_m1_pc); //control for drive 1
   actuate(u1, m1_pins); //actuate drive 1
+  Serial.println("control output");
+  Serial.println(u1, 4);
 }
 //--------------------------------------------------------------------------
 float pid(float e, float de, PIDParameters* p)
@@ -155,6 +185,10 @@ int actuate(float control, const MotorControlPins* mc_pins)
 //--------------------------------------------------------------------------
 float minimumJerk(float t0, float t, float T, float q0, float qf)
 {
+  if(T == 0) return 0;
+  if(t > t0+T) {
+    t=T+t0;
+  }
   return q0+(qf-q0)*(10*pow((t-t0)/T,3)-15*pow((t-t0)/T,4)+6*pow((t-t0)/T,5));
 }
 //--------------------------------------------------------------------------
@@ -219,30 +253,79 @@ int readEncoder(const SensorPins* s_pins)
 //--------------------------------------------------------------------------
 void computeEncoderStates(SensorStates* e_s, const SensorPins* s_pins)
 {
-  Serial.print("Reading: ");
+//  Serial.print("Reading: ");
   (*e_s).reading_ = readEncoder(s_pins); //Read encoder 
+  
+  if(!beltsInited) {
+      (*e_s).offset_ = (*e_s).reading_;
+      beltsInited = true;
+  }
    
   if ((*e_s).reading_ >= 0)
     {
       //calculate sensor value 
-      float v=(float)(*e_s).reading_ * 0.088; //where is this number coming from ??
+      float v=(float)((*e_s).reading_-(*e_s).offset_) * 0.088; //where is this number coming from ?? -> encoder data sheet
 
       //calculate sensor value derivative
-      (*e_s).dv_ = (v-(*e_s).dv_)/((float)dT);
+      (*e_s).dv_ = (v-(*e_s).v_)/((float)dT);
 
       (*e_s).v_=v; //set new sensor value
 
       Serial.print("Reading: ");
       Serial.print((*e1_s).reading_, DEC);
+      Serial.print("offset: ");
+      Serial.print((*e1_s).offset_, DEC);
       Serial.print(" Position: ");
-      Serial.println((*e1_s).v_, 4); //DEC);
+      Serial.println((*e1_s).v_, 4);//, DEC);
       Serial.print(" Velocity: ");
       Serial.println((*e1_s).dv_, 4); //DEC);
     }
   else
     {
       Serial.print("Error: ");
-      Serial.println((*e_s).reading_);
+      Serial.println((*e_s).reading_, DEC);
     }
+}
+void processMessage() {
+
+  byte b1,b2;
+  short target_val = 0;
+  
+  if(Serial.available()) {
+    char code[3];  
+    for (int i=0; i<3; i++) {
+        b1 = Serial.read();
+        code[i] = b1;
+    }
+    //Serial.println(code);
+    if(code[0] == 'P' && code[1] == 'O' && code[2] == 'S') {
+       //position mode 
+       mode = POSITION_MODE;
+       b1 = Serial.read();
+       b2 = Serial.read();
+       target_val = b2;
+       target_val = target_val << 8;
+       target_val = target_val | b1;
+       //Serial.println(b1, BIN);
+       //Serial.println(b2, BIN);
+       (*cs1).rf_ = (float)target_val;
+       (*cs1).ri_ = (float)(*e1_s).v_;
+       (*cs1).ti_ = (float)millis()/1000;
+       (*cs1).T_ = 10;
+       Serial.println("Got a new SETPOINT !!!!!!!!!!!!!!!!!!!!!!!!!!");
+       Serial.println("rf:");
+       Serial.println((*cs1).rf_,4);
+       Serial.println("ri:");
+       Serial.println((*cs1).ri_,4);
+       Serial.println("ti:");
+       Serial.println((*cs1).ti_,4);
+       Serial.println("T:");
+       Serial.println((*cs1).T_,4);
+    }
+    if(code[0] == 'N' && code[1] == 'O' && code[2] == 'N') {
+       mode = NO_MODE;
+       target_val = 0;
+    }
+  } 
 }
 //--------------------------------------------------------------------------

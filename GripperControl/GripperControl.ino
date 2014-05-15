@@ -40,16 +40,24 @@ struct SensorStates
   
   SensorStates(int reading, float v, float dv) : reading_(reading), v_(v), dv_(dv) {};
 };
+
+struct ControlStates
+{
+  float r_; //setpoint value
+  float e_; //error 
+  float de_; //error derivative
+  
+  ControlStates(float r, float e, float de) : r_(r), e_(e), de_(de) {};
+};
 //======================= Global Variables ========================
 MotorControlPins* m1_pins=new MotorControlPins(24, 25, 26, 27, A0, 6);     //Motor 1 Arduino pins
 PIDParameters* pid_m1_pc=new PIDParameters(0.0, 0.0, 0.0, 4095.0, -4095.0, 0.0); //Position controller PID parameters for Motor 1
+ControlStates* cs1=new ControlStates(0.0, 0.0, 0.0); //Setpoint and error for drive 1
 
 SensorPins* e1_pins=new SensorPins(31, 33, 35); //Encoder 1 pins
 SensorStates* e1_s=new SensorStates(0, 0.0 ,0.0); //Sensor states for encoder 1
 
 int dT = 1000; //Sample time in microseconds
-
-float m1_pc_r=0.0; //Motor 1 position controller setpoint 
 
 //======================= Initialization ==========================
 void setup() {
@@ -97,8 +105,14 @@ void loop()
 void update()
 {
   computeEncoderStates(e1_s, e1_pins); //Compute angle + velocity of encoder 1
+  float r1=0;  //update the setpoint for drive 1 
+  float e1=r1-(*e1_s).v_; //position error for drive 1
+  float de1= (e1-(*cs1).e_)/((float)dT); //derivative of the position error for drive 1
 
-  delay(1000);
+  (*cs1).r_=r1; (*cs1).e_=e1; (*cs1).de_=de1; //update the control states for the next iteration 
+  
+  float u1= pid(e1, de1, pid_m1_pc); //control for drive 1
+  actuate(u1, m1_pins); //actuate drive 1
 }
 //--------------------------------------------------------------------------
 float pid(float e, float de, PIDParameters* p)

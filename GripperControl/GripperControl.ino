@@ -77,10 +77,10 @@ void setup() {
 void update(); //Simple state machine which reads sensors, computes and sets controls
 float pid(float e, float de, PIDParameters* p); //Computes the controls from error e, error derivative de, and controller parameters p)
 int actuate(float control, const MotorControlPins* mc_pins); //Send the sign-corrected input to the actuator and read the motor status flag
-void read(SensorStates* s, SensorPins* s_pins);
 float minimumJerk(float t0, float t, float q0, float qf); //evaluates a minimum-jerk position trajectory
-int readPosition(const SensorPins* s_pins); //read the current position from the sensor connected to the given pins
-byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of data from the digital input corresponding to the given sensor
+int readEncoder(const SensorPins* s_pins); //read the current position from the sensor connected to the given pins
+void computeEncoderStates(SensorStates* e_s, const SensorPins* s_pins); //Converts the encoder readings and computes derivatives
+byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta from the digital input corresponding to the given sensor
 //============================== Loop ===================================
 void loop() 
 {
@@ -96,34 +96,9 @@ void loop()
 //====================  Function Implementations =========================
 void update()
 {
+  computeEncoderStates(e1_s, e1_pins); //Compute angle + velocity of encoder 1
 
-   Serial.print("Reading: ");
-   (*e1_s).reading_ = readPosition(e1_pins); //Read encoder 1
-   
-   if ((*e1_s).reading_ >= 0)
-   {
-  //calculate sensor value 
-  float v=(float)(*e1_s).reading_ * 0.088; //where is this number coming from ??
-
-  //calculate sensor value derivative
-  (*e1_s).dv_ = (v-(*e1_s).dv_)/((float)dT);
-
-  (*e1_s).v_=v; //set new sensor value
-
-      Serial.print("Reading: ");
-      Serial.print((*e1_s).reading_, DEC);
-      Serial.print(" Position: ");
-      Serial.println((*e1_s).v_, 4); //DEC);
-      Serial.print(" Velocity: ");
-      Serial.println((*e1_s).dv_, 4); //DEC);
-   }
-   else
-   {
-      Serial.print("Error: ");
-      Serial.println((*e1_s).reading_);
-   }
-   
-   delay(1000);
+  delay(1000);
 }
 //--------------------------------------------------------------------------
 float pid(float e, float de, PIDParameters* p)
@@ -151,22 +126,17 @@ int actuate(float control, const MotorControlPins* mc_pins)
   //adjust direction depending on the control sign 
   if (control < 0)
     {
-    digitalWrite((*mc_pins).IN1_,HIGH);
-    digitalWrite((*mc_pins).IN2_,LOW);
+      digitalWrite((*mc_pins).IN1_,HIGH);
+      digitalWrite((*mc_pins).IN2_,LOW);
     }
   else
     {
-    digitalWrite((*mc_pins).IN1_,LOW);
-    digitalWrite((*mc_pins).IN2_,HIGH);
+      digitalWrite((*mc_pins).IN1_,LOW);
+      digitalWrite((*mc_pins).IN2_,HIGH);
     }
   analogWrite((*mc_pins).D2_, (int)(abs(control)+0.5f)); //set the value on the PWM
 
   return digitalRead((*mc_pins).SF_); //return the motor status flag
-}
-//--------------------------------------------------------------------------
-void read(SensorStates* s, SensorPins* s_pins)
-{
-
 }
 //--------------------------------------------------------------------------
 float minimumJerk(float t0, float t, float T, float q0, float qf)
@@ -178,24 +148,24 @@ byte shiftIn(const SensorPins* s_pins, int readBits)
 {
   byte data = 0;
   for (int i=readBits-1; i>=0; i--)
-  {
-    digitalWrite((*s_pins).CK_, LOW);
-    delayMicroseconds(1);
-    digitalWrite((*s_pins).CK_, HIGH);
-    delayMicroseconds(1);
+    {
+      digitalWrite((*s_pins).CK_, LOW);
+      delayMicroseconds(1);
+      digitalWrite((*s_pins).CK_, HIGH);
+      delayMicroseconds(1);
 
-    byte bit = digitalRead((*s_pins).D_);
-    //Serial.println(bit, BIN);
-    data = data|(bit << i);
-  }
+      byte bit = digitalRead((*s_pins).D_);
+      //Serial.println(bit, BIN);
+      data = data|(bit << i);
+    }
   //Serial.print("byte: ");
   //Serial.println(data, BIN);
   return data;
 }
 //--------------------------------------------------------------------------
-int readPosition(const SensorPins* s_pins)
+int readEncoder(const SensorPins* s_pins)
 {
-  unsigned int position = 0;
+  unsigned int reading = 0;
 
   //shift in our data  
   digitalWrite((*s_pins).S_, LOW);
@@ -205,31 +175,60 @@ int readPosition(const SensorPins* s_pins)
   byte d3 = shiftIn(s_pins,2);
   digitalWrite((*s_pins).S_, HIGH);
 
-  //get our position variable
-  position = d1;
-  position = position << 8;
-  position = position|d2;
+  //get our reading variable
+  reading = d1;
+  reading = reading << 8;
+  reading = reading|d2;
 
-  position = position >> 4;
+  reading = reading >> 4;
 
   //check the offset compensation flag: 1 == started up
   if (!((d2 & B00001000) == B00001000))
-    position = -1;
+    reading = -1;
 
   //check the cordic overflow flag: 1 = error
   if (d2 & B00000100)
-    position = -2;
+    reading = -2;
 
   //check the linearity alarm: 1 = error
   if (d2 & B00000010)
-    position = -3;
+    reading = -3;
 
   //check the magnet range: 11 = error
   if ((d2 & B00000001) & (d3 & B10000000))
-    position = -4;
+    reading = -4;
     
   //add the checksum bit
 
-  return position;
+  return reading;
+}
+//--------------------------------------------------------------------------
+void computeEncoderStates(SensorStates* e_s, const SensorPins* s_pins)
+{
+  Serial.print("Reading: ");
+  (*e_s).reading_ = readEncoder(s_pins); //Read encoder 
+   
+  if ((*e_s).reading_ >= 0)
+    {
+      //calculate sensor value 
+      float v=(float)(*e_s).reading_ * 0.088; //where is this number coming from ??
+
+      //calculate sensor value derivative
+      (*e_s).dv_ = (v-(*e_s).dv_)/((float)dT);
+
+      (*e_s).v_=v; //set new sensor value
+
+      Serial.print("Reading: ");
+      Serial.print((*e1_s).reading_, DEC);
+      Serial.print(" Position: ");
+      Serial.println((*e1_s).v_, 4); //DEC);
+      Serial.print(" Velocity: ");
+      Serial.println((*e1_s).dv_, 4); //DEC);
+    }
+  else
+    {
+      Serial.print("Error: ");
+      Serial.println((*e_s).reading_);
+    }
 }
 //--------------------------------------------------------------------------

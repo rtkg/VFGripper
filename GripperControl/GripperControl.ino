@@ -1,12 +1,15 @@
 //Low-level gripper control
 //Robert Krug, Todor Stoyanov 13/06/2014
 
+#include "pwm01.h"
+
 #define POSITION_MODE 0
 #define CURRENT_MODE 1
 #define BELT_MODE 2
 #define NO_MODE 3
 
 const float pi = 3.14159;
+const uint32_t pwm_frequency = 1000;
 
 //======================= Struct Definitions ======================
 struct MotorControlPins{
@@ -91,12 +94,15 @@ byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta 
 
 //======================= Initialization ==========================
 void setup() {
+  pwm_set_resolution(16); //set PWM resolution to 16 bit (0 ... 65535)
+
   pinMode(m1_pins->IN1_,OUTPUT);
   pinMode(m1_pins->IN2_,OUTPUT);
   pinMode(m1_pins->SF_,INPUT);
   pinMode(m1_pins->FB_,INPUT);
   pinMode(m1_pins->EN_,OUTPUT);
   pinMode(m1_pins->D2_,OUTPUT);
+  pwm_setup(m1_pins->D2_, pwm_frequency, 1); 
   digitalWrite(m1_pins->EN_,HIGH); //Enable the driver board
 
   pinMode(e1_pins->D_,INPUT);
@@ -118,22 +124,24 @@ void setup() {
 
   Serial.begin(19200); //open a serial connection
   Serial.println("setup done");
+
+  pwm_write_duty(m1_pins->D2_, 16383); //25% duty cycle  
 }
 //============================== Loop ===================================
 void loop() 
 {
-  t_new = micros();
-  //Do nothing if the sampling period didn't pass yet   
-  if(abs(t_new - t_old) < dT) 
-    return;
-  t_old = t_new;
+  // t_new = micros();
+  // //Do nothing if the sampling period didn't pass yet   
+  // if(abs(t_new - t_old) < dT) 
+  //   return;
+  // t_old = t_new;
   
-  processMessage();
-  if (mode == POSITION_MODE) {
-    update(); //Read sensors, compute and send controls
-  } else {
-    //  delay(100); Shouldn't be necessary ... the loop is throttled by the sampling time anyway ...
-  }
+  // processMessage();
+  // if (mode == POSITION_MODE) {
+  //   update(); //Read sensors, compute and send controls
+  // } else {
+  //   //  delay(100); Shouldn't be necessary ... the loop is throttled by the sampling time anyway ...
+  // }
     
 }
 //====================  Function Implementations =========================

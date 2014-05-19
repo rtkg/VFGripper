@@ -5,7 +5,7 @@
 
 void setup() {
   // start serial port at 9600 bps:
-  Serial.begin(9600);
+  Serial.begin(19200);
 }
 
 int mode = NO_MODE;
@@ -14,8 +14,22 @@ short target_val = 0;
 void loop() {
   // put your main code here, to run repeatedly:
   processMessage();
-  Serial.println(target_val, DEC);  
-  Serial.println(mode, DEC);
+  Serial.print(target_val, DEC);  
+  Serial.print(",");
+  Serial.print(mode, DEC);
+  Serial.print(",");
+  Serial.print(target_val, DEC);  
+  Serial.print(",");
+  Serial.print(mode, DEC);
+  Serial.print(",");
+  Serial.print(mode, DEC);
+  Serial.print(",");
+  Serial.print(target_val, DEC);  
+  Serial.print(",");
+  Serial.print(mode, DEC);
+  Serial.print(",");
+  Serial.print(mode, DEC);
+  Serial.print("\r\n");
   delay(100);
 }
 

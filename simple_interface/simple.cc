@@ -57,7 +57,48 @@ set_interface_attribs (int fd, int speed, int parity)
     return 0;
 }
 
+char* readInput(int fd) {
+    char buf[1000];
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+    int sofar = 0;
 
+    bool readMore = true;
+    char* tok;
+
+    FD_ZERO(&rfds);
+    FD_SET(fd, &rfds);
+
+    /* Wait up to five seconds. */
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+
+    while (readMore) {    
+	retval = select(fd+1, &rfds, NULL, NULL, NULL); //&tv); //
+	if (retval) {
+	    int n = read (fd, buf+sofar, sizeof(buf)-sofar);  // read up to 100 characters if ready to read
+	    if ( n>0) {
+		sofar+=n;
+	    }
+	    //check what we read
+	    tok = strtok(buf, "\r\n");
+	    if(tok!=NULL) {
+		cout<<"TOK: "<<tok<<endl;
+		return tok;
+	    }
+	    if(sofar > 500) {
+		cout<<"didn't get my delimiters\n";
+		cout<<buf;
+		readMore = false;
+	    }
+	} else {
+	    printf("no data yet\n");
+	    usleep(100);
+	}
+    }
+    return NULL;
+}
 
 
 int main(int argc, char* argv[]) {
@@ -99,39 +140,9 @@ int main(int argc, char* argv[]) {
     printf("msg size %d, string %s\n",msg_size,payload);
     delete [] payload;
 
-    fd_set rfds;
-    struct timeval tv;
-    int retval;
-
-    FD_ZERO(&rfds);
-    FD_SET(fd, &rfds);
-
-    /* Wait up to five seconds. */
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
-    
-    char buf [1000];
-    int sofar=0;
-
     while(1) {
-	retval = select(fd+1, &rfds, NULL, NULL, NULL); //&tv);
-	/* Don't rely on the value of tv now! */
-/*
-	if (retval == -1)
-	    perror("select()");
-	else if (retval)
-	    printf("Data is available now.\n");
-	else
-	    printf("No data within five seconds.\n");
-*/
-	if(sofar > 500) {
-	    cout<<buf;
-	    sofar=0;
-	}
-	int n = read (fd, buf+sofar, sizeof(buf)-sofar);  // read up to 100 characters if ready to read
-	if ( n>0) {
-	    sofar+=n;
-	}
+	char *linep = readInput(fd);
+	//process linep
     }
     close(fd);
 }

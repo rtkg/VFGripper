@@ -1,7 +1,7 @@
 //Low-level gripper control
 //Robert Krug, Todor Stoyanov 13/06/2014
 
-#include "pwm01.h"
+#include <limits.h>
 
 #define POSITION_MODE 0
 #define CURRENT_MODE 1
@@ -9,7 +9,8 @@
 #define NO_MODE 3
 
 const float pi = 3.14159;
-const uint32_t pwm_frequency = 1000;
+const uint32_t pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
+const uint32_t enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
 
 //======================= Struct Definitions ======================
 struct MotorControlPins{
@@ -18,9 +19,8 @@ struct MotorControlPins{
   int SF_;  //Motor status flag pin
   int EN_;  //Driver board enable pin
   int FB_;  //Analog input pin for current sensing 
-  int D2_;  //PWM pin
-
-  MotorControlPins(int IN1, int IN2, int SF, int EN, int FB, int D2) : IN1_(IN1), IN2_(IN2), SF_(SF), EN_(EN), FB_(FB), D2_(D2) {};
+  
+  MotorControlPins(int IN1, int IN2, int SF, int EN, int FB) : IN1_(IN1), IN2_(IN2), SF_(SF), EN_(EN), FB_(FB) {};
 };
 
 struct SensorPins{
@@ -71,15 +71,16 @@ struct ControlStates
   
   ControlStates(float r, float rf, float ri, float e, float de, float ti, float T, bool active) : r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), active_(active){};
 };
+
 //======================= Global Variables ========================
-MotorControlPins* m1_pins=new MotorControlPins(24, 25, 26, 27, A0, 6);     //Motor 1 Arduino pins
-PIDParameters* pid_m1_pc=new PIDParameters(50.0, 0.0, 0.0, 4095.0, -4095.0, 0.0); //Position controller PID parameters for Motor 1
+MotorControlPins* m1_pins=new MotorControlPins(6, 7, 24, 25, A0);     //Motor 1 Arduino pins
+PIDParameters* pid_m1_pc=new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for Motor 1
 ControlStates* cs1=new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false); //Setpoint and error for drive 1
 
-SensorPins* e1_pins=new SensorPins(31, 33, 35); //Encoder 1 pins
-EncoderStates* e1_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, 4095, 1.0); //Sensor states for encoder 1
+SensorPins* e1_pins=new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
+EncoderStates* e1_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0); //Sensor states for encoder 1
 
-int dT = 10000; //Sample time in microseconds
+int dT = 1000; //Sample time in microseconds
 int t_old, t_new;
 int mode = NO_MODE;
 
@@ -89,20 +90,18 @@ float pid(float e, float de, PIDParameters* p); //Computes the controls from err
 int actuate(float control, const MotorControlPins* mc_pins); //Send the sign-corrected input to the actuator and read the motor status flag
 float minimumJerk(float t0, float t, float q0, float qf); //evaluates a minimum-jerk position trajectory
 int readEncoder(const SensorPins* s_pins); //read the current position from the sensor connected to the given pins
-void computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins); //Converts the encoder readings and computes derivatives
+int computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins); //Converts the encoder readings and computes derivatives
 byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta from the digital input corresponding to the given sensor
-
+void processMessage(); //Process the message comming from the serial connection
 //======================= Initialization ==========================
 void setup() {
-  pwm_set_resolution(16); //set PWM resolution to 16 bit (0 ... 65535)
+ 
 
   pinMode(m1_pins->IN1_,OUTPUT);
   pinMode(m1_pins->IN2_,OUTPUT);
   pinMode(m1_pins->SF_,INPUT);
   pinMode(m1_pins->FB_,INPUT);
   pinMode(m1_pins->EN_,OUTPUT);
-  pinMode(m1_pins->D2_,OUTPUT);
-  pwm_setup(m1_pins->D2_, pwm_frequency, 1); 
   digitalWrite(m1_pins->EN_,HIGH); //Enable the driver board
 
   pinMode(e1_pins->D_,INPUT);
@@ -110,7 +109,6 @@ void setup() {
   pinMode(e1_pins->S_,OUTPUT);
   digitalWrite(e1_pins->CK_, HIGH);   //give some default value
   digitalWrite(e1_pins->S_, HIGH);    //give some default value
-
 
   analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
   analogReadResolution(12); //sets the resolution of the analogRead(...) function to 12 bit, i.e., between 0 - 4095
@@ -123,25 +121,25 @@ void setup() {
   t_old = micros();
 
   Serial.begin(19200); //open a serial connection
-  Serial.println("setup done");
 
-  pwm_write_duty(m1_pins->D2_, 16383); //25% duty cycle  
+  Serial.println("setup done");
 }
 //============================== Loop ===================================
 void loop() 
 {
-  // t_new = micros();
-  // //Do nothing if the sampling period didn't pass yet   
-  // if(abs(t_new - t_old) < dT) 
-  //   return;
-  // t_old = t_new;
+  t_new = micros();
+  //Do nothing if the sampling period didn't pass yet   
+  if(abs(t_new - t_old) < dT) 
+    return;
+  t_old = t_new;
   
-  // processMessage();
-  // if (mode == POSITION_MODE) {
-  //   update(); //Read sensors, compute and send controls
-  // } else {
-  //   //  delay(100); Shouldn't be necessary ... the loop is throttled by the sampling time anyway ...
-  // }
+   processMessage();
+   if (mode == POSITION_MODE) {
+     update(); //Read sensors, compute and send controls
+   } else {
+     //  delay(100); Shouldn't be necessary ... the loop is throttled by the sampling time anyway ...
+  }
+
     
 }
 //====================  Function Implementations =========================
@@ -188,17 +186,16 @@ float pid(float e, float de, PIDParameters* p)
 int actuate(float control, const MotorControlPins* mc_pins)
 {
   //adjust direction depending on the control sign 
-  if (control < 0)
+  if (control > 0)
     {
-      digitalWrite(mc_pins->IN1_,HIGH);
-      digitalWrite(mc_pins->IN2_,LOW);
+      analogWrite(mc_pins->IN2_, (int)(abs(control)+0.5f)); //set the value on the PWM
+      analogWrite(mc_pins->IN1_, 0);
     }
   else
     {
-      digitalWrite(mc_pins->IN1_,LOW);
-      digitalWrite(mc_pins->IN2_,HIGH);
+      analogWrite(mc_pins->IN1_, (int)(abs(control)+0.5f)); //set the value on the PWM
+      analogWrite(mc_pins->IN2_, 0);
     }
-  analogWrite(mc_pins->D2_, (int)(abs(control)+0.5f)); //set the value on the PWM
 
   return digitalRead(mc_pins->SF_); //return the motor status flag
 }
@@ -270,17 +267,20 @@ int readEncoder(const SensorPins* s_pins)
   return reading;
 }
 //--------------------------------------------------------------------------
-void computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins)
+int computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins)
 {
   int reading_prev=e_s->reading_; //save the previous encoder value
   e_s->reading_ = readEncoder(s_pins); //read the new encoder value
       
+  if ((e_s->k_ == INT_MAX) ||  (e_s->k_ == INT_MIN))  
+    e_s->reading =(-5); //Over/underflow of the rollover count variable
+      
   if (e_s->reading_ >= 0)
     {
       //check whether a rollover happened
-      if((e_s->reading_-reading_prev) > e_s->res_/2) //if delta is larger than half the resolution -> positive rollover
+      if((e_s->reading_-reading_prev) < -e_s->res_/2) //if delta is smaller than minus half the resolution -> positive rollover
         e_s->k_++;
-      if((e_s->reading_-reading_prev) < -e_s->res_/2)//if delta is smaller than minus half the resolution -> negative rollover
+      if((e_s->reading_-reading_prev) > e_s->res_/2)//if delta is larger than half the resolution -> negative rollover 
         e_s->k_--;
 
       float v_prev=e_s->v_; //save previous sensor value 
@@ -289,20 +289,25 @@ void computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins)
       //calculate sensor value derivative
       e_s->dv_ = (e_s->v_-v_prev)/((float)dT);
 
-      Serial.print("Reading: ");
-      Serial.print(e_s->reading_, DEC);
-      Serial.print("offset: ");
-      Serial.print(e_s->offset_, DEC);
-      Serial.print(" Position: ");
-      Serial.println(e_s->v_, 4);//, DEC);
-      Serial.print(" Velocity: ");
-      Serial.println(e_s->dv_, 4); //DEC);
+      //Serial.print("Reading: ");
+      //Serial.print(e_s->reading_, DEC);
+      //Serial.print(" Offset: ");
+      //Serial.print(e_s->offset_, DEC);
+      //Serial.print(" Position: ");
+      //Serial.print(e_s->v_, 4);//, DEC);
+      //Serial.print(" k: ");
+      //Serial.print(e_s->k_, DEC);//, DEC);
+      //Serial.print(" Velocity: ");
+      //Serial.println(e_s->dv_, 4); //DEC);
     }
   else
     {
-      Serial.print("Error: ");
+      Serial.print("Error in computeEncoderStates(...): ");
       Serial.println(e_s->reading_, DEC);
+      return e_s-reading_;
     }
+    
+ return 1;
 }
 //--------------------------------------------------------------------------
 void processMessage() {

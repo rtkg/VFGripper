@@ -186,7 +186,7 @@ void loop()
   }
 
   computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
-  curr_b1_s->filter(analogRead(mb1_pins->FB_));
+  curr_b1_s->filter(analogRead(mb1_pins->FB_)); curr_b1_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
   curr_b2_s->c_=(float)analogRead(mb1_pins->FB_); //DEBUG
 
   if (mode == POSITION_MODE) {
@@ -436,11 +436,11 @@ void sendStatus() {
   Serial.print(",");
   Serial.print((int) ((*e_b2_s).v_ * 1000), DEC);
   Serial.print(",");
-  Serial.print((int) (curr_oc_s->v_, DEC);
+  Serial.print((int)curr_oc_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int) (curr_b1_s->v_, DEC);
+  Serial.print((int)curr_b1_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int) (curr_b2_s->v_, DEC);
+  Serial.print((int)curr_b2_s->v_, DEC);
   Serial.print("\r\n");
 }
 //--------------------------------------------------------------------------

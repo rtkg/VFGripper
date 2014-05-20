@@ -5,8 +5,7 @@
 
 #define POSITION_MODE 0
 #define CURRENT_MODE 1
-#define BELT_MODE 2
-#define NO_MODE 3
+#define NO_MODE 2
 
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
@@ -76,17 +75,30 @@ struct ControlStates
 };
 
 //======================= Global Variables ========================
-MotorControlPins* m1_pins=new MotorControlPins(6, 7, 24, 25, A0);     //Motor 1 Arduino pins
-PIDParameters* pid_m1_pc=new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for Motor 1
+//BELT1
+MotorControlPins* m_b1_pins=new MotorControlPins(6, 7, 24, 25, A0);     //Motor 1 Arduino pins
 ControlStates* c_b1=new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 1
-ControlStates* c_b2=new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 2
-ControlStates* c_oc=new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive open close
-
+PIDParameters* pid_mb1_pc=new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_b1_pins=new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_b1_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0); //Sensor states for encoder belt 1
+
+///TODO: pins for the sensors and controllers bellow need to be updated
+//BELT2
+MotorControlPins* m_b2_pins=new MotorControlPins(6, 7, 24, 25, A0);     //Motor 1 Arduino pins
+ControlStates* c_b2=new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 2
+PIDParameters* pid_mb2_pc=new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+SensorPins* e_b2_pins=new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_b2_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0); //Sensor states for encoder belt 2
+
+//OPEN CLOSE
+MotorControlPins* m_oc_pins=new MotorControlPins(6, 7, 24, 25, A0);     //Motor 1 Arduino pins
+ControlStates* c_oc=new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive open close
+PIDParameters* pid_moc_pc=new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+SensorPins* e_oc_pins=new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_oc_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0); //Sensor states for encoder open close
+SensorPins* e_p1_pins=new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_p1_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0); //Sensor states for encoder phalange 1
+SensorPins* e_p2_pins=new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_p2_s=new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0); //Sensor states for encoder phalange 2
 
 int dT = 1000; //Sample time in microseconds
@@ -108,12 +120,12 @@ void processMessage(); //Process the message comming from the serial connection
 void setup() {
  
 
-  pinMode(m1_pins->IN1_,OUTPUT);
-  pinMode(m1_pins->IN2_,OUTPUT);
-  pinMode(m1_pins->SF_,INPUT);
-  pinMode(m1_pins->FB_,INPUT);
-  pinMode(m1_pins->EN_,OUTPUT);
-  digitalWrite(m1_pins->EN_,HIGH); //Enable the driver board
+  pinMode(m_b1_pins->IN1_,OUTPUT);
+  pinMode(m_b1_pins->IN2_,OUTPUT);
+  pinMode(m_b1_pins->SF_,INPUT);
+  pinMode(m_b1_pins->FB_,INPUT);
+  pinMode(m_b1_pins->EN_,OUTPUT);
+  digitalWrite(m_b1_pins->EN_,HIGH); //Enable the driver board
 
   pinMode(e_b1_pins->D_,INPUT);
   pinMode(e_b1_pins->CK_,OUTPUT);
@@ -176,10 +188,10 @@ void update()
       float e1=r1-e_b1_s->v_; //position error for drive 1
       float de1= (e1-c_b1->e_)/((float)dT); //derivative of the position error for drive 1
       (*c_b1).r_=r1; c_b1->e_=e1; (*c_b1).de_=de1; //update the control states for the next iteration 
-      float u1= pid(e1, de1, pid_m1_pc); //control for drive 1
-      actuate(u1, m1_pins); //actuate drive 1
-      c_b1->curr_ = (((float)analogRead(m1_pins->FB_)*3.3)/4096.0)/0.000525;
-      c_b2->curr_ = analogRead(m1_pins->FB_);
+      float u1= pid(e1, de1, pid_mb1_pc); //control for drive 1
+      actuate(u1, m_b1_pins); //actuate drive 1
+      c_b1->curr_ = (((float)analogRead(m_b1_pins->FB_)*3.3)/4096.0)/0.000525;
+      c_b2->curr_ = analogRead(m_b1_pins->FB_);
       //Serial.println("control output");
       //Serial.println(u1, 4);
     }
@@ -336,44 +348,88 @@ int computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins)
 //--------------------------------------------------------------------------
 void processMessage() {
 
-  byte b1,b2;
+
   short target_val = 0;
   
   if(Serial.available()) {
     delay(10);
-    char code[10];
+    char code[50];
     short i =0;
     while(Serial.available() && i<50) {
        code[i++] = Serial.read();
-    } 
-    
+    }    
     //Serial.print(code);
     //Serial.print("\r\n");
+    /* * * * * * * communication protocol * * * * * * * * 
+     * POS id[short] val[short] dt[short]       : set drive id to position (float)val and time period to achieve target is (float)dt/1000 [Sec]
+     * SET id[short] p[short] i[short] d[short] : set pid parameters to (float)param/10.
+     * ZER id[short]                            : set zero position for encoder of drive id
+     * CUR id[short] val[short]                 : set to current control mode, target (float)val [mA]
+     * NON                                      : set to idle mode
+     * OFF                                      : disable all motors
+     * ON                                       : enable all motors
+     * ids: 0 = open close, 1 = belt1, 2 = belt2
+     * * * * * * * * * * * * * * * * * * * * * * * * * */
+    ControlStates* target_control;
+    EncoderStates* target_enc;
+    PIDParameters* target_pid;
+    
     if(code[0] == 'P' && code[1] == 'O' && code[2] == 'S') {
       //position mode 
+      target_val = getShort(code,3);
+      if(target_val == 0) { 
+        target_control = c_oc; 
+        target_enc = e_oc_s; 
+      } else if(target_val == 1) { 
+        target_control = c_b1; 
+        target_enc = e_b1_s;
+      } else if(target_val == 2) { 
+        target_control = c_b2; 
+        target_enc = e_b2_s;
+      } else { 
+        return; 
+      }
       mode = POSITION_MODE;
-      b1 = code[3];
-      b2 = code[4];
-      target_val = b2;
-      target_val = target_val << 8;
-      target_val = target_val | b1;
-      //Serial.println(b1, BIN);
-      //Serial.println(b2, BIN);
-      c_b1->rf_ = (float)target_val;
-      c_b1->ri_ = (float)(*e_b1_s).v_;
-      c_b1->ti_ = (float)millis()/1000;
-      c_b1->T_ = 10;
-      c_b1->active_=true;
-      //Serial.println("Got a new SETPOINT !!!!!!!!!!!!!!!!!!!!!!!!!!");
-      //Serial.println("rf:");
-      //Serial.println(c_b1->rf_,4);
-      //Serial.println("ri:");
-      //Serial.println(c_b1->ri_,4);
-      //Serial.println("ti:");
-      //Serial.println(c_b1->ti_,4);
-      //Serial.println("T:");
-      //Serial.println(c_b1->T_,4);
-      //Serial.print("\r\n");
+
+      target_val = getShort(code,5);
+      //TODO: bounds checks on target_val!!!
+      target_control->rf_ = (float)target_val; //value in mRad!
+      target_control->ri_ = (float)target_enc->v_;
+      target_control->ti_ = (float)millis()/1000;
+
+      target_val = getShort(code,7);          
+      //TODO: bounds checks!
+      target_control->T_ = (float)target_val/1000.;
+      target_control->active_=true;
+      
+    }
+    if(code[0] == 'S' && code[1] == 'E' && code[2] == 'T') {
+      target_val = getShort(code,3);
+      if(target_val == 0) { 
+        target_pid = pid_moc_pc; 
+      } else if(target_val == 1) { 
+        target_pid = pid_mb1_pc; 
+      } else if(target_val == 2) { 
+        target_pid = pid_mb2_pc; 
+      } else { 
+        return; 
+      }
+      target_pid->Kp_ = (float)getShort(code,5)/10.;
+      target_pid->Ki_ = (float)getShort(code,7)/10.;
+      target_pid->Kd_ = (float)getShort(code,9)/10.;      
+    }
+    
+    if(code[0] == 'Z' && code[1] == 'E' && code[2] == 'R') {
+      //for B1 and B2 set the offset param, for OC store in permanent memory(?)
+    }
+    if(code[0] == 'C' && code[1] == 'U' && code[2] == 'R') {
+      //set to current mode
+    }
+    if(code[0] == 'O' && code[1] == 'F' && code[2] == 'F') {
+      //Set enable to LOW for the correct motor  
+    }
+    if(code[0] == 'S' && code[1] == 'N') {
+      //Set enable to HIGH for correct motor
     }
     if(code[0] == 'N' && code[1] == 'O' && code[2] == 'N') {
       mode = NO_MODE;
@@ -381,23 +437,40 @@ void processMessage() {
     }
   } 
 }
+
+short getShort(char *buf, short pos) {
+    byte b1,b2;
+    short val;
+    b1 = buf[pos];
+    b2 = buf[pos+1];
+    val = b2;
+    val = val << 8;
+    val = val | b1;
+    return val;
+}
+
 void sendStatus() {
    //Serial.print((int) ((*e_oc_s).v_*1000), DEC);
    Serial.print((int) (c_b1->duty_), DEC);
    Serial.print(",");
-   Serial.print((int) ((*e_p1_s).v_*1000), DEC);
+   //Serial.print((int) ((*e_p1_s).v_*1000), DEC);
+   Serial.print((int)pid_mb1_pc->Kp_,DEC);
    Serial.print(",");
-   Serial.print((int) ((*e_p2_s).v_*1000), DEC);
+   //Serial.print((int) ((*e_p2_s).v_*1000), DEC);
+   Serial.print((int)pid_mb1_pc->Ki_,DEC);
    Serial.print(",");
    Serial.print((int) ((*e_b1_s).v_*1000), DEC);
    Serial.print(",");
-   Serial.print((int) ((*e_b2_s).v_*1000), DEC);
+   //Serial.print((int) ((*e_b2_s).v_*1000), DEC);
+   Serial.print((int)pid_mb1_pc->Kd_,DEC);
    Serial.print(",");
-   Serial.print((int) ((*c_oc).curr_), DEC);
+   //Serial.print((int) ((*c_oc).curr_), DEC);
+   Serial.print((int) ((*c_b1).rf_), DEC);
    Serial.print(",");   
    Serial.print((int) ((*c_b1).curr_), DEC);
    Serial.print(",");  
-   Serial.print((int) ((*c_b2).curr_), DEC);
+//   Serial.print((int) ((*c_b2).curr_), DEC);
+   Serial.print((int) ((*c_b1).T_), DEC);
    Serial.print("\r\n");
 }
 //--------------------------------------------------------------------------

@@ -124,7 +124,7 @@ MotorControlPins* m_b1_pins = new MotorControlPins(6, 7, 24, 25, A0);   //Motor 
 ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 1
 PIDParameters* pid_mb1_pc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_b1_pins = new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
-EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
+EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.3, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
 ///TODO: pins for the sensors and controllers bellow need to be updated
 //BELT2
@@ -159,8 +159,8 @@ int readEncoder(const SensorPins* s_pins); //read the current position from the 
 int computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins); //Converts the encoder readings and computes derivatives
 byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta from the digital input corresponding to the given sensor
 void processMessage(); //Process the message comming from the serial connection
-float positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p); //Compute position control
-float currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p);
+void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p); //Compute position control
+void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p);
 //======================= Initialization ==========================
 void setup() {
   pinMode(m_b1_pins->IN1_, OUTPUT);
@@ -208,15 +208,15 @@ void loop()
   }
 
   computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
-  computeEncoderStates(e_b2_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
+  //computeEncoderStates(e_b2_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
   curr_b1_s->filter(analogRead(m_b1_pins->FB_)); curr_b1_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
-  curr_b2_s->v_ = (float)analogRead(m_b1_pins->FB_); //DEBUG
+  //curr_b2_s->v_ = (float)analogRead(m_b1_pins->FB_); //DEBUG
 
-  analogWrite(m_b1_pins->IN1_, 1400);
-  analogWrite(m_b1_pins->IN2_, 0);
+  //analogWrite(m_b1_pins->IN1_, 1400);
+  //analogWrite(m_b1_pins->IN2_, 0);
 
   if (mode == POSITION_MODE) {
-    //update(); //Read sensors, compute and send controls
+    update(); //Read sensors, compute and send controls
   } else {
     //  delay(100); Shouldn't be necessary ... the loop is throttled by the sampling time anyway ...
   }
@@ -230,28 +230,29 @@ void update()
   //Control Drive 1 if its active
   if (c_b1->active_)
   {
-    float u = positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc); //compute controls for drive belt 1
-    int sf = actuate(u, m_b1_pins); //actuate drive belt 1
+    positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
+    int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
   }
 }
 //--------------------------------------------------------------------------
-float positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p)
+void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p)
 {
   float r = minimumJerk(c_s->ti_, (float)millis(), c_s->T_, c_s->ri_, c_s->rf_); //update the setpoint
   float e = r - e_s->p_; //position error
   float de = (e - c_s->e_) / ((float)dT); //derivative of the position error
   c_s->r_ = r; c_s->e_ = e; c_s->de_ = de; //update the control states for the next iteration
 
-  return pid(e, de, pid_p); //compute control
+  c_s->u_=pid(e, de, pid_p); //compute control
+
 }
 //--------------------------------------------------------------------------
-float currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p)
+void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p)
 {
   float e = c_s->r_ - curr_s->v_; //current error (setpoint r_ = rf_ = const for current control)
   float de = (e - c_s->e_) / ((float)dT); //derivative of the current error
   c_s->e_ = e; c_s->de_ = de; //update the control states for the next iteration
 
-  return pid(e, de, pid_p) + c_s->k_ * c_s->r_; //compute control with feedforward term
+  c_s->u_=pid(e, de, pid_p) + c_s->k_ * c_s->r_; //compute control with feedforward term
 }
 //--------------------------------------------------------------------------
 float pid(float e, float de, PIDParameters* p)
@@ -436,7 +437,7 @@ void processMessage() {
 
       target_val = getShort(code, 5);
       //TODO: bounds checks on target_val!!!
-      target_control->rf_ = (float)target_val; //value in mRad!
+      target_control->rf_ = (float)target_val/100.; //value in mRad!
       target_control->ri_ = (float)target_enc->p_;
       target_control->ti_ = (float)millis();
 
@@ -457,7 +458,7 @@ void processMessage() {
       } else {
         return;
       }
-      e_b1_s->alpha_ = (float)getShort(code, 5) / 100.;
+      //e_b1_s->alpha_ = (float)getShort(code, 5) / 100.;
       target_pid->Kp_ = (float)getShort(code, 5) / 10.;
       target_pid->Ki_ = (float)getShort(code, 7) / 10.;
       target_pid->Kd_ = (float)getShort(code, 9) / 10.;
@@ -494,31 +495,23 @@ short getShort(char *buf, short pos) {
 }
 
 void sendStatus() {
-  //Serial.print((int) ((*e_oc_s).v_*1000), DEC);
-  Serial.print((int) (c_b1->u_), DEC);
+  
+  Serial.print((int) (e_b1_s->p_), DEC);
   Serial.print(",");
-  //Serial.print((int) ((*e_p1_s).v_*1000), DEC);
   Serial.print((int)pid_mb1_pc->Kp_, DEC);
   Serial.print(",");
-  //Serial.print((int) ((*e_p2_s).v_*1000), DEC);
   Serial.print((int)pid_mb1_pc->Ki_, DEC);
   Serial.print(",");
-  Serial.print((int) ((*e_b1_s).p_ * 1000), DEC);
+  Serial.print((int)pid_mb1_pc->Kd_,DEC);
   Serial.print(",");
-  //Serial.print((int) ((*e_b2_s).v_*1000), DEC);
-  //Serial.print((int)pid_mb1_pc->Kd_,DEC);
-  Serial.print((int) ((*e_b2_s).dp_ * 1000000), DEC);
+  Serial.print((int)c_b1->r_, DEC);
   Serial.print(",");
-  //Serial.print((int)curr_oc_s->v_, DEC);
-  //Serial.print((int) ((*c_b1).rf_), DEC);
-  Serial.print((int) ((*e_b2_s).p_), DEC);
+  Serial.print((int)(c_b1->e_*100), DEC);
   Serial.print(",");
-  Serial.print((int) ((*e_b1_s).p_), DEC);
-  //Serial.print((int)curr_b1_s->v_, DEC);
+  Serial.print((int)c_b1->u_, DEC);
   Serial.print(",");
-  Serial.print((int) ((*e_b1_s).dp_ * 1000000), DEC);
-  //Serial.print((int)curr_b2_s->v_, DEC);
-  //Serial.print((int) ((*c_b1).T_), DEC);
+  Serial.print((int)curr_b1_s->v_, DEC);
+
   Serial.print("\r\n");
 
 }

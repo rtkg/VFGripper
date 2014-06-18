@@ -83,7 +83,7 @@ struct EncoderStates
   float alpha_;    //first order filter parameter, 0<=alpha<=1
 
 
-  EncoderStates(float p_raw, int offset, float p, float dp, int k, int res, int scale, int raw_ticks, float alpha) : p_raw_(p_raw), offset_(offset), p_(p), dp_(dp), k_(k), res_(res), scale_(scale), raw_ticks_(raw_ticks), alpha_(alpha) {};
+  EncoderStates(float p_raw, int offset, float p, float dp, int k, int res, float scale, int raw_ticks, float alpha) : p_raw_(p_raw), offset_(offset), p_(p), dp_(dp), k_(k), res_(res), scale_(scale), raw_ticks_(raw_ticks), alpha_(alpha) {};
   void convertSensorReading(int raw_ticks_new) {
     if ((raw_ticks_new - raw_ticks_) < -res_ / 2) //if delta is smaller than minus half the resolution -> positive rollover
       k_++;
@@ -184,6 +184,8 @@ void setup() {
   e_b1_s->offset_ =  e_b1_s->raw_ticks_;
   e_b1_s->convertSensorReading(e_b1_s->raw_ticks_);
   */
+  Serial.begin(19200); //open a serial connection
+  Serial.println("setup start");
   
   setupMotorPins(m_b1_pins);
   setupMotorPins(m_b2_pins);
@@ -206,9 +208,8 @@ void setup() {
   t_old = micros();
   t_old_serial = micros();
 
-  Serial.begin(19200); //open a serial connection
-
   Serial.println("setup done");
+
 }
 //============================== Loop ===================================
 void loop()
@@ -225,11 +226,12 @@ void loop()
     t_old_serial = t_new;
   }
 
+  //Serial.println("Help");
   //read encoders
-  computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
-  computeEncoderStates(e_b2_s, e_b2_pins); //Compute angle + velocity of encoder belt 2
-  computeEncoderStates(e_p1_s, e_p1_pins); //Compute angle + velocity of encoder phalange 1
-  computeEncoderStates(e_p2_s, e_p2_pins); //Compute angle + velocity of encoder phalange 2
+  //computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
+  //computeEncoderStates(e_b2_s, e_b2_pins); //Compute angle + velocity of encoder belt 2
+  //computeEncoderStates(e_p1_s, e_p1_pins); //Compute angle + velocity of encoder phalange 1
+  //computeEncoderStates(e_p2_s, e_p2_pins); //Compute angle + velocity of encoder phalange 2
   computeEncoderStates(e_oc_s, e_oc_pins); //Compute angle + velocity of encoder open close
   
   curr_b1_s->filter(analogRead(m_b1_pins->FB_)); curr_b1_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
@@ -501,13 +503,14 @@ void processMessage() {
           target_enc = e_oc_s;
           target_val = getShort(code, j+5);
           //TODO: bounds checks on target_val!!!
-          target_control->rf_ = (float)target_val/100.; //value in mRad!
+          target_control->rf_ = (float)target_enc->p_+(float)target_val/100.; //value in mRad!
           target_control->ri_ = (float)target_enc->p_;
           target_control->ti_ = (float)millis();
           target_val = getShort(code, j+7);
           //TODO: bounds checks!
           target_control->T_ = (float)target_val;
           target_control->active_ = true;
+          
         } else if (target_val == 1 || target_val == 2) {
           target_val = getShort(code, j+5);
           
@@ -615,20 +618,21 @@ short getShort(char *buf, short pos) {
 
 void sendStatus() {
   
-  Serial.print((int) (e_oc_s->p_), DEC);
+  Serial.print((int) (e_oc_s->p_*1000), DEC);
   Serial.print(",");
-  Serial.print((int) (e_p1_s->p_), DEC);
+  Serial.print((int) (e_oc_s->p_raw_*1000), DEC);
+  //Serial.print((int) (e_p1_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int) (e_p2_s->p_), DEC);
+  Serial.print((int) (e_oc_s->raw_ticks_), DEC);
+  //Serial.print((int) (e_p2_s->p_), DEC);
   Serial.print(",");
   Serial.print((int) (e_b1_s->p_),DEC);
   Serial.print(",");
   Serial.print((int) (e_b2_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int) (c_b1->r_),DEC);
-  //Serial.print((int) curr_oc_s->v_, DEC);
+  Serial.print((int) curr_oc_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int) (c_b2->r_),DEC);
+  Serial.print((int) (c_oc->r_),DEC);
   //Serial.print((int) curr_b1_s->v_, DEC);
   Serial.print(",");
   Serial.print((int) curr_b2_s->v_, DEC);

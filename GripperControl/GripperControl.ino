@@ -122,27 +122,27 @@ struct ControlStates
 //BELT1
 MotorControlPins* m_b1_pins = new MotorControlPins(6, 7, 24, 25, A0);   //Motor 1 Arduino pins
 ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 1
-PIDParameters* pid_mb1_pc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
-SensorPins* e_b1_pins = new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
+PIDParameters* pid_mb1_pc = new PIDParameters(100.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+SensorPins* e_b1_pins = new SensorPins(27, 28, 26); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.3, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
 ///TODO: pins for the sensors and controllers bellow need to be updated
 //BELT2
-MotorControlPins* m_b2_pins = new MotorControlPins(6, 7, 24, 25, A0);   //Motor 1 Arduino pins
+MotorControlPins* m_b2_pins = new MotorControlPins(5, 4, 29, 25, A1);   //Motor 1 Arduino pins
 ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 2
-PIDParameters* pid_mb2_pc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
-SensorPins* e_b2_pins = new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
-EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
+PIDParameters* pid_mb2_pc = new PIDParameters(-100.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+SensorPins* e_b2_pins = new SensorPins(32, 33, 34); //Encoder 1 pins (31, 33, 35);
+EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.3, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
 //OPEN CLOSE
-MotorControlPins* m_oc_pins = new MotorControlPins(6, 7, 24, 25, A0);   //Motor 1 Arduino pins
+MotorControlPins* m_oc_pins = new MotorControlPins(3, 2, 30, 31, A2);   //Motor 1 Arduino pins
 ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive open close
 PIDParameters* pid_moc_pc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
-SensorPins* e_oc_pins = new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
+SensorPins* e_oc_pins = new SensorPins(35, 36, 37); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder open close
-SensorPins* e_p1_pins = new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
+SensorPins* e_p1_pins = new SensorPins(38, 39, 40); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_p1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 1
-SensorPins* e_p2_pins = new SensorPins(26, 27, 28); //Encoder 1 pins (31, 33, 35);
+SensorPins* e_p2_pins = new SensorPins(41, 42, 43); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_p2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 2
 
 CurrentSensorStates* curr_b1_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA, 3.3 / 4095 / 0.000525); //current in Milliampere
@@ -161,9 +161,12 @@ byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta 
 void processMessage(); //Process the message comming from the serial connection
 void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p); //Compute position control
 void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p);
+void setupMotorPins(MotorControlPins* mp); //sets up the pins for a motor
+void setupEncoderPins(SensorPins* ep); //sets up the pins for an encoder
+void setupEncoderSensor(SensorPins* ep, EncoderStates* es); //connects an encoder sensor to the pins and reads in the first value
 //======================= Initialization ==========================
 void setup() {
-  pinMode(m_b1_pins->IN1_, OUTPUT);
+  /*pinMode(m_b1_pins->IN1_, OUTPUT);
   pinMode(m_b1_pins->IN2_, OUTPUT);
   pinMode(m_b1_pins->SF_, INPUT);
   pinMode(m_b1_pins->FB_, INPUT);
@@ -176,14 +179,30 @@ void setup() {
   digitalWrite(e_b1_pins->CK_, HIGH);   //give some default value
   digitalWrite(e_b1_pins->S_, HIGH);    //give some default value
 
-  analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
-  analogReadResolution(12); //sets the resolution of the analogRead(...) function to 12 bit, i.e., between 0 - 4095
-
   //Initialize encoder 1 (for belt 1)
   e_b1_s->raw_ticks_ = readEncoder(e_b1_pins); //Read encoder 1
   e_b1_s->offset_ =  e_b1_s->raw_ticks_;
   e_b1_s->convertSensorReading(e_b1_s->raw_ticks_);
+  */
+  
+  setupMotorPins(m_b1_pins);
+  setupMotorPins(m_b2_pins);
+  setupMotorPins(m_oc_pins);
+  
+  setupEncoderPins(e_b1_pins);
+  setupEncoderPins(e_b2_pins);
+  setupEncoderPins(e_oc_pins);
+  setupEncoderPins(e_p1_pins);
+  setupEncoderPins(e_p2_pins);  
 
+  setupEncoderSensor(e_b1_pins, e_b1_s);  
+  setupEncoderSensor(e_b2_pins, e_b2_s);  
+  setupEncoderSensor(e_oc_pins, e_oc_s);  
+  setupEncoderSensor(e_p1_pins, e_p1_s);  
+  setupEncoderSensor(e_p2_pins, e_p2_s);  
+  
+  analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
+  analogReadResolution(12); //sets the resolution of the analogRead(...) function to 12 bit, i.e., between 0 - 4095
   t_old = micros();
   t_old_serial = micros();
 
@@ -201,40 +220,90 @@ void loop()
     return;
   t_old = t_new;
 
-
   if (abs(t_new - t_old_serial) > dT_serial) {
     sendStatus();
     t_old_serial = t_new;
   }
 
+  //read encoders
   computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
-  //computeEncoderStates(e_b2_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
+  computeEncoderStates(e_b2_s, e_b2_pins); //Compute angle + velocity of encoder belt 2
+  computeEncoderStates(e_p1_s, e_p1_pins); //Compute angle + velocity of encoder phalange 1
+  computeEncoderStates(e_p2_s, e_p2_pins); //Compute angle + velocity of encoder phalange 2
+  computeEncoderStates(e_oc_s, e_oc_pins); //Compute angle + velocity of encoder open close
+  
   curr_b1_s->filter(analogRead(m_b1_pins->FB_)); curr_b1_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
-  //curr_b2_s->v_ = (float)analogRead(m_b1_pins->FB_); //DEBUG
-
-  //analogWrite(m_b1_pins->IN1_, 1400);
-  //analogWrite(m_b1_pins->IN2_, 0);
+  curr_b2_s->filter(analogRead(m_b2_pins->FB_)); curr_b2_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
+  curr_oc_s->filter(analogRead(m_oc_pins->FB_)); curr_oc_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
 
   if (mode == POSITION_MODE) {
     update(); //Read sensors, compute and send controls
+  } else if (mode == CURRENT_MODE) {
+    updateCC(); //current control
   } else {
-    //  delay(100); Shouldn't be necessary ... the loop is throttled by the sampling time anyway ...
+    //do nothing 
   }
 
-
+}
+//====================  Setup helper Function Implementations =========================
+void setupMotorPins(MotorControlPins* mp)
+{
+  pinMode(mp->IN1_, OUTPUT);
+  pinMode(mp->IN2_, OUTPUT);
+  pinMode(mp->SF_, INPUT);
+  pinMode(mp->FB_, INPUT);
+  pinMode(mp->EN_, OUTPUT);
+  digitalWrite(mp->EN_, HIGH); //Enable the driver board
+}
+//--------------------------------------------------------------------------
+void setupEncoderPins(SensorPins* ep)
+{
+  pinMode(ep->D_, INPUT);
+  pinMode(ep->CK_, OUTPUT);
+  pinMode(ep->S_, OUTPUT);
+  digitalWrite(ep->CK_, HIGH);   //give some default value
+  digitalWrite(ep->S_, HIGH);    //give some default value
+}
+//--------------------------------------------------------------------------
+void setupEncoderSensor(SensorPins* ep, EncoderStates* es)
+{
+  es->raw_ticks_ = readEncoder(ep); //Read encoder 1
+  es->offset_ =  es->raw_ticks_;
+  es->convertSensorReading(es->raw_ticks_);
 }
 //====================  Function Implementations =========================
 void update()
 {
-
   //Control Drive 1 if its active
   if (c_b1->active_)
   {
     positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
     int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
   }
+  if (c_b2->active_)
+  {
+    positionControl(c_b2, e_b2_s, m_b2_pins, pid_mb2_pc);//compute the controls for drive belt 1
+    int sf = actuate(c_b2->u_, m_b2_pins); //actuate drive belt 1
+  }
+  if (c_oc->active_)
+  {
+    positionControl(c_oc, e_oc_s, m_oc_pins, pid_moc_pc);//compute the controls for drive belt 1
+    int sf = actuate(c_oc->u_, m_oc_pins); //actuate drive belt 1
+  }
 }
 //--------------------------------------------------------------------------
+void updateCC()
+{
+
+  //Control Drive 1 if its active
+  /*if (c_b1->active_)
+  {
+    positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
+    int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
+  }*/
+}
+//--------------------------------------------------------------------------
+
 void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p)
 {
   float r = minimumJerk(c_s->ti_, (float)millis(), c_s->T_, c_s->ri_, c_s->rf_); //update the setpoint
@@ -385,6 +454,8 @@ int computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins)
   {
     Serial.print("Error in computeEncoderStates(...): ");
     Serial.println(e_s->raw_ticks_, DEC);
+    Serial.print("read from sensor: ");
+    Serial.println(t_new, DEC);
     return e_s->raw_ticks_;
   }
 
@@ -402,8 +473,9 @@ void processMessage() {
     while (Serial.available() && i < 50) {
       code[i++] = Serial.read();
     }
+
     //Serial.print(code);
-    //Serial.print("\r\n");
+
     /* * * * * * * communication protocol * * * * * * * *
      * POS id[short] val[short] dt[short]       : set drive id to position (float)val and time period to achieve target is (float)dt/1000 [Sec]
      * SET id[short] p[short] i[short] d[short] : set pid parameters to (float)param/10.
@@ -417,68 +489,115 @@ void processMessage() {
     ControlStates* target_control;
     EncoderStates* target_enc;
     PIDParameters* target_pid;
-
-    if (code[0] == 'P' && code[1] == 'O' && code[2] == 'S') {
-      //position mode
-      target_val = getShort(code, 3);
-      if (target_val == 0) {
-        target_control = c_oc;
-        target_enc = e_oc_s;
-      } else if (target_val == 1) {
-        target_control = c_b1;
-        target_enc = e_b1_s;
-      } else if (target_val == 2) {
-        target_control = c_b2;
-        target_enc = e_b2_s;
-      } else {
-        return;
+    CurrentSensorStates* target_curr;
+    short j=0;
+    
+    while(j < i) {
+      if (code[j+0] == 'P' && code[j+1] == 'O' && code[j+2] == 'S') {
+        //position mode
+        target_val = getShort(code, 3);
+        if (target_val == 0) {
+          target_control = c_oc;
+          target_enc = e_oc_s;
+          target_val = getShort(code, j+5);
+          //TODO: bounds checks on target_val!!!
+          target_control->rf_ = (float)target_val/100.; //value in mRad!
+          target_control->ri_ = (float)target_enc->p_;
+          target_control->ti_ = (float)millis();
+          target_val = getShort(code, j+7);
+          //TODO: bounds checks!
+          target_control->T_ = (float)target_val;
+          target_control->active_ = true;
+        } else if (target_val == 1 || target_val == 2) {
+          target_val = getShort(code, j+5);
+          
+          //TODO: bounds checks on target_val!!!
+          c_b1->rf_ = (float)target_val/100.; //value in mRad!
+          c_b1->ri_ = (float)e_b1_s->p_;
+          c_b1->ti_ = (float)millis();
+          c_b2->rf_ = (float)target_val/100.; //value in mRad!
+          c_b2->ri_ = (float)e_b2_s->p_;
+          c_b2->ti_ = (float)millis();
+          
+          target_val = getShort(code, j+7);
+          //TODO: bounds checks!
+          c_b1->T_ = (float)target_val;
+          c_b1->active_ = true;
+          c_b2->T_ = (float)target_val;
+          c_b2->active_ = true;
+          
+        } else {
+          return;
+        }
+        mode = POSITION_MODE;      
+  
+        j=j+8; //continue reading from there
+        continue;        
       }
-      mode = POSITION_MODE;
-
-      target_val = getShort(code, 5);
-      //TODO: bounds checks on target_val!!!
-      target_control->rf_ = (float)target_val/100.; //value in mRad!
-      target_control->ri_ = (float)target_enc->p_;
-      target_control->ti_ = (float)millis();
-
-      target_val = getShort(code, 7);
-      //TODO: bounds checks!
-      target_control->T_ = (float)target_val;
-      target_control->active_ = true;
-
-    }
-    if (code[0] == 'S' && code[1] == 'E' && code[2] == 'T') {
-      target_val = getShort(code, 3);
-      if (target_val == 0) {
-        target_pid = pid_moc_pc;
-      } else if (target_val == 1) {
-        target_pid = pid_mb1_pc;
-      } else if (target_val == 2) {
-        target_pid = pid_mb2_pc;
-      } else {
-        return;
+      if (code[j+0] == 'S' && code[j+1] == 'E' && code[j+2] == 'T') {
+        target_val = getShort(code, 3);
+        if (target_val == 0) {
+          target_pid = pid_moc_pc;
+        } else if (target_val == 1) {
+          target_pid = pid_mb1_pc;
+        } else if (target_val == 2) {
+          target_pid = pid_mb2_pc;
+        } else {
+          return;
+        }
+        //e_b1_s->alpha_ = (float)getShort(code, 5) / 100.;
+        target_pid->Kp_ = (float)getShort(code, j+5) / 10.;
+        target_pid->Ki_ = (float)getShort(code, j+7) / 10.;
+        target_pid->Kd_ = (float)getShort(code, j+9) / 10.;
+        
+        j=j+10; 
+        continue;        
       }
-      //e_b1_s->alpha_ = (float)getShort(code, 5) / 100.;
-      target_pid->Kp_ = (float)getShort(code, 5) / 10.;
-      target_pid->Ki_ = (float)getShort(code, 7) / 10.;
-      target_pid->Kd_ = (float)getShort(code, 9) / 10.;
-    }
-
-    if (code[0] == 'Z' && code[1] == 'E' && code[2] == 'R') {
-      //for B1 and B2 set the offset param, for OC store in permanent memory(?)
-    }
-    if (code[0] == 'C' && code[1] == 'U' && code[2] == 'R') {
-      //set to current mode
-    }
-    if (code[0] == 'O' && code[1] == 'F' && code[2] == 'F') {
-      //Set enable to LOW for the correct motor
-    }
-    if (code[0] == 'S' && code[1] == 'N') {
-      //Set enable to HIGH for correct motor
-    }
-    if (code[0] == 'N' && code[1] == 'O' && code[2] == 'N') {
-      mode = NO_MODE;
-      target_val = 0;
+  
+      if (code[j+0] == 'Z' && code[j+1] == 'E' && code[j+2] == 'R') {
+        //for B1 and B2 set the offset param, for OC store in permanent memory(?)
+        j = j+3;
+        continue;        
+      }
+      if (code[j+0] == 'C' && code[j+1] == 'U' && code[j+2] == 'R') {
+        //set to current mode
+        mode = CURRENT_MODE;
+        
+        target_val = getShort(code, j+3);
+        if (target_val == 0) {
+          target_control = c_oc;
+          target_curr = curr_oc_s;
+        } else if (target_val == 1) {
+          target_control = c_b1;
+          target_curr = curr_b1_s;
+        } else if (target_val == 2) {
+          target_control = c_b2;
+          target_curr = curr_b2_s;
+        } else {
+          return;
+        }
+        target_val = getShort(code, j+5);
+        
+        j= j+6;
+        continue;        
+      }
+      if (code[j] == 'O' && code[j+1] == 'F' && code[j+2] == 'F') {
+        //Set enable to LOW for the correct motor
+        j = j+3;
+        continue;
+      }
+      if (code[j] == 'O' && code[j+1] == 'N') {
+        //Set enable to HIGH for correct motor
+        j = j+2;
+        continue;
+      }
+      if (code[j] == 'N' && code[j+1] == 'O' && code[j+2] == 'N') {
+        mode = NO_MODE;
+        target_val = 0;
+        j = j+3;
+        continue;        
+      }
+      return; //we couldn't parse anything meaningful
     }
   }
 }
@@ -496,21 +615,23 @@ short getShort(char *buf, short pos) {
 
 void sendStatus() {
   
-  Serial.print((int) (e_b1_s->p_), DEC);
+  Serial.print((int) (e_oc_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int)pid_mb1_pc->Kp_, DEC);
+  Serial.print((int) (e_p1_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int)pid_mb1_pc->Ki_, DEC);
+  Serial.print((int) (e_p2_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int)pid_mb1_pc->Kd_,DEC);
+  Serial.print((int) (e_b1_s->p_),DEC);
   Serial.print(",");
-  Serial.print((int)c_b1->r_, DEC);
+  Serial.print((int) (e_b2_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int)(c_b1->e_*100), DEC);
+  Serial.print((int) (c_b1->r_),DEC);
+  //Serial.print((int) curr_oc_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int)c_b1->u_, DEC);
+  Serial.print((int) (c_b2->r_),DEC);
+  //Serial.print((int) curr_b1_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int)curr_b1_s->v_, DEC);
+  Serial.print((int) curr_b2_s->v_, DEC);
 
   Serial.print("\r\n");
 

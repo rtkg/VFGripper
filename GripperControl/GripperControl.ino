@@ -2,17 +2,25 @@
 //Robert Krug, Todor Stoyanov 13/06/2014
 
 #include <limits.h>
+#include <DueFlashStorage.h>
 
 #define POSITION_MODE 0
 #define CURRENT_MODE 1
 #define NO_MODE 2
 
 #define ENCODER_ALPHA 0.7
-#define CURRENT_ALPHA 0.85
+#define CURRENT_ALPHA 0.98 
+#define CURRENT_ALPHA_B 0.85 
+
+DueFlashStorage dueFlashStorage;
+uint8_t zeroPositionOCSetFlag = 1;
 
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
+const float MAX_CURRENT_OC = 500;
+const float MAX_CURRENT_B = 1000;
+const float VOLTAGE_FACTOR = 0.17; // 4096 * 1000 / 24V //resolution * mAmp / V
 
 int dT = 1000; //Sample time in microseconds
 int dT_serial = 1000; //Sample time for the serial connection in microseconds
@@ -90,8 +98,8 @@ struct EncoderStates
     if ((raw_ticks_new - raw_ticks_) > res_ / 2) //if delta is larger than half the resolution -> negative rollover
       k_--;
 
-    raw_ticks_ = raw_ticks_new; 
-    p_raw_ = 2 * pi *((raw_ticks_ - (float)offset_) / (float)res_ + (float)k_) * scale_;
+    raw_ticks_ = raw_ticks_new;
+    p_raw_ = 2 * pi * ((raw_ticks_ - (float)offset_) / (float)res_ + (float)k_) * scale_;
     float p_temp = alpha_ * p_ + (1 - alpha_) * p_raw_; //first order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
     dp_ = (p_temp - p_) / ((float)dT);
     p_ = p_temp;
@@ -111,43 +119,47 @@ struct ControlStates
 
   float u_; //computed control
 
-  float k_; //Motor constant
+  float R_; //Motor resistance for cc
 
   bool active_; //flag indicating whether the corresponding controller is active or not
+  bool isPosition_; //is it a position or current controller at the moment?
 
-  ControlStates(float r, float rf, float ri, float e, float de, float ti, float T, int u, int k, bool active) : r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), u_(u), k_(k), active_(active) {};
+  ControlStates(float r, float rf, float ri, float e, float de, float ti, float T, int u, int R, bool active, bool isPosition) : r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), u_(u), R_(R), active_(active), isPosition_(isPosition) {};
 };
 
 //======================= Global Variables ========================
 //BELT1
 MotorControlPins* m_b1_pins = new MotorControlPins(6, 7, 24, 25, A0);   //Motor 1 Arduino pins
-ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 1
+ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.67, false, true); //Setpoint and error for drive belt 1
 PIDParameters* pid_mb1_pc = new PIDParameters(100.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_mb1_cc = new PIDParameters(0.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_b1_pins = new SensorPins(27, 28, 26); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.3, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
 ///TODO: pins for the sensors and controllers bellow need to be updated
 //BELT2
-MotorControlPins* m_b2_pins = new MotorControlPins(5, 4, 29, 25, A1);   //Motor 1 Arduino pins
-ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive belt 2
-PIDParameters* pid_mb2_pc = new PIDParameters(-100.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+MotorControlPins* m_b2_pins = new MotorControlPins(4, 5, 29, 25, A1);   //Motor 1 Arduino pins
+ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.67, false, true); //Setpoint and error for drive belt 2
+PIDParameters* pid_mb2_pc = new PIDParameters(100.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_mb2_cc = new PIDParameters(0.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_b2_pins = new SensorPins(32, 33, 34); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.3, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
 //OPEN CLOSE
-MotorControlPins* m_oc_pins = new MotorControlPins(3, 2, 30, 31, A2);   //Motor 1 Arduino pins
-ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false); //Setpoint and error for drive open close
-PIDParameters* pid_moc_pc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+MotorControlPins* m_oc_pins = new MotorControlPins(2, 3, 30, 31, A2);   //Motor 1 Arduino pins
+ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 40, false, true); //Setpoint and error for drive open close
+PIDParameters* pid_moc_pc = new PIDParameters(2000.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_moc_cc = new PIDParameters(100.0, 0.0, 50.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_oc_pins = new SensorPins(35, 36, 37); //Encoder 1 pins (31, 33, 35);
-EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder open close
+EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.5, 0, ENCODER_ALPHA); //Sensor states for encoder open close
 SensorPins* e_p1_pins = new SensorPins(38, 39, 40); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_p1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 1
 SensorPins* e_p2_pins = new SensorPins(41, 42, 43); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_p2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 2
 
-CurrentSensorStates* curr_b1_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA, 3.3 / 4095 / 0.000525); //current in Milliampere
-CurrentSensorStates* curr_b2_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA, 1); //just for testing
-CurrentSensorStates* curr_oc_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA, 1); //just for testing
+CurrentSensorStates* curr_b1_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA_B, 3.3 / 4095 / 0.000525); //current in Milliampere
+CurrentSensorStates* curr_b2_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA_B, 3.3 / 4095 / 0.000525); //just for testing
+CurrentSensorStates* curr_oc_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA, 3.5 / 4.095 ); //just for testing
 
 
 //====================  Function Declarations ===========================
@@ -186,27 +198,39 @@ void setup() {
   */
   Serial.begin(19200); //open a serial connection
   Serial.println("setup start");
-  
+
   setupMotorPins(m_b1_pins);
   setupMotorPins(m_b2_pins);
   setupMotorPins(m_oc_pins);
-  
+
   setupEncoderPins(e_b1_pins);
   setupEncoderPins(e_b2_pins);
   setupEncoderPins(e_oc_pins);
   setupEncoderPins(e_p1_pins);
-  setupEncoderPins(e_p2_pins);  
+  setupEncoderPins(e_p2_pins);
 
-  setupEncoderSensor(e_b1_pins, e_b1_s);  
-  setupEncoderSensor(e_b2_pins, e_b2_s);  
-  setupEncoderSensor(e_oc_pins, e_oc_s);  
-  setupEncoderSensor(e_p1_pins, e_p1_s);  
-  setupEncoderSensor(e_p2_pins, e_p2_s);  
-  
+  setupEncoderSensor(e_b1_pins, e_b1_s);
+  setupEncoderSensor(e_b2_pins, e_b2_s);
+  setupEncoderSensor(e_oc_pins, e_oc_s);
+  setupEncoderSensor(e_p1_pins, e_p1_s);
+  setupEncoderSensor(e_p2_pins, e_p2_s);
+
   analogWriteResolution(12); //sets the resolution of the analogWrite(...) function to 12 bit, i.e., between 0 - 4095
   analogReadResolution(12); //sets the resolution of the analogRead(...) function to 12 bit, i.e., between 0 - 4095
   t_old = micros();
   t_old_serial = micros();
+
+  //check if the OC zero position is stored in flash
+  zeroPositionOCSetFlag = dueFlashStorage.read(0);
+  if (zeroPositionOCSetFlag == 0) {
+    //read in the encoder offset!
+    byte* b = dueFlashStorage.readAddress(4); // byte array which is read from flash at adress 4
+    int encoderFromFlash; // create a temporary struct
+    memcpy(&encoderFromFlash, b, sizeof(int)); // copy byte array to temporary struct
+    Serial.print("read encoder form flash");
+    Serial.println(encoderFromFlash, DEC);
+    e_oc_s->offset_ = encoderFromFlash;
+  }
 
   Serial.println("setup done");
 
@@ -228,22 +252,28 @@ void loop()
 
   //Serial.println("Help");
   //read encoders
-  //computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
-  //computeEncoderStates(e_b2_s, e_b2_pins); //Compute angle + velocity of encoder belt 2
-  //computeEncoderStates(e_p1_s, e_p1_pins); //Compute angle + velocity of encoder phalange 1
-  //computeEncoderStates(e_p2_s, e_p2_pins); //Compute angle + velocity of encoder phalange 2
+  computeEncoderStates(e_b1_s, e_b1_pins); //Compute angle + velocity of encoder belt 1
+  computeEncoderStates(e_b2_s, e_b2_pins); //Compute angle + velocity of encoder belt 2
+  computeEncoderStates(e_p1_s, e_p1_pins); //Compute angle + velocity of encoder phalange 1
+  computeEncoderStates(e_p2_s, e_p2_pins); //Compute angle + velocity of encoder phalange 2
   computeEncoderStates(e_oc_s, e_oc_pins); //Compute angle + velocity of encoder open close
-  
+
   curr_b1_s->filter(analogRead(m_b1_pins->FB_)); curr_b1_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
   curr_b2_s->filter(analogRead(m_b2_pins->FB_)); curr_b2_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
   curr_oc_s->filter(analogRead(m_oc_pins->FB_)); curr_oc_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
 
-  if (mode == POSITION_MODE) {
+  //watchdogs on the three currents
+  if(curr_oc_s->v_ > MAX_CURRENT_OC) {
+     digitalWrite(m_oc_pins->EN_, LOW); //Enable the driver board
+  }
+  if(curr_b1_s->v_ > MAX_CURRENT_B || curr_b2_s->v_ > MAX_CURRENT_B) {
+     digitalWrite(m_b1_pins->EN_, LOW); //Enable the driver board
+  }
+  
+  if (mode == POSITION_MODE || mode == CURRENT_MODE) {
     update(); //Read sensors, compute and send controls
-  } else if (mode == CURRENT_MODE) {
-    updateCC(); //current control
   } else {
-    //do nothing 
+    //do nothing
   }
 
 }
@@ -279,30 +309,31 @@ void update()
   //Control Drive 1 if its active
   if (c_b1->active_)
   {
-    positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
+    if(c_b1->isPosition_) {
+      positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
+    } else {
+      currentControl(c_b1, curr_b1_s, m_b1_pins, pid_mb1_cc);//compute the current controls for drive belt 1
+    }
     int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
   }
   if (c_b2->active_)
   {
-    positionControl(c_b2, e_b2_s, m_b2_pins, pid_mb2_pc);//compute the controls for drive belt 1
+    if(c_b2->isPosition_) {    
+      positionControl(c_b2, e_b2_s, m_b2_pins, pid_mb2_pc);//compute the controls for drive belt 1
+    } else {
+      currentControl(c_b2, curr_b2_s, m_b2_pins, pid_mb2_cc);//compute the current control for drive belt 1
+    }
     int sf = actuate(c_b2->u_, m_b2_pins); //actuate drive belt 1
   }
   if (c_oc->active_)
   {
-    positionControl(c_oc, e_oc_s, m_oc_pins, pid_moc_pc);//compute the controls for drive belt 1
+    if(c_oc->isPosition_) {    
+      positionControl(c_oc, e_oc_s, m_oc_pins, pid_moc_pc);//compute the controls for drive belt 1
+    } else {
+      currentControl(c_oc, curr_oc_s, m_oc_pins, pid_moc_cc);//compute the current controls for drive belt 1
+    }
     int sf = actuate(c_oc->u_, m_oc_pins); //actuate drive belt 1
   }
-}
-//--------------------------------------------------------------------------
-void updateCC()
-{
-
-  //Control Drive 1 if its active
-  /*if (c_b1->active_)
-  {
-    positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
-    int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
-  }*/
 }
 //--------------------------------------------------------------------------
 
@@ -313,17 +344,22 @@ void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m
   float de = (e - c_s->e_) / ((float)dT); //derivative of the position error
   c_s->r_ = r; c_s->e_ = e; c_s->de_ = de; //update the control states for the next iteration
 
-  c_s->u_=pid(e, de, pid_p); //compute control
+  c_s->u_ = pid(e, de, pid_p); //compute control
 
 }
 //--------------------------------------------------------------------------
 void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p)
 {
-  float e = c_s->r_ - curr_s->v_; //current error (setpoint r_ = rf_ = const for current control)
+  float dir =  c_s->rf_ > 0 ? 1 : -1;
+  float current = dir*curr_s->v_;
+  float r = minimumJerk(c_s->ti_, (float)millis(), c_s->T_, c_s->ri_, c_s->rf_); //update the setpoint
+
+  c_s->r_ = r;
+  float e = c_s->r_ - current; //current error (setpoint r_ = rf_ = const for current control)
   float de = (e - c_s->e_) / ((float)dT); //derivative of the current error
   c_s->e_ = e; c_s->de_ = de; //update the control states for the next iteration
 
-  c_s->u_=pid(e, de, pid_p) + c_s->k_ * c_s->r_; //compute control with feedforward term
+  c_s->u_ = pid(e, de, pid_p) + c_s->R_ * c_s->r_ * VOLTAGE_FACTOR; //compute control with feedforward term
 }
 //--------------------------------------------------------------------------
 float pid(float e, float de, PIDParameters* p)
@@ -492,113 +528,144 @@ void processMessage() {
     EncoderStates* target_enc;
     PIDParameters* target_pid;
     CurrentSensorStates* target_curr;
-    short j=0;
-    
-    while(j < i) {
-      if (code[j+0] == 'P' && code[j+1] == 'O' && code[j+2] == 'S') {
+    short j = 0;
+
+    while (j < i) {
+      if (code[j + 0] == 'P' && code[j + 1] == 'O' && code[j + 2] == 'S') {
         //position mode
         target_val = getShort(code, 3);
         if (target_val == 0) {
           target_control = c_oc;
           target_enc = e_oc_s;
-          target_val = getShort(code, j+5);
+          target_val = getShort(code, j + 5);
           //TODO: bounds checks on target_val!!!
-          target_control->rf_ = (float)target_enc->p_+(float)target_val/100.; //value in mRad!
+          target_control->rf_ = (float)target_val / 100.; //value in mRad! (float)target_enc->p_ +
           target_control->ri_ = (float)target_enc->p_;
           target_control->ti_ = (float)millis();
-          target_val = getShort(code, j+7);
+          target_val = getShort(code, j + 7);
           //TODO: bounds checks!
           target_control->T_ = (float)target_val;
           target_control->active_ = true;
-          
+          target_control->isPosition_ = true;
+
         } else if (target_val == 1 || target_val == 2) {
-          target_val = getShort(code, j+5);
-          
+          target_val = getShort(code, j + 5);
+
           //TODO: bounds checks on target_val!!!
-          c_b1->rf_ = (float)target_val/100.; //value in mRad!
+          c_b1->rf_ = (float)target_val / 100.; //value in mRad!
           c_b1->ri_ = (float)e_b1_s->p_;
           c_b1->ti_ = (float)millis();
-          c_b2->rf_ = (float)target_val/100.; //value in mRad!
+          c_b2->rf_ = (float)target_val / 100.; //value in mRad!
           c_b2->ri_ = (float)e_b2_s->p_;
           c_b2->ti_ = (float)millis();
-          
-          target_val = getShort(code, j+7);
+
+          target_val = getShort(code, j + 7);
           //TODO: bounds checks!
           c_b1->T_ = (float)target_val;
           c_b1->active_ = true;
+          c_b1->isPosition_ = true;
           c_b2->T_ = (float)target_val;
           c_b2->active_ = true;
-          
+          c_b2->isPosition_ = true;
+
         } else {
           return;
         }
-        mode = POSITION_MODE;      
-  
-        j=j+8; //continue reading from there
-        continue;        
+        mode = POSITION_MODE;
+
+        j = j + 8; //continue reading from there
+        continue;
       }
-      if (code[j+0] == 'S' && code[j+1] == 'E' && code[j+2] == 'T') {
+      if (code[j + 0] == 'S' && code[j + 1] == 'E' && code[j + 2] == 'T') {
         target_val = getShort(code, 3);
         if (target_val == 0) {
           target_pid = pid_moc_pc;
         } else if (target_val == 1) {
-          target_pid = pid_mb1_pc;
+          target_pid = pid_mb1_cc;
         } else if (target_val == 2) {
-          target_pid = pid_mb2_pc;
+          target_pid = pid_mb2_cc;
         } else {
           return;
         }
         //e_b1_s->alpha_ = (float)getShort(code, 5) / 100.;
-        target_pid->Kp_ = (float)getShort(code, j+5) / 10.;
-        target_pid->Ki_ = (float)getShort(code, j+7) / 10.;
-        target_pid->Kd_ = (float)getShort(code, j+9) / 10.;
-        
-        j=j+10; 
-        continue;        
+        target_pid->Kp_ = (float)getShort(code, j + 5);
+        target_pid->Ki_ = (float)getShort(code, j + 7);
+        target_pid->Kd_ = (float)getShort(code, j + 9);
+
+        j = j + 10;
+        continue;
       }
-  
-      if (code[j+0] == 'Z' && code[j+1] == 'E' && code[j+2] == 'R') {
+
+      if (code[j + 0] == 'Z' && code[j + 1] == 'E' && code[j + 2] == 'R') {
         //for B1 and B2 set the offset param, for OC store in permanent memory(?)
-        j = j+3;
-        continue;        
+        setupEncoderSensor(e_b1_pins, e_b1_s);
+        setupEncoderSensor(e_b2_pins, e_b2_s);
+        setupEncoderSensor(e_oc_pins, e_oc_s);
+
+        byte b2[sizeof(int)]; // create byte array to store the struct
+        memcpy(b2, &e_oc_s->offset_, sizeof(int)); // copy the struct to the byte array
+        dueFlashStorage.write(4, b2, sizeof(int)); // write byte array to flash
+        // write 0 to address 0 to indicate that it is not the first time running anymore
+        dueFlashStorage.write(0, 0);
+        j = j + 3;
+        continue;
       }
-      if (code[j+0] == 'C' && code[j+1] == 'U' && code[j+2] == 'R') {
+      if (code[j + 0] == 'C' && code[j + 1] == 'U' && code[j + 2] == 'R') {
         //set to current mode
         mode = CURRENT_MODE;
-        
-        target_val = getShort(code, j+3);
         if (target_val == 0) {
           target_control = c_oc;
-          target_curr = curr_oc_s;
-        } else if (target_val == 1) {
-          target_control = c_b1;
-          target_curr = curr_b1_s;
-        } else if (target_val == 2) {
-          target_control = c_b2;
-          target_curr = curr_b2_s;
+          target_val = getShort(code, j + 5);
+          //TODO: bounds checks on target_val!!!
+          target_control->rf_ = (float)target_val / 100.; //value in mAmp!
+          target_control->ri_ = curr_oc_s->v_; //value in mAmp!          
+          target_control->ti_ = (float)millis();
+          target_control->T_ = 1500;
+          target_control->active_ = true;
+          target_control->isPosition_ = false;
+
+        } else if (target_val == 1 || target_val == 2) {
+          target_val = getShort(code, j + 5);
+          //TODO: bounds checks on target_val!!!
+          c_b1->rf_ = (float)target_val / 100.; //value in mRad!
+          c_b1->ti_ = (float)millis();
+          c_b1->ri_ = curr_b1_s->v_; //value in mAmp!          
+          c_b2->rf_ = (float)target_val / 100.; //value in mRad!
+          c_b2->ti_ = (float)millis();
+          c_b2->ri_ = curr_b2_s->v_; //value in mAmp!                    
+          c_b1->T_ = 1500;
+          c_b2->T_ = 1500;          
+          c_b1->active_ = true;
+          c_b1->isPosition_ = false;
+          c_b2->active_ = true;
+          c_b2->isPosition_ = false;
+
         } else {
           return;
         }
-        target_val = getShort(code, j+5);
-        
-        j= j+6;
-        continue;        
+
+        j = j + 6;
+        continue;
       }
-      if (code[j] == 'O' && code[j+1] == 'F' && code[j+2] == 'F') {
+      if (code[j] == 'O' && code[j + 1] == 'F' && code[j + 2] == 'F') {
         //Set enable to LOW for the correct motor
-        j = j+3;
+        digitalWrite(m_b1_pins->EN_, LOW); //Enable the driver board
+        digitalWrite(m_oc_pins->EN_, LOW); //Enable the driver board
+        j = j + 3;
         continue;
       }
-      if (code[j] == 'O' && code[j+1] == 'N') {
+      if (code[j] == 'O' && code[j + 1] == 'N') {
         //Set enable to HIGH for correct motor
-        j = j+2;
+        digitalWrite(m_b1_pins->EN_, HIGH); //Enable the driver board
+        digitalWrite(m_oc_pins->EN_, HIGH); //Enable the driver board
+        j = j + 2;
         continue;
       }
-      if (code[j] == 'N' && code[j+1] == 'O' && code[j+2] == 'N') {
+      if (code[j] == 'N' && code[j + 1] == 'O' && code[j + 2] == 'N') {
         mode = NO_MODE;
         target_val = 0;
-        j = j+3;
-        continue;        
+        j = j + 3;
+        continue;
       }
       return; //we couldn't parse anything meaningful
     }
@@ -617,26 +684,28 @@ short getShort(char *buf, short pos) {
 }
 
 void sendStatus() {
-  
-  Serial.print((int) (e_oc_s->p_*1000), DEC);
+
+  Serial.print((int) (e_oc_s->p_ * 1000), DEC);
   Serial.print(",");
-  Serial.print((int) (e_oc_s->p_raw_*1000), DEC);
+  //Serial.print((int) (e_oc_s->p_raw_ * 1000), DEC);
+  Serial.print((int) (c_oc->r_*1000), DEC);
   //Serial.print((int) (e_p1_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int) (e_oc_s->raw_ticks_), DEC);
-  //Serial.print((int) (e_p2_s->p_), DEC);
+  //Serial.print((int) (e_oc_s->raw_ticks_), DEC);
+  Serial.print((int) (e_p2_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int) (e_b1_s->p_),DEC);
+  Serial.print((int) (e_b1_s->p_), DEC);
   Serial.print(",");
-  Serial.print((int) (e_b2_s->p_), DEC);
+//  Serial.print((int) (e_b2_s->p_), DEC);
+  Serial.print((int) c_oc->u_, DEC);
   Serial.print(",");
   Serial.print((int) curr_oc_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int) (c_oc->r_),DEC);
-  //Serial.print((int) curr_b1_s->v_, DEC);
+  //Serial.print((int) (c_oc->r_), DEC);
+  Serial.print((int) curr_b1_s->v_, DEC);
   Serial.print(",");
-  Serial.print((int) curr_b2_s->v_, DEC);
-
+//  Serial.print((int) curr_b2_s->v_, DEC);
+  Serial.print((int) (c_oc->rf_), DEC);
   Serial.print("\r\n");
 
 }

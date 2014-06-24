@@ -15,6 +15,7 @@
 DueFlashStorage dueFlashStorage;
 uint8_t zeroPositionOCSetFlag = 1;
 
+
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
@@ -23,7 +24,7 @@ const float MAX_CURRENT_B = 1000;
 const float VOLTAGE_FACTOR = 0.17; // 4096 * 1000 / 24V //resolution * mAmp / V
 
 int dT = 1000; //Sample time in microseconds
-int dT_serial = 1000; //Sample time for the serial connection in microseconds
+int dT_serial = 10000; //Sample time for the serial connection in microseconds
 int t_old, t_new;
 int t_old_serial;
 int mode = NO_MODE;
@@ -526,9 +527,9 @@ void processMessage() {
 
   if (Serial.available()) {
     delay(10);
-    char code[50];
+    char code[100];
     short i = 0;
-    while (Serial.available() && i < 50) {
+    while (Serial.available() && i < 100) {
       code[i++] = Serial.read();
     }
 
@@ -593,7 +594,7 @@ void processMessage() {
         }
         mode = POSITION_MODE;
 
-        j = j + 8; //continue reading from there
+        j = j + 9; //continue reading from there
         continue;
       }
       if (code[j + 0] == 'S' && code[j + 1] == 'E' && code[j + 2] == 'T') {
@@ -612,7 +613,7 @@ void processMessage() {
         target_pid->Ki_ = (float)getShort(code, j + 7);
         target_pid->Kd_ = (float)getShort(code, j + 9);
 
-        j = j + 10;
+        j = j + 11;
         continue;
       }
 
@@ -630,10 +631,10 @@ void processMessage() {
         j = j + 3;
         continue;
       }
-      if (code[j + 0] == 'C' && code[j + 1] == 'U' && code[j + 2] == 'R') {
+      if (code[j] == 'C' && code[j + 1] == 'U' && code[j + 2] == 'R') {
         //set to current mode
         mode = CURRENT_MODE;
-        target_val = getShort(code, 3);
+        target_val = getShort(code, j + 3);
         if (target_val == 0) {
           target_control = c_oc;
           target_val = getShort(code, j + 5);
@@ -655,6 +656,11 @@ void processMessage() {
           c_b1->ti_ = (float)millis();
           c_b1->ri_ = dir1*curr_b1_s->v_; //value in mAmp!          
           c_b2->rf_ = (float)target_val / 100.; //value in mRad!
+
+          //TERRIBLE hack to pull evenly with the two belts
+          if(c_b1->rf_ > 50) c_b1->rf_+=80;
+          if(c_b1->rf_ < -50) c_b1->rf_-=80;
+          
           c_b2->ti_ = (float)millis();
           c_b2->ri_ = dir2*curr_b2_s->v_; //value in mAmp!                    
           c_b1->T_ = 1500;
@@ -668,19 +674,19 @@ void processMessage() {
           return;
         }
 
-        j = j + 6;
+        j = j + 7;
         continue;
       }
       if (code[j] == 'O' && code[j + 1] == 'F' && code[j + 2] == 'F') {
         //Set enable to LOW for the correct motor
-        digitalWrite(m_b1_pins->EN_, LOW); //Enable the driver board
+        //digitalWrite(m_b1_pins->EN_, LOW); //Enable the driver board
         digitalWrite(m_oc_pins->EN_, LOW); //Enable the driver board
         j = j + 3;
         continue;
       }
       if (code[j] == 'O' && code[j + 1] == 'N') {
         //Set enable to HIGH for correct motor
-        digitalWrite(m_b1_pins->EN_, HIGH); //Enable the driver board
+        //digitalWrite(m_b1_pins->EN_, HIGH); //Enable the driver board
         digitalWrite(m_oc_pins->EN_, HIGH); //Enable the driver board
         j = j + 2;
         continue;
@@ -693,7 +699,7 @@ void processMessage() {
       }
       return; //we couldn't parse anything meaningful
     }
-  }
+  } 
 }
 
 short getShort(char *buf, short pos) {
@@ -731,6 +737,7 @@ void sendStatus() {
   Serial.print((int) curr_oc_s->v_, DEC);
   Serial.print(",");
   
+  //Serial.print((int) c_oc->r_, DEC);
   Serial.print((int) curr_b1_s->v_, DEC);
   Serial.print(",");
   

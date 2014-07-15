@@ -5,8 +5,9 @@
 #include <DueFlashStorage.h>
 
 #define POSITION_MODE 0
-#define CURRENT_MODE 1
-#define NO_MODE 2
+#define VELOCITY_MODE 1
+#define CURRENT_MODE 2
+#define NO_MODE 3
 
 #define ENCODER_ALPHA 0.7
 #define CURRENT_ALPHA 0.99 
@@ -123,15 +124,15 @@ struct ControlStates
   float R_; //Motor resistance for cc
 
   bool active_; //flag indicating whether the corresponding controller is active or not
-  bool isPosition_; //is it a position or current controller at the moment?
+  int mode_; //is it a position or current or velocity controller at the moment?
 
-  ControlStates(float r, float rf, float ri, float e, float de, float ti, float T, int u, int R, bool active, bool isPosition) : r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), u_(u), R_(R), active_(active), isPosition_(isPosition) {};
+  ControlStates(float r, float rf, float ri, float e, float de, float ti, float T, int u, int R, bool active, int mode) : r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), u_(u), R_(R), active_(active), mode_(mode) {};
 };
 
 //======================= Global Variables ========================
 //BELT1
 MotorControlPins* m_b1_pins = new MotorControlPins(6, 7, 24, 25, A0);   //Motor 1 Arduino pins
-ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30, false, true); //Setpoint and error for drive belt 1
+ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 30, false, NO_MODE); //Setpoint and error for drive belt 1
 PIDParameters* pid_mb1_pc = new PIDParameters(150.0, 0.0, 25.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb1_cc = new PIDParameters(100.0, 0.0, 25.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_b1_pins = new SensorPins(27, 28, 26); //Encoder 1 pins (31, 33, 35);
@@ -140,7 +141,7 @@ EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.
 ///TODO: pins for the sensors and controllers bellow need to be updated
 //BELT2
 MotorControlPins* m_b2_pins = new MotorControlPins(5, 4, 29, 25, A1);   //Motor 1 Arduino pins
-ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, true); //Setpoint and error for drive belt 2
+ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
 PIDParameters* pid_mb2_pc = new PIDParameters(150.0, 0.0, 25.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb2_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_b2_pins = new SensorPins(32, 33, 34); //Encoder 1 pins (31, 33, 35);
@@ -148,7 +149,7 @@ EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.
 
 //OPEN CLOSE
 MotorControlPins* m_oc_pins = new MotorControlPins(3, 2, 30, 31, A2);   //Motor 1 Arduino pins
-ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
+ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, NO_MODE); //Setpoint and error for drive open close
 PIDParameters* pid_moc_pc = new PIDParameters(10.5, 0.0, 55.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_moc_cc = new PIDParameters(30.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_oc_pins = new SensorPins(35, 36, 37); //Encoder 1 pins (31, 33, 35);
@@ -173,6 +174,7 @@ int computeEncoderStates(EncoderStates* e_s, const SensorPins* s_pins); //Conver
 byte shiftIn(const SensorPins* s_pins, int readBits); //read in a byte of dapta from the digital input corresponding to the given sensor
 void processMessage(); //Process the message comming from the serial connection
 void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p); //Compute position control
+void velocityControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p); //Compute velocity control
 void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p);
 void setupMotorPins(MotorControlPins* mp); //sets up the pins for a motor
 void setupEncoderPins(SensorPins* ep); //sets up the pins for an encoder
@@ -267,13 +269,13 @@ void loop()
 
   //watchdogs on the three currents
   if(curr_oc_s->v_ > MAX_CURRENT_OC) {
-     digitalWrite(m_oc_pins->EN_, LOW); //Enable the driver board
+     digitalWrite(m_oc_pins->EN_, LOW); //Disable the driver board
   }
   if(curr_b1_s->v_ > MAX_CURRENT_B || curr_b2_s->v_ > MAX_CURRENT_B) {
-     digitalWrite(m_b1_pins->EN_, LOW); //Enable the driver board
+     digitalWrite(m_b1_pins->EN_, LOW); //Disable the driver board
   }
   
-  if (mode == POSITION_MODE || mode == CURRENT_MODE) {
+  if (mode == POSITION_MODE || mode == VELOCITY_MODE || mode == CURRENT_MODE) {
     update(); //Read sensors, compute and send controls
   } else {
     //do nothing
@@ -311,35 +313,49 @@ void update()
 {
   //Control Drive 1 if its active
   if (c_b1->active_)
-  {
-    if(c_b1->isPosition_) {
-      positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
-    } else {
-      currentControl(c_b1, curr_b1_s, m_b1_pins, pid_mb1_cc);//compute the current controls for drive belt 1
+    {
+      if(c_b1->mode_==POSITION_MODE) {
+	positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
+      } 
+      else if(c_b1->mode_==CURRENT_MODE)
+	{
+	  currentControl(c_b1, curr_b1_s, m_b1_pins, pid_mb1_cc);//compute the current controls for drive belt 1
+	}
+      else if(c_b1->mode_==VELOCITY_MODE)
+	{
+
+	}
+      int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
     }
-    int sf = actuate(c_b1->u_, m_b1_pins); //actuate drive belt 1
-  }
   if (c_b2->active_)
-  {
-    if(c_b2->isPosition_) {    
-      positionControl(c_b2, e_b2_s, m_b2_pins, pid_mb2_pc);//compute the controls for drive belt 1
-    } else {
-      currentControl(c_b2, curr_b2_s, m_b2_pins, pid_mb2_cc);//compute the current control for drive belt 1
+    {
+      if(c_b1->mode_==POSITION_MODE) 
+	{
+	  positionControl(c_b2, e_b2_s, m_b2_pins, pid_mb2_pc);//compute the controls for drive belt 1
+	} else if(c_b1->mode_==CURRENT_MODE)
+	{
+	  currentControl(c_b2, curr_b2_s, m_b2_pins, pid_mb2_cc);//compute the current control for drive belt 1
+	}
+      else if(c_b1->mode_==VELOCITY_MODE)
+	{
+
+	}
+      int sf = actuate(c_b2->u_, m_b2_pins); //actuate drive belt 1
     }
-    int sf = actuate(c_b2->u_, m_b2_pins); //actuate drive belt 1
-  }
   if (c_oc->active_)
-  {
-    if(c_oc->isPosition_) {    
-      positionControl(c_oc, e_oc_s, m_oc_pins, pid_moc_pc);//compute the controls for drive belt 1
-    } else {
-      currentControl(c_oc, curr_oc_s, m_oc_pins, pid_moc_cc);//compute the current controls for drive belt 1
+    {
+      if(c_oc->mode_==POSITION_MODE) 
+	{    
+	  positionControl(c_oc, e_oc_s, m_oc_pins, pid_moc_pc);//compute the controls for drive belt 1
+	} 
+      else if(c_oc->==CURRENT_MODE)
+	{
+	  currentControl(c_oc, curr_oc_s, m_oc_pins, pid_moc_cc);//compute the current controls for drive belt 1
+	}
+      int sf = actuate(c_oc->u_, m_oc_pins); //actuate drive belt 1
     }
-    int sf = actuate(c_oc->u_, m_oc_pins); //actuate drive belt 1
-  }
 }
 //--------------------------------------------------------------------------
-
 void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p)
 {
   float r = minimumJerk(c_s->ti_, (float)millis(), c_s->T_, c_s->ri_, c_s->rf_); //update the setpoint
@@ -348,8 +364,16 @@ void positionControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m
   c_s->r_ = r; c_s->e_ = e; c_s->de_ = de; //update the control states for the next iteration
 
   c_s->u_ = pid(e, de, pid_p); //compute control
-
 }
+//--------------------------------------------------------------------------
+void velocityControl(ControlStates* c_s, EncoderStates* e_s, MotorControlPins* m_pins, PIDParameters* pid_p)
+{
+  float r = minimumJerk(c_s->ti_, (float)millis(), c_s->T_, c_s->ri_, c_s->rf_); //update the setpoint
+  float e = r - e_s->dp_; //velocity error
+  float de = (e - c_s->e_) / ((float)dT); //derivative of the velocity error
+  c_s->r_ = r; c_s->e_ = e; c_s->de_ = de; //update the control states for the next iteration
+
+  c_s->u_ = pid(e, de, pid_p); //compute control
 //--------------------------------------------------------------------------
 void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorControlPins* m_pins, PIDParameters* pid_p)
 {

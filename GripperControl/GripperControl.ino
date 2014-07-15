@@ -19,7 +19,7 @@ uint8_t zeroPositionOCSetFlag = 1;
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
-const float MAX_CURRENT_OC = 1500;
+const float MAX_CURRENT_OC = 4500;
 const float MAX_CURRENT_B = 1000;
 const float VOLTAGE_FACTOR = 0.17; // 4096 * 1000 / 24V //resolution * mAmp / V
 
@@ -149,7 +149,7 @@ EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 5.
 //OPEN CLOSE
 MotorControlPins* m_oc_pins = new MotorControlPins(3, 2, 30, 31, A2);   //Motor 1 Arduino pins
 ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
-PIDParameters* pid_moc_pc = new PIDParameters(10.5, 0.0, 55.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_moc_pc = new PIDParameters(7.5, 0.04, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_moc_cc = new PIDParameters(30.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for belt Motor 1
 SensorPins* e_oc_pins = new SensorPins(35, 36, 37); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 500, 0, ENCODER_ALPHA); //Sensor states for encoder open close
@@ -611,10 +611,10 @@ void processMessage() {
           return;
         }
         //e_b1_s->alpha_ = (float)getShort(code, 5) / 100.;
-        target_pid->Kp_ = (float)getShort(code, j + 5);
-        c_b2->R_ = (float)getShort(code, j + 7);
-        //target_pid->Ki_ = (float)getShort(code, j + 7);
-        target_pid->Kd_ = (float)getShort(code, j + 9);
+        target_pid->Kp_ = (float)getShort(code, j + 5)/10;
+        //c_oc->R_ = (float)getShort(code, j + 7);
+        target_pid->Ki_ = (float)getShort(code, j + 7)/100;
+        target_pid->Kd_ = (float)getShort(code, j + 9)/10;
 
         j = j + 11;
         continue;
@@ -643,10 +643,10 @@ void processMessage() {
           target_val = getShort(code, j + 5);
           //TODO: bounds checks on target_val!!!
           float dir =  target_control->r_ >= 0 ? 1 : -1;
-          target_control->rf_ = (float)target_val / 10.; //value in mAmp!
+          target_control->rf_ = (float)target_val ; //value in mAmp!
           target_control->ri_ = dir*curr_oc_s->v_; //value in mAmp!          
           target_control->ti_ = (float)millis();
-          target_control->T_ = 1500;
+          target_control->T_ = 3500;
           target_control->active_ = true;
           target_control->isPosition_ = false;
 
@@ -655,15 +655,15 @@ void processMessage() {
           float dir1 =  c_b1->r_ >= 0 ? 1 : -1;
           float dir2 =  c_b2->r_ >= 0 ? 1 : -1;          
           //TODO: bounds checks on target_val!!!
-          c_b1->rf_ = (float)target_val / 10.; //value in mRad!
+          c_b1->rf_ = (float)target_val ; //value in mRad!
           c_b1->ti_ = (float)millis();
           c_b1->ri_ = dir1*curr_b1_s->v_; //value in mAmp!          
-          c_b2->rf_ = (float)target_val / 10.; //value in mRad!
+          c_b2->rf_ = (float)target_val ; //value in mRad!
 
           //TERRIBLE hack to pull evenly with the two belts
           //if(c_b1->rf_ > 50) c_b1->rf_+=80;
           //if(c_b1->rf_ < -50) c_b1->rf_-=80;
-          c_b2->rf_ = 3*c_b2->rf_;
+          c_b2->rf_ = 2*c_b2->rf_;
           
           c_b2->ti_ = (float)millis();
           c_b2->ri_ = dir2*curr_b2_s->v_; //value in mAmp!                    
@@ -742,6 +742,7 @@ void sendStatus() {
   //Serial.print((int) c_b2->r_, DEC);
   Serial.print(",");
   
+  //Serial.print((int) c_oc->r_, DEC);
   Serial.print((int) curr_b1_s->v_, DEC);
   Serial.print(",");
   

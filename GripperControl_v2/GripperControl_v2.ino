@@ -370,6 +370,8 @@ void update()
   {
     if (c_b1->mode_ == POSITION_MODE) {
       positionControl(c_b1, e_b1_s, m_b1_pins, pid_mb1_pc);//compute the controls for drive belt 1
+    } else {
+      c_b1->u_ = 0; 
     }
     /*else if (c_b1->mode_ == CURRENT_MODE)
     {
@@ -386,7 +388,9 @@ void update()
     if (c_b2->mode_ == POSITION_MODE)
     {
       positionControl(c_b2, e_b2_s, m_b2_pins, pid_mb2_pc);//compute the controls for drive belt 1
-    } 
+    } else {
+      c_b2->u_ = 0; 
+    }
     /*else if (c_b2->mode_ == CURRENT_MODE)
     {
       currentControl(c_b2, curr_b2_s, m_b2_pins, pid_mb2_cc);//compute the current control for drive belt 1

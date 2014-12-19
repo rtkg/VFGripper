@@ -173,7 +173,7 @@ EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14
 //OPEN CLOSE
 MotorControlPins* m_oc_pins = new MotorControlPins(11, 10, 37, 35, A7);   //Motor 1 Arduino pins
 ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
-PIDParameters* pid_moc_pc = new PIDParameters(6, 0.1, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for opening Motor
+PIDParameters* pid_moc_pc = new PIDParameters(3, 0.1, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for opening Motor
 PIDParameters* pid_moc_cc = new PIDParameters(50.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motor
 SensorPins* e_oc_pins = new SensorPins(47, 49, 51); //Encoder 1 pins (31, 33, 35);
 EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -500, 0, ENCODER_ALPHA); //Sensor states for encoder open close

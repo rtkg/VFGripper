@@ -54,7 +54,7 @@ const float MAX_CURRENT_B = 500;
 const float VOLTAGE_FACTOR = 0.17; // 4096 * 1000 / 24V //resolution * mAmp / V
 
 int dT = 1000; //Sample time in microseconds
-int dT_serial = 10000; //Sample time for the serial connection in microseconds
+int dT_serial = 70000; //Sample time for the serial connection in microseconds
 int t_old, t_new;
 int t_old_serial;
 int mode = NO_MODE;
@@ -316,16 +316,22 @@ void setup() {
 //============================== Loop ===================================
 void loop()
 {
-  updateState();
-  state_publisher.publish(&state);
+  
+  //spin and check if we should publish
+  t_new = micros();    
   nh.spinOnce();
-  //processMessage();
+  if (abs(t_new - t_old_serial) > dT_serial) {
+    updateState();
+    state_publisher.publish(&state);
+    t_old_serial = t_new;
+  }
+  
+  //add the ROS overhead to the time since last loop
   t_new = micros();
   //Do nothing if the sampling period didn't pass yet
   if (abs(t_new - t_old) < dT)
     return;
   t_old = t_new;
-
 
   //Serial.println("Help");
   //read encoders

@@ -47,7 +47,7 @@ uint8_t zeroPositionOCSetFlag = 1;
 
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
-const float belt_limit = 2000; //PWM resoluion: 12 bit, i.e., 0 - 4095
+const float belt_limit = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
 const float MAX_CURRENT_OC = 1500;
 const float MAX_CURRENT_B = 500;
@@ -160,53 +160,53 @@ struct ControlStates
 
 //======================= Global Variables ========================
 //BELT1
-MotorControlPins* m_b1_pins =   new MotorControlPins(6, 7, 46, 40, A11); //belt left back Motor 1 Arduino pins
+MotorControlPins* m_b1_pins =   new MotorControlPins(7, 6, 46, 40, A11); //belt left back Motor 1 Arduino pins
 ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 1
-PIDParameters* pid_mb1_pc = new PIDParameters(100.0, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_mb1_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb1_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 1
 PIDParameters* pid_mb1_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 1
 SensorPins* e_b1_pins = new SensorPins(33, 35, 37);
-EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
+EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
-MotorControlPins* m_b3_pins = new MotorControlPins(4, 5, 34, 42, A4); //   //belt left front Motor 1 Arduino pins
+MotorControlPins* m_b3_pins = new MotorControlPins(5, 4, 34, 42, A4); //   //belt left front Motor 1 Arduino pins
 ControlStates* c_b3 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 1
-PIDParameters* pid_mb3_pc = new PIDParameters(150.0, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_mb3_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb3_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 1
 PIDParameters* pid_mb3_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 1
 SensorPins* e_b3_pins = new SensorPins(39, 41, 43); 
-EncoderStates* e_b3_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
+EncoderStates* e_b3_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
 ///TODO: pins for the sensors and controllers bellow need to be updated
 //BELT2
-MotorControlPins* m_b2_pins = new MotorControlPins(8, 9, 50, 42, A1);//   //belt right back Motor 1 Arduino pins
+MotorControlPins* m_b2_pins = new MotorControlPins(9, 8, 50, 42, A1);//   //belt right back Motor 1 Arduino pins
 ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
-PIDParameters* pid_mb2_pc = new PIDParameters(150.0, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_mb2_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb2_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 2
 PIDParameters* pid_mb2_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 2
 SensorPins* e_b2_pins = new SensorPins(24, 26, 28); //
-EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
+EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
-MotorControlPins* m_b4_pins =  new MotorControlPins(3, 2, 36, 40, A10); //   //belt right front Motor 1 Arduino pins
+MotorControlPins* m_b4_pins =  new MotorControlPins(2, 3, 36, 40, A10); //   //belt right front Motor 1 Arduino pins
 ControlStates* c_b4 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
-PIDParameters* pid_mb4_pc = new PIDParameters(150.0, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
+PIDParameters* pid_mb4_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb4_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 2
 PIDParameters* pid_mb4_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 2
 SensorPins* e_b4_pins = new SensorPins(45, 47, 49);
-EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
+EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
 //OPEN CLOSE
 MotorControlPins* m_oc1_pins = new MotorControlPins(10, 11, 32, 44, A2);//;   //OC Motor 1 Arduino pins
 MotorControlPins* m_oc2_pins = new MotorControlPins(12, 13, 48, 44, A0);   //OC Motor 2 Arduino pins
 ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
-PIDParameters* pid_moc_pc = new PIDParameters(3, 0.1, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for opening Motors
-PIDParameters* pid_moc_cc = new PIDParameters(50.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motors
+PIDParameters* pid_moc_pc = new PIDParameters(21, 0.1, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for opening Motors
+PIDParameters* pid_moc_cc = new PIDParameters(100.0, 0.02, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motors
 SensorPins* e_oc_pins =  new SensorPins(22, 23, 25);
-EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -500, 0, ENCODER_ALPHA); //Sensor states for encoder open close
+EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 533.3, 0, ENCODER_ALPHA); //Sensor states for encoder open close
 //PHALANGES
 SensorPins* e_p1_pins = new SensorPins(27, 29, 31); //;
 EncoderStates* e_p1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 1
 SensorPins* e_p2_pins =  new SensorPins(51, 53, 48);
-EncoderStates* e_p2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 2
+EncoderStates* e_p2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 2
 
 CurrentSensorStates* curr_b1_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA_B, 3.3 / 4095 / 0.000525); //current in Milliampere
 CurrentSensorStates* curr_b2_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA_B, 3.3 / 4095 / 0.000525); //just for testing
@@ -308,9 +308,9 @@ void setup() {
   //Serial.println(sf,DEC);
   //actuate(1000, m_b4_pins);
   //Serial.println(sf,DEC);
-  //actuate(1000, m_oc2_pins);
+  //actuate(500, m_oc2_pins);
   //Serial.println(sf,DEC);
-  //actuate(1000, m_oc1_pins);
+  //actuate(500, m_oc1_pins);
 
 }
 //============================== Loop ===================================

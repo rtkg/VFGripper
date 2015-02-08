@@ -85,8 +85,9 @@ struct PIDParameters {
   float u_max_; //Maximum controller output (<= max PWM)
   float u_min_; //Minimum controller output [>= -(max PWM)]
   float I_;     //Serves as memory for the integral term [i.e., I=dT*(Ki*e_0, ... , Ki*e_t)]
-
-  PIDParameters(float Kp, float Ki, float Kd, float u_max, float u_min, float I) : Kp_(Kp), Kd_(Kd), Ki_(Ki), u_max_(u_max), u_min_(u_min), I_(I) {};
+  float dead_space_;
+  
+  PIDParameters(float Kp, float Ki, float Kd, float u_max, float u_min, float I, float dead=-1) : Kp_(Kp), Kd_(Kd), Ki_(Ki), u_max_(u_max), u_min_(u_min), I_(I),dead_space_(dead) {};
 };
 
 struct CurrentSensorStates
@@ -198,7 +199,7 @@ EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.
 MotorControlPins* m_oc1_pins = new MotorControlPins(10, 11, 32, 44, A2);//;   //OC Motor 1 Arduino pins
 MotorControlPins* m_oc2_pins = new MotorControlPins(12, 13, 48, 44, A0);   //OC Motor 2 Arduino pins
 ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
-PIDParameters* pid_moc_pc = new PIDParameters(21, 0.1, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for opening Motors
+PIDParameters* pid_moc_pc = new PIDParameters(6, 0.01, 5.0, pwm_resolution, -pwm_resolution, 0.0, 10); //Position controller PID parameters for opening Motors
 PIDParameters* pid_moc_cc = new PIDParameters(100.0, 0.02, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motors
 SensorPins* e_oc_pins =  new SensorPins(22, 23, 25);
 EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 533.3, 0, ENCODER_ALPHA); //Sensor states for encoder open close
@@ -538,8 +539,16 @@ void currentControl(ControlStates* c_s, CurrentSensorStates* curr_s, MotorContro
 float pid(float e, float de, PIDParameters* p)
 {
   p->I_ += p->Ki_ * e; //update the integral term
-  float u = p->Kp_ * e + p->Kd_ * de + p->I_; //compute the control value
-
+  float u = p->Kp_ * e + p->Kd_ * de + p->I_;
+ 
+  if(p->dead_space_>0 ) {
+    if(abs(e) < p->dead_space_) {
+      u = p->Kd_ * de + p->I_;
+    } else {
+      int dir = e<0 ? -1 : 1;
+      u = p->Kp_ * (e - dir*p->dead_space_) + p->Kd_ * de + p->I_;
+    }
+  }
   //clamp the control value and back-calculate the integral term (the latter to avoid windup)
   if (u > p->u_max_)
   {
@@ -683,6 +692,7 @@ void updateState() {
   state.oc.ticks = e_oc_s->raw_ticks_;
   state.oc.val = e_oc_s->p_;
   state.oc.target = c_oc->r_;
+  //state.oc.target = c_oc->r_ - e_oc_s->p_;
 
   state.blb.ticks = e_b1_s->raw_ticks_;
   state.blb.val = e_b1_s->p_;

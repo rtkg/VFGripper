@@ -754,7 +754,8 @@ void setPosCallback(const velvet_msgs::SetPos::Request &req, velvet_msgs::SetPos
     c_oc->active_ = true;
     c_oc->mode_ = POSITION_MODE;
 
-  } else {
+  } 
+  else  if (req.id == 1) {
     c_b1->rf_ = (float)e_b1_s->p_ + req.pos; //value in mm
     c_b1->ri_ = (float)e_b1_s->p_;
     c_b1->ti_ = (float)millis();
@@ -781,6 +782,33 @@ void setPosCallback(const velvet_msgs::SetPos::Request &req, velvet_msgs::SetPos
     c_b4->active_ = true;
     c_b4->mode_ = POSITION_MODE;
 
+  }
+  else  if (req.id == 2) {
+    c_b1->rf_ = (float)e_b1_s->p_ - req.pos; //value in mm
+    c_b1->ri_ = (float)e_b1_s->p_;
+    c_b1->ti_ = (float)millis();
+    c_b2->rf_ = (float)e_b2_s->p_ + req.pos;
+    c_b2->ri_ = (float)e_b2_s->p_;
+    c_b2->ti_ = (float)millis();
+    c_b3->rf_ = (float)e_b3_s->p_ - req.pos;
+    c_b3->ri_ = (float)e_b3_s->p_;
+    c_b3->ti_ = (float)millis();
+    c_b4->rf_ = (float)e_b4_s->p_ + req.pos;
+    c_b4->ri_ = (float)e_b4_s->p_;
+    c_b4->ti_ = (float)millis();
+
+    c_b1->T_ = req.time;
+    c_b1->active_ = true;
+    c_b1->mode_ = POSITION_MODE;
+    c_b2->T_ = req.time;
+    c_b2->active_ = true;
+    c_b2->mode_ = POSITION_MODE;
+    c_b3->T_ = req.time;
+    c_b3->active_ = true;
+    c_b3->mode_ = POSITION_MODE;
+    c_b4->T_ = req.time;
+    c_b4->active_ = true;
+    c_b4->mode_ = POSITION_MODE;    
   }
 
   mode = POSITION_MODE;

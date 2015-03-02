@@ -9,6 +9,7 @@
 #include <velvet_msgs/SetCur.h>
 #include <velvet_msgs/SetVel.h>
 #include <velvet_msgs/SetPID.h>
+#include <std_msgs/Bool.h>
 #include <std_srvs/Empty.h>
 
 #define POSITION_MODE 0
@@ -31,7 +32,9 @@ void setOff(const std_srvs::Empty::Request &req, std_srvs::Empty::Response &res)
 
 ros::NodeHandle nh;
 velvet_msgs::GripperState state;
+std_msgs::Bool watchdog;
 ros::Publisher state_publisher("/velvet_state", &state);
+ros::Publisher watchdog_publisher("/velvet_watchdog", &watchdog);
 ros::ServiceServer<velvet_msgs::SetPos::Request, velvet_msgs::SetPos::Response> pos_server("set_pos", &setPosCallback);
 ros::ServiceServer<velvet_msgs::SetCur::Request, velvet_msgs::SetCur::Response> cur_server("set_cur", &setCurCallback);
 ros::ServiceServer<velvet_msgs::SetVel::Request, velvet_msgs::SetVel::Response> vel_server("set_vel", &setVelCallback);
@@ -47,9 +50,10 @@ uint8_t zeroPositionOCSetFlag = 1;
 
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
-const float belt_limit = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
+const float belt_limit = 3095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
-const float MAX_CURRENT_OC = 1500;
+const float MAX_CURRENT_OC = 100;
+const float MAX_CURRENT_COMPLY = 20;
 const float MAX_CURRENT_B = 500;
 const float VOLTAGE_FACTOR = 0.17; // 4096 * 1000 / 24V //resolution * mAmp / V
 
@@ -86,8 +90,8 @@ struct PIDParameters {
   float u_min_; //Minimum controller output [>= -(max PWM)]
   float I_;     //Serves as memory for the integral term [i.e., I=dT*(Ki*e_0, ... , Ki*e_t)]
   float dead_space_;
-  
-  PIDParameters(float Kp, float Ki, float Kd, float u_max, float u_min, float I, float dead=-1) : Kp_(Kp), Kd_(Kd), Ki_(Ki), u_max_(u_max), u_min_(u_min), I_(I),dead_space_(dead) {};
+
+  PIDParameters(float Kp, float Ki, float Kd, float u_max, float u_min, float I, float dead = -1) : Kp_(Kp), Kd_(Kd), Ki_(Ki), u_max_(u_max), u_min_(u_min), I_(I), dead_space_(dead) {};
 };
 
 struct CurrentSensorStates
@@ -166,48 +170,49 @@ ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 PIDParameters* pid_mb1_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb1_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 1
 PIDParameters* pid_mb1_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 1
-SensorPins* e_b1_pins = new SensorPins(33, 35, 37);
-EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
+SensorPins* e_b1_pins = new SensorPins(27, 29, 31);
+EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
-MotorControlPins* m_b3_pins = new MotorControlPins(5, 4, 34, 42, A4); //   //belt left front Motor 1 Arduino pins
+MotorControlPins* m_b3_pins = new MotorControlPins(4, 5, 34, 42, A4); //   //belt left front Motor 1 Arduino pins
 ControlStates* c_b3 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 1
 PIDParameters* pid_mb3_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb3_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 1
 PIDParameters* pid_mb3_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 1
-SensorPins* e_b3_pins = new SensorPins(39, 41, 43); 
-EncoderStates* e_b3_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
+SensorPins* e_b3_pins =  new SensorPins(33, 35, 37);
+EncoderStates* e_b3_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
 ///TODO: pins for the sensors and controllers bellow need to be updated
 //BELT2
-MotorControlPins* m_b2_pins = new MotorControlPins(9, 8, 50, 42, A1);//   //belt right back Motor 1 Arduino pins
+MotorControlPins* m_b2_pins = new  MotorControlPins(3, 2, 36, 40, A10);//   //belt right back Motor 1 Arduino pins
 ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
 PIDParameters* pid_mb2_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb2_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 2
 PIDParameters* pid_mb2_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 2
 SensorPins* e_b2_pins = new SensorPins(24, 26, 28); //
-EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
+EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
-MotorControlPins* m_b4_pins =  new MotorControlPins(2, 3, 36, 40, A10); //   //belt right front Motor 1 Arduino pins
+MotorControlPins* m_b4_pins =  new MotorControlPins(9, 8, 50, 42, A1);; //   //belt right front Motor 1 Arduino pins
 ControlStates* c_b4 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
 PIDParameters* pid_mb4_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb4_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 2
 PIDParameters* pid_mb4_vc = new PIDParameters(1.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Velocity controller PID parameters for belt Motor 2
 SensorPins* e_b4_pins = new SensorPins(45, 47, 49);
-EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
+EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 14.4, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
 //OPEN CLOSE
-MotorControlPins* m_oc1_pins = new MotorControlPins(10, 11, 32, 44, A2);//;   //OC Motor 1 Arduino pins
-MotorControlPins* m_oc2_pins = new MotorControlPins(12, 13, 48, 44, A0);   //OC Motor 2 Arduino pins
+MotorControlPins* m_oc2_pins = new MotorControlPins(10, 11, 32, 44, A2);//;   //OC Motor 1 Arduino pins
+MotorControlPins* m_oc1_pins = new MotorControlPins(12, 13, 48, 44, A0);   //OC Motor 2 Arduino pins
 ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
-PIDParameters* pid_moc_pc = new PIDParameters(6, 0.01, 5.0, pwm_resolution, -pwm_resolution, 0.0, 10); //Position controller PID parameters for opening Motors
-PIDParameters* pid_moc_cc = new PIDParameters(100.0, 0.02, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motors
+ControlStates* c_oc_comply = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12, false, true); //Setpoint and error for drive open close
+PIDParameters* pid_moc_pc = new PIDParameters(18, 0.02, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Position controller PID parameters for opening Motors >>> deadbend was: , 10
+PIDParameters* pid_moc_cc = new PIDParameters(100.0, 0.0, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motors
 SensorPins* e_oc_pins =  new SensorPins(22, 23, 25);
-EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 533.3, 0, ENCODER_ALPHA); //Sensor states for encoder open close
+EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -500.0, 0, ENCODER_ALPHA); //Sensor states for encoder open close
 //PHALANGES
-SensorPins* e_p1_pins = new SensorPins(27, 29, 31); //;
+SensorPins* e_p1_pins = new SensorPins(39, 41, 43); //;
 EncoderStates* e_p1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 1
 SensorPins* e_p2_pins =  new SensorPins(51, 53, 48);
-EncoderStates* e_p2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 2
+EncoderStates* e_p2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 2
 
 CurrentSensorStates* curr_b1_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA_B, 3.3 / 4095 / 0.000525); //current in Milliampere
 CurrentSensorStates* curr_b2_s = new CurrentSensorStates(0, 0.0, CURRENT_ALPHA_B, 3.3 / 4095 / 0.000525); //just for testing
@@ -278,6 +283,7 @@ void setup() {
   //////////////ROS stuff /////////////////////
   nh.initNode();
   nh.advertise(state_publisher);
+  nh.advertise(watchdog_publisher);
   nh.advertiseService(pos_server);
   nh.advertiseService(cur_server);
   nh.advertiseService(vel_server);
@@ -301,32 +307,32 @@ void setup() {
 
   //Serial1.println("setup done");
   //int sf;
-  //actuate(1000, m_b1_pins);
+  //actuate(3000, m_b1_pins);
   //Serial.println(sf,DEC);
-  //actuate(1000, m_b2_pins);
+  //actuate(3000, m_b2_pins);
   //Serial.println(sf,DEC);
-  //actuate(1000, m_b3_pins);
+  //actuate(3000, m_b3_pins);
   //Serial.println(sf,DEC);
   //actuate(1000, m_b4_pins);
   //Serial.println(sf,DEC);
   //actuate(500, m_oc2_pins);
   //Serial.println(sf,DEC);
-  //actuate(500, m_oc1_pins);
+  //actuate(1000, m_oc2_pins);
 
 }
 //============================== Loop ===================================
 void loop()
 {
-  
+
   //spin and check if we should publish
-  t_new = micros();    
+  t_new = micros();
   nh.spinOnce();
   if (abs(t_new - t_old_serial) > dT_serial) {
     updateState();
     state_publisher.publish(&state);
     t_old_serial = t_new;
   }
-  
+
   //add the ROS overhead to the time since last loop
   t_new = micros();
   //Do nothing if the sampling period didn't pass yet
@@ -354,12 +360,15 @@ void loop()
   curr_oc2_s->filter(analogRead(m_oc2_pins->FB_)); curr_oc2_s->convertSensorReading(); //read, filter and convert the current sensor reading of belt 1
 
   //watchdogs on the three currents
-  /* if (curr_oc_s->v_ > MAX_CURRENT_OC) {
-     digitalWrite(m_oc_pins->EN_, LOW); //Disable the driver board
-   }
-   if (curr_b1_s->v_ > MAX_CURRENT_B || curr_b2_s->v_ > MAX_CURRENT_B) {
-     digitalWrite(m_b1_pins->EN_, LOW); //Disable the driver board
-   }*/
+  if (curr_oc1_s->v_ > MAX_CURRENT_OC) {
+    digitalWrite(m_oc1_pins->EN_, LOW); //Disable the driver board
+    watchdog.data = true;
+    watchdog_publisher.publish(&watchdog);
+  }
+  /*
+  if (curr_b1_s->v_ > MAX_CURRENT_B || curr_b2_s->v_ > MAX_CURRENT_B) {
+    digitalWrite(m_b1_pins->EN_, LOW); //Disable the driver board
+  }*/
 
   if (mode == POSITION_MODE || mode == VELOCITY_MODE || mode == CURRENT_MODE) {
     update(); //Read sensors, compute and send controls
@@ -470,7 +479,27 @@ void update()
   {
     if (c_oc->mode_ == POSITION_MODE)
     {
-      positionControl(c_oc, e_oc_s, m_oc1_pins, pid_moc_pc);//compute the controls for drive belt 1
+      if (curr_oc1_s->v_ > MAX_CURRENT_COMPLY) {
+        //switch to current control mode and keep the current at the comply level
+        //are we already in compliance mode?
+        if(!c_oc_comply->active_) {
+          watchdog.data = true;
+          watchdog_publisher.publish(&watchdog);
+          float dir =  c_oc->e_ >= 0 ? 1 : -1;
+          c_oc_comply->r_ = dir * curr_oc1_s->v_;            
+          c_oc_comply->mode_ = CURRENT_MODE;          
+          c_oc_comply->rf_ = MAX_CURRENT_COMPLY ; //value in mAmp!
+          c_oc_comply->ri_ = c_oc_comply->r_; //value in mAmp!
+          c_oc_comply->ti_ = (float)millis();
+          c_oc_comply->T_ = 100;
+          c_oc_comply->active_ = true;
+        }
+        currentControl(c_oc_comply, curr_oc1_s, m_oc1_pins, pid_moc_cc);//compute the current controls for drive belt 1
+        c_oc->u_ = c_oc_comply->u_;       
+      } else {
+        c_oc_comply->active_ = false;
+        positionControl(c_oc, e_oc_s, m_oc1_pins, pid_moc_pc);//compute the controls for drive belt 1
+      }
     }
     else if (c_oc->mode_ == CURRENT_MODE)
     {
@@ -478,7 +507,7 @@ void update()
     }
     //mirror output for the two motors
     int sf = actuate(c_oc->u_, m_oc1_pins); //actuate drive belt 1
-    sf = actuate(c_oc->u_, m_oc2_pins);
+    //sf = actuate(c_oc->u_, m_oc2_pins);
   }
 }
 //--------------------------------------------------------------------------
@@ -540,13 +569,13 @@ float pid(float e, float de, PIDParameters* p)
 {
   p->I_ += p->Ki_ * e; //update the integral term
   float u = p->Kp_ * e + p->Kd_ * de + p->I_;
- 
-  if(p->dead_space_>0 ) {
-    if(abs(e) < p->dead_space_) {
+
+  if (p->dead_space_ > 0 ) {
+    if (abs(e) < p->dead_space_) {
       u = p->Kd_ * de + p->I_;
     } else {
-      int dir = e<0 ? -1 : 1;
-      u = p->Kp_ * (e - dir*p->dead_space_) + p->Kd_ * de + p->I_;
+      int dir = e < 0 ? -1 : 1;
+      u = p->Kp_ * (e - dir * p->dead_space_) + p->Kd_ * de + p->I_;
     }
   }
   //clamp the control value and back-calculate the integral term (the latter to avoid windup)
@@ -754,7 +783,7 @@ void setPosCallback(const velvet_msgs::SetPos::Request &req, velvet_msgs::SetPos
     c_oc->active_ = true;
     c_oc->mode_ = POSITION_MODE;
 
-  } 
+  }
   else  if (req.id == 1) {
     c_b1->rf_ = (float)e_b1_s->p_ + req.pos; //value in mm
     c_b1->ri_ = (float)e_b1_s->p_;
@@ -808,7 +837,7 @@ void setPosCallback(const velvet_msgs::SetPos::Request &req, velvet_msgs::SetPos
     c_b3->mode_ = POSITION_MODE;
     c_b4->T_ = req.time;
     c_b4->active_ = true;
-    c_b4->mode_ = POSITION_MODE;    
+    c_b4->mode_ = POSITION_MODE;
   }
 
   mode = POSITION_MODE;

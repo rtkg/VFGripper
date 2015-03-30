@@ -202,7 +202,7 @@ ControlStates* c_oc = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 PIDParameters* pid_moc_pc = new PIDParameters(6, 0.01, 5.0, pwm_resolution, -pwm_resolution, 0.0, 10); //Position controller PID parameters for opening Motors
 PIDParameters* pid_moc_cc = new PIDParameters(100.0, 0.02, 0.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for opening Motors
 SensorPins* e_oc_pins =  new SensorPins(22, 23, 25);
-EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 533.3, 0, ENCODER_ALPHA); //Sensor states for encoder open close
+EncoderStates* e_oc_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -533.3, 0, ENCODER_ALPHA); //Sensor states for encoder open close
 //PHALANGES
 SensorPins* e_p1_pins = new SensorPins(27, 29, 31); //;
 EncoderStates* e_p1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -1.0, 0, ENCODER_ALPHA); //Sensor states for encoder phalange 1

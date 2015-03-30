@@ -47,7 +47,7 @@ uint8_t zeroPositionOCSetFlag = 1;
 
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
-const float belt_limit = 2095; //PWM resoluion: 12 bit, i.e., 0 - 4095
+const float belt_limit = 1095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
 const float MAX_CURRENT_OC = 1500;
 const float MAX_CURRENT_B = 500;
@@ -133,7 +133,8 @@ struct EncoderStates
     raw_ticks_ = raw_ticks_new;
     p_raw_ = 2 * pi * ((raw_ticks_ - (float)offset_) / (float)res_ + (float)k_) * scale_;
     float p_temp = alpha_ * p_ + (1 - alpha_) * p_raw_; //first order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-    dp_ = (p_temp - p_) / ((float)dT);
+    float dp_raw = (p_temp - p_) / ((float)dT*1e-6);
+    dp_ = alpha_ * dp_ + (1 - alpha_) * dp_raw;
     p_ = p_temp;
   }; // angle=2*pi*[(reading-offset)/res+k]
 };
@@ -165,7 +166,7 @@ MotorControlPins* m_b1_pins =   new MotorControlPins(7, 6, 46, 40, A11); //belt 
 ControlStates* c_b1 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 1
 PIDParameters* pid_mb1_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb1_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 1
-PIDParameters* pid_mb1_vc = new PIDParameters(1.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 1
+PIDParameters* pid_mb1_vc = new PIDParameters(1.5, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 1
 SensorPins* e_b1_pins = new SensorPins(33, 35, 37);
 EncoderStates* e_b1_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
@@ -173,7 +174,7 @@ MotorControlPins* m_b3_pins = new MotorControlPins(5, 4, 34, 42, A4); //   //bel
 ControlStates* c_b3 =  new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 1
 PIDParameters* pid_mb3_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb3_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 1
-PIDParameters* pid_mb3_vc = new PIDParameters(1.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 1
+PIDParameters* pid_mb3_vc = new PIDParameters(1.5, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 1
 SensorPins* e_b3_pins = new SensorPins(39, 41, 43); 
 EncoderStates* e_b3_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, -0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 1
 
@@ -183,7 +184,7 @@ MotorControlPins* m_b2_pins = new MotorControlPins(9, 8, 50, 42, A1);//   //belt
 ControlStates* c_b2 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
 PIDParameters* pid_mb2_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb2_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 2
-PIDParameters* pid_mb2_vc = new PIDParameters(1.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 2
+PIDParameters* pid_mb2_vc = new PIDParameters(1.5, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 2
 SensorPins* e_b2_pins = new SensorPins(24, 26, 28); //
 EncoderStates* e_b2_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
@@ -191,7 +192,7 @@ MotorControlPins* m_b4_pins =  new MotorControlPins(2, 3, 36, 40, A10); //   //b
 ControlStates* c_b4 = new ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15, false, NO_MODE); //Setpoint and error for drive belt 2
 PIDParameters* pid_mb4_pc = new PIDParameters(150.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Position controller PID parameters for belt Motor 1
 PIDParameters* pid_mb4_cc = new PIDParameters(50.0, 0.0, 15.0, pwm_resolution, -pwm_resolution, 0.0); //Current controller PID parameters for belt Motor 2
-PIDParameters* pid_mb4_vc = new PIDParameters(1.0, 0.0, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 2
+PIDParameters* pid_mb4_vc = new PIDParameters(1.5, 0.05, 0.0, belt_limit, -belt_limit, 0.0); //Velocity controller PID parameters for belt Motor 2
 SensorPins* e_b4_pins = new SensorPins(45, 47, 49);
 EncoderStates* e_b4_s = new EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); //Sensor states for encoder belt 2
 
@@ -728,10 +729,13 @@ void updateState() {
   state.c_oc.val = curr_oc1_s->v_;
   state.c_oc.target = c_oc->r_;
 
+  //commented stuff is for debuging velocity control
   state.c_blb.val = curr_b1_s->v_;
+  //state.c_blb.val = e_b1_s->dp_;
   state.c_blb.target = c_b1->r_;
 
   state.c_brb.val = curr_b2_s->v_;
+  //state.c_brb.val = e_b2_s->dp_;
   state.c_brb.target = c_b2->r_;
 
   state.c_blf.val = curr_b3_s->v_;
@@ -894,10 +898,10 @@ void setVelCallback(const velvet_msgs::SetVel::Request &req, velvet_msgs::SetVel
       res.success = false;
     }
     else  if (req.id == 1) {
-      c_b1->rf_ = (float)e_b1_s->dp_ + req.vel; //value in mm
+      c_b1->rf_ = req.vel; //value in mm
       c_b1->ri_ = (float)e_b1_s->dp_;
       c_b1->ti_ = (float)millis();
-      c_b3->rf_ = (float)e_b3_s->dp_ + req.vel;
+      c_b3->rf_ = req.vel;
       c_b3->ri_ = (float)e_b3_s->dp_;
       c_b3->ti_ = (float)millis();
 
@@ -908,12 +912,10 @@ void setVelCallback(const velvet_msgs::SetVel::Request &req, velvet_msgs::SetVel
       c_b3->active_ = true;
       c_b3->mode_ = VELOCITY_MODE;
 
-    }
-    else  if (req.id == 2) {
-      c_b2->rf_ = (float)e_b2_s->dp_ + req.vel;
+      c_b2->rf_ =  req.vel;
       c_b2->ri_ = (float)e_b2_s->dp_;
       c_b2->ti_ = (float)millis();
-      c_b4->rf_ = (float)e_b4_s->dp_ + req.vel;
+      c_b4->rf_ =  req.vel;
       c_b4->ri_ = (float)e_b4_s->dp_;
       c_b4->ti_ = (float)millis();
 
@@ -923,6 +925,9 @@ void setVelCallback(const velvet_msgs::SetVel::Request &req, velvet_msgs::SetVel
       c_b4->T_ = req.time;
       c_b4->active_ = true;
       c_b4->mode_ = VELOCITY_MODE;
+    }
+    else  if (req.id == 2) {
+      
     }
 
     mode = VELOCITY_MODE;
@@ -944,6 +949,11 @@ void setPIDCallback(const velvet_msgs::SetPID::Request &req, velvet_msgs::SetPID
     if (req.id == 2) target_control = pid_mb2_cc;
     if (req.id == 3) target_control = pid_mb3_cc;
     if (req.id == 4) target_control = pid_mb4_cc;
+  } else if (req.mode == 'V') {
+    if (req.id == 1) target_control = pid_mb1_vc;
+    if (req.id == 2) target_control = pid_mb2_vc;
+    if (req.id == 3) target_control = pid_mb3_vc;
+    if (req.id == 4) target_control = pid_mb4_vc;
   } else {
     res.success = false;
     return;

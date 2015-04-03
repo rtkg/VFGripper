@@ -47,14 +47,14 @@ uint8_t zeroPositionOCSetFlag = 1;
 
 const float pi = 3.14159;
 const float pwm_resolution = 4095; //PWM resoluion: 12 bit, i.e., 0 - 4095
-const float belt_limit = 1095; //PWM resoluion: 12 bit, i.e., 0 - 4095
+const float belt_limit = 3095; //PWM resoluion: 12 bit, i.e., 0 - 4095
 const float enc_resolution = 4095; //Encoder resolution: 12 bit, i.e., 0 - 4095
 const float MAX_CURRENT_OC = 1500;
 const float MAX_CURRENT_B = 500;
 const float VOLTAGE_FACTOR = 0.17; // 4096 * 1000 / 24V //resolution * mAmp / V
 
 int dT = 1000; //Sample time in microseconds
-int dT_serial = 70000; //Sample time for the serial connection in microseconds
+int dT_serial = 75000; //Sample time for the serial connection in microseconds
 int t_old, t_new;
 int t_old_serial;
 int mode = NO_MODE;

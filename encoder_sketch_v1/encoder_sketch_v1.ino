@@ -5,14 +5,15 @@
 void setup()
 {
   //setup our pins
-  pinMode(DATA_PIN, INPUT);
-  pinMode(CLOCK_PIN, OUTPUT);
+  pinMode(DATA_PIN,   INPUT);
+  pinMode(CLOCK_PIN,  OUTPUT);
   pinMode(SELECT_PIN, OUTPUT);
 
   //give some default values
-  digitalWrite(CLOCK_PIN, HIGH);
+  digitalWrite(CLOCK_PIN,  HIGH);
   digitalWrite(SELECT_PIN, HIGH);
 
+  // start serial port
   Serial.begin(19200);
 }
 
@@ -22,21 +23,16 @@ float angle = 0;
 
 void loop()
 {
-    Serial.print("Reading: ");
+   Serial.print("Reading: ");
    reading = readPosition();
    
-   if (reading >= 0)
-   {
-      angle = (float)reading * 0.088;
-//((float)reading / 1024.0) * 360.0;
-
+   if (reading >= 0) {
+      angle = (float)reading * 0.088; // ((float)reading / 1024.0) * 360.0;
       Serial.print("Reading: ");
       Serial.print(reading, DEC);
       Serial.print(" Angle: ");
       Serial.println(angle, 4); //DEC);
-   }
-   else
-   {
+   } else {
       Serial.print("Error: ");
       Serial.println(reading);
    }
@@ -52,17 +48,17 @@ int readPosition()
   //shift in our data  
   digitalWrite(SELECT_PIN, LOW);
   delayMicroseconds(1);
-  byte d1 = shiftIn(DATA_PIN, CLOCK_PIN,8);
-  byte d2 = shiftIn(DATA_PIN, CLOCK_PIN,8);
-  byte d3 = shiftIn(DATA_PIN, CLOCK_PIN,2);
+  byte d1 = shiftIn(DATA_PIN, CLOCK_PIN, 8);
+  byte d2 = shiftIn(DATA_PIN, CLOCK_PIN, 8);
+  byte d3 = shiftIn(DATA_PIN, CLOCK_PIN, 2);
   digitalWrite(SELECT_PIN, HIGH);
 
   //get our position variable
+  // TODO why like that?
   position = d1;
   position = position << 8;
   position = position|d2;
-
-
+  
   position = position >> 4;
 
   //check the offset compensation flag: 1 == started up
@@ -110,4 +106,3 @@ byte shiftIn(byte data_pin, byte clock_pin, int readBits)
 
   return data;
 }
-

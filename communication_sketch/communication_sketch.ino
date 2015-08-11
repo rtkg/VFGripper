@@ -5,6 +5,7 @@
 
 void setup() {
   // start serial port at 9600 bps:
+  //                   or 19200? // TODO
   Serial.begin(19200);
 }
 
@@ -60,5 +61,3 @@ void processMessage() {
     }
   } 
 }
-
-

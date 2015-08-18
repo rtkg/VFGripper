@@ -1,0 +1,47 @@
+digraph "visualization_msgs::InteractiveMarkerInit"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="visualization_msgs\l::InteractiveMarkerInit",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ros::Msg",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" markers\nst_markers" ,fontname="Helvetica"];
+  Node3 [label="visualization_msgs\l::InteractiveMarker",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classvisualization__msgs_1_1_interactive_marker.html"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" controls\nst_controls" ,fontname="Helvetica"];
+  Node4 [label="visualization_msgs\l::InteractiveMarkerControl",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classvisualization__msgs_1_1_interactive_marker_control.html"];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" orientation" ,fontname="Helvetica"];
+  Node5 [label="geometry_msgs::Quaternion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_quaternion.html"];
+  Node2 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" markers\nst_markers" ,fontname="Helvetica"];
+  Node6 [label="visualization_msgs\l::Marker",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classvisualization__msgs_1_1_marker.html"];
+  Node2 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" lifetime" ,fontname="Helvetica"];
+  Node7 [label="ros::Duration",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_duration.html"];
+  Node8 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" scale" ,fontname="Helvetica"];
+  Node8 [label="geometry_msgs::Vector3",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_vector3.html"];
+  Node2 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pose" ,fontname="Helvetica"];
+  Node9 [label="geometry_msgs::Pose",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_pose.html"];
+  Node2 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" orientation" ,fontname="Helvetica"];
+  Node10 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" position" ,fontname="Helvetica"];
+  Node10 [label="geometry_msgs::Point",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_point.html"];
+  Node2 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" st_colors\ncolor\ncolors" ,fontname="Helvetica"];
+  Node11 [label="std_msgs::ColorRGBA",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_color_r_g_b_a.html"];
+  Node2 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" header" ,fontname="Helvetica"];
+  Node12 [label="std_msgs::Header",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_header.html"];
+  Node2 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" stamp" ,fontname="Helvetica"];
+  Node13 [label="ros::Time",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_time.html"];
+  Node10 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" points\nst_points" ,fontname="Helvetica"];
+  Node9 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pose" ,fontname="Helvetica"];
+  Node12 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" header" ,fontname="Helvetica"];
+  Node14 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" st_menu_entries\nmenu_entries" ,fontname="Helvetica"];
+  Node14 [label="visualization_msgs\l::MenuEntry",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classvisualization__msgs_1_1_menu_entry.html"];
+  Node2 -> Node14 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

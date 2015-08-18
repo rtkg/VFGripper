@@ -1,0 +1,6 @@
+<map id="mapFloat" name="mapFloat">
+<area shape="rect" id="node2" href="$class_p_i_d_controller.html#a78c61c2fb20bc91ec27c7029a3e55798" title="Calculates PID control variable. " alt="" coords="131,5,258,32"/>
+<area shape="rect" id="node5" href="$class_current_sensor.html#a882e3afe096a77081058d655e254a733" title="Measure current. " alt="" coords="309,56,501,83"/>
+<area shape="rect" id="node3" href="$class_current_control.html#aef2bf63a00372e1f27ed4aca4aa4ded8" title="Current control feedback. " alt="" coords="307,5,504,32"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="553,31,599,57"/>
+</map>

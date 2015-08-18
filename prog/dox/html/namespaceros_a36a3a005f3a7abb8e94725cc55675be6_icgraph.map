@@ -1,0 +1,12 @@
+<map id="ros::normalizeSecNSec" name="ros::normalizeSecNSec">
+<area shape="rect" id="node2" href="$classros_1_1_node_handle__.html#adaa1afdf5ef97f12f820f8767b6c7cd3" title="ros::NodeHandle_::now" alt="" coords="225,5,383,32"/>
+<area shape="rect" id="node3" href="$classros_1_1_node_handle__.html#a93227fd969fcb4e888aca0704d3cb31a" title="ros::NodeHandle_::setNow" alt="" coords="214,56,394,83"/>
+<area shape="rect" id="node8" href="$classros_1_1_time.html#ab514665deba4d357f41c2cb56c009ec0" title="ros::Time::fromNSec" alt="" coords="232,107,376,133"/>
+<area shape="rect" id="node9" href="$classros_1_1_time.html#a6fa81f1713d88454a9e472f06a71d8da" title="ros::Time::operator+=" alt="" coords="230,157,378,184"/>
+<area shape="rect" id="node10" href="$classros_1_1_time.html#a143318c811bb54fb2a62f41818f78f89" title="ros::Time::operator&#45;=" alt="" coords="232,208,376,235"/>
+<area shape="rect" id="node11" href="$classros_1_1_time.html#ad19182c5d3de466157d959c069d60052" title="ros::Time::Time" alt="" coords="247,259,361,285"/>
+<area shape="rect" id="node4" href="$classros_1_1_node_handle__.html#a3c7aff10f36b29378a9437a468763449" title="ros::NodeHandle_::syncTime" alt="" coords="443,56,635,83"/>
+<area shape="rect" id="node5" href="$classros_1_1_node_handle__.html#a84759ad12f60ae2e0627a9a51a212b98" title="ros::NodeHandle_::spinOnce" alt="" coords="683,56,874,83"/>
+<area shape="rect" id="node6" href="$classros_1_1_node_handle__.html#a106bf555f9d5542794d9f4425f1c1272" title="ros::NodeHandle_::request\lParam" alt="" coords="923,49,1101,90"/>
+<area shape="rect" id="node7" href="$classros_1_1_node_handle__.html#a085148f0e86141abc2e68a95bb3d00b8" title="ros::NodeHandle_::getParam" alt="" coords="1150,56,1341,83"/>
+</map>

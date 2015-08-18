@@ -1,0 +1,13 @@
+digraph "diagnostic_msgs::KeyValue::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="diagnostic_msgs::KeyValue\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="diagnostic_msgs::Diagnostic\lStatus::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdiagnostic__msgs_1_1_diagnostic_status.html#a288fd66f2e1d2aac68a41bb27b8c4985"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="diagnostic_msgs::Diagnostic\lArray::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdiagnostic__msgs_1_1_diagnostic_array.html#a451d7bc72b5b5fd8e89ad024dd178fdb"];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="diagnostic_msgs::SelfTest\lResponse::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdiagnostic__msgs_1_1_self_test_response.html#ac7c0a6b1197d0d79a3156e77202ef6b6"];
+}

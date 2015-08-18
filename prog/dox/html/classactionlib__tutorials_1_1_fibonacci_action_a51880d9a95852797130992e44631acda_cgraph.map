@@ -1,0 +1,11 @@
+<map id="actionlib_tutorials::FibonacciAction::serialize" name="actionlib_tutorials::FibonacciAction::serialize">
+<area shape="rect" id="node2" href="$classactionlib__tutorials_1_1_fibonacci_action_goal.html#af88c1c5457c31e33b24d6540358dd694" title="actionlib_tutorials\l::FibonacciActionGoal\l::serialize" alt="" coords="247,45,398,101"/>
+<area shape="rect" id="node6" href="$classactionlib__tutorials_1_1_fibonacci_action_result.html#a8a68692a15f6631cf51119ccf3f8716f" title="actionlib_tutorials\l::FibonacciActionResult\l::serialize" alt="" coords="242,222,403,278"/>
+<area shape="rect" id="node9" href="$classactionlib__tutorials_1_1_fibonacci_action_feedback.html#a19669920623a1ed9ee75f89684b7d76c" title="actionlib_tutorials\l::FibonacciActionFeedback\l::serialize" alt="" coords="233,142,413,198"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="462,99,647,126"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="697,103,855,144"/>
+<area shape="rect" id="node5" href="$classactionlib__tutorials_1_1_fibonacci_goal.html#adef7915eb9d99ff06d8aef3f68d8f4d3" title="actionlib_tutorials\l::FibonacciGoal::serialize" alt="" coords="470,33,639,75"/>
+<area shape="rect" id="node7" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="463,229,646,271"/>
+<area shape="rect" id="node8" href="$classactionlib__tutorials_1_1_fibonacci_result.html#a9bb1298c49e1465e888436a04f61e4b8" title="actionlib_tutorials\l::FibonacciResult::serialize" alt="" coords="465,295,645,336"/>
+<area shape="rect" id="node10" href="$classactionlib__tutorials_1_1_fibonacci_feedback.html#a926dffe50155db9fb7374531cf07d756" title="actionlib_tutorials\l::FibonacciFeedback\l::serialize" alt="" coords="483,150,626,206"/>
+</map>

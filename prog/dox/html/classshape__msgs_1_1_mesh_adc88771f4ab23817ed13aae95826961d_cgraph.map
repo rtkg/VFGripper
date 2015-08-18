@@ -1,0 +1,5 @@
+<map id="shape_msgs::Mesh::serialize" name="shape_msgs::Mesh::serialize">
+<area shape="rect" id="node2" href="$classshape__msgs_1_1_mesh_triangle.html#a36fea46b3e866606b7e3b2a453c40f4d" title="shape_msgs::MeshTriangle\l::serialize" alt="" coords="246,5,429,46"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="261,70,414,111"/>
+<area shape="rect" id="node4" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="477,77,669,104"/>
+</map>

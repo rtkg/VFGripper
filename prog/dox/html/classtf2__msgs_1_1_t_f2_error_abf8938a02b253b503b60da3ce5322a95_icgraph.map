@@ -1,0 +1,5 @@
+<map id="tf2_msgs::TF2Error::serialize" name="tf2_msgs::TF2Error::serialize">
+<area shape="rect" id="node2" href="$classtf2__msgs_1_1_lookup_transform_result.html#af084a215cc61efbf840a23dd9854566d" title="tf2_msgs::LookupTransform\lResult::serialize" alt="" coords="190,5,375,46"/>
+<area shape="rect" id="node3" href="$classtf2__msgs_1_1_lookup_transform_action_result.html#a523937865c7544102a3e0b236bbca3c0" title="tf2_msgs::LookupTransform\lActionResult::serialize" alt="" coords="425,5,610,46"/>
+<area shape="rect" id="node4" href="$classtf2__msgs_1_1_lookup_transform_action.html#a7c5880ab1d4af63ee270b5ddfad178b5" title="tf2_msgs::LookupTransform\lAction::serialize" alt="" coords="659,5,845,46"/>
+</map>

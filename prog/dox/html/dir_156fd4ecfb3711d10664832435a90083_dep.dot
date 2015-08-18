@@ -1,0 +1,9 @@
+digraph "ServiceClient" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_2bc6d149b5f6a040eb45e55ce4532f7a {
+    graph [ bgcolor="#ddddee", pencolor="black", label="examples" fontname="Helvetica", fontsize="10", URL="dir_2bc6d149b5f6a040eb45e55ce4532f7a.html"]
+  dir_156fd4ecfb3711d10664832435a90083 [shape=box, label="ServiceClient", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_156fd4ecfb3711d10664832435a90083.html"];
+  }
+}

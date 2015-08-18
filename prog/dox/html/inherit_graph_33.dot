@@ -1,0 +1,7 @@
+digraph "Graphical Class Hierarchy"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="grasp_planner::PlanGrasp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgrasp__planner_1_1_plan_grasp.html"];
+}

@@ -1,0 +1,15 @@
+digraph "ros::normalizeSecNSecSigned"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="ros::normalizeSecNSecSigned",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ros::Duration::operator+=",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_duration.html#a385d35178d4fdd99758915098c522c83"];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ros::Duration::operator-=",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_duration.html#a428292250454bfcf6671e89e30678d47"];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="ros::Duration::operator*=",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_duration.html#ac328f7d46dbbf99deb7b6edac4e254bf"];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="ros::Duration::Duration",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_duration.html#a623121b0d2944ff7d7894e3e81a15798"];
+}

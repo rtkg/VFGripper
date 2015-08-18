@@ -1,0 +1,6 @@
+<map id="control_msgs::JointTrajectoryActionFeedback::serialize" name="control_msgs::JointTrajectoryActionFeedback::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="253,5,438,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="254,57,437,98"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_joint_trajectory_feedback.html#ac435448dbdd7c437f00256ce35031bab" title="control_msgs::JointTrajectory\lFeedback::serialize" alt="" coords="248,122,443,163"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="491,57,650,98"/>
+</map>

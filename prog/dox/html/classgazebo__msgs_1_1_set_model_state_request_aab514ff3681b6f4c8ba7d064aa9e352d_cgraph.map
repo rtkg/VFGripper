@@ -1,0 +1,9 @@
+<map id="gazebo_msgs::SetModelStateRequest::deserialize" name="gazebo_msgs::SetModelStateRequest::deserialize">
+<area shape="rect" id="node2" href="$classgazebo__msgs_1_1_model_state.html#a8cc94b714a447408946eae4284fc7d28" title="gazebo_msgs::ModelState\l::deserialize" alt="" coords="251,103,429,145"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_pose.html#a17f97030f8c390c1f4351ccafa0edec8" title="geometry_msgs::Pose\l::deserialize" alt="" coords="478,70,631,111"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_twist.html#a51f4b5ab24bdb3eb5b0690e6ffe03818" title="geometry_msgs::Twist\l::deserialize" alt="" coords="477,135,632,177"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point.html#a29b8448415203bbc983901c4e40df3cc" title="geometry_msgs::Point\l::deserialize" alt="" coords="697,5,850,46"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_quaternion.html#ad2925053e238e52d8fd9fd06a962a5a8" title="geometry_msgs::Quaternion\l::deserialize" alt="" coords="680,70,867,111"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="915,70,1077,111"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_vector3.html#aae9cb57e6b7550f30d193a1c298f9631" title="geometry_msgs::Vector3\l::deserialize" alt="" coords="689,135,857,177"/>
+</map>

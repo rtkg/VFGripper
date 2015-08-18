@@ -1,0 +1,9 @@
+<map id="sensor_msgs::MultiDOFJointState::serialize" name="sensor_msgs::MultiDOFJointState::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="246,5,431,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_transform.html#a41af5075ee0d737a4af6e97da0bb6bed" title="geometry_msgs::Transform\l::serialize" alt="" coords="247,187,430,229"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_twist.html#a6b6773811c51714ffce0412ec15ff277" title="geometry_msgs::Twist\l::serialize" alt="" coords="261,57,416,98"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_wrench.html#a775fb20d263b4bf2bd4f3200fca1afec" title="geometry_msgs::Wrench\l::serialize" alt="" coords="255,122,423,163"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="489,122,657,163"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="480,187,667,229"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="715,163,907,189"/>
+</map>

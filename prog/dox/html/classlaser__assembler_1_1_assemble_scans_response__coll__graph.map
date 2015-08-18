@@ -1,0 +1,8 @@
+<map id="laser_assembler::AssembleScansResponse" name="laser_assembler::AssembleScansResponse">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="189,5,261,32"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_point_cloud.html" title="sensor_msgs::PointCloud" alt="" coords="139,200,311,227"/>
+<area shape="rect" id="node4" href="$classsensor__msgs_1_1_channel_float32.html" title="sensor_msgs::ChannelFloat32" alt="" coords="126,96,324,123"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_point32.html" title="geometry_msgs::Point32" alt="" coords="349,96,515,123"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="539,96,668,123"/>
+<area shape="rect" id="node7" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="565,5,641,32"/>
+</map>

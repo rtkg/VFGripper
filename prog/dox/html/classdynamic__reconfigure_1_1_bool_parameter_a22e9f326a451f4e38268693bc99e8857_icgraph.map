@@ -1,0 +1,6 @@
+<map id="dynamic_reconfigure::BoolParameter::serialize" name="dynamic_reconfigure::BoolParameter::serialize">
+<area shape="rect" id="node2" href="$classdynamic__reconfigure_1_1_config.html#aa41c00d165d1496b801a2c92acf40d64" title="dynamic_reconfigure\l::Config::serialize" alt="" coords="227,93,370,134"/>
+<area shape="rect" id="node3" href="$classdynamic__reconfigure_1_1_config_description.html#a2d5e8b35063938e410fd590f630137a9" title="dynamic_reconfigure\l::ConfigDescription\l::serialize" alt="" coords="427,5,570,61"/>
+<area shape="rect" id="node4" href="$classdynamic__reconfigure_1_1_reconfigure_request.html#a23a967142e5242a065dff12f70efc7e7" title="dynamic_reconfigure\l::ReconfigureRequest\l::serialize" alt="" coords="424,85,573,141"/>
+<area shape="rect" id="node5" href="$classdynamic__reconfigure_1_1_reconfigure_response.html#a0213fe083b2f68ffd4309b1d3c753395" title="dynamic_reconfigure\l::ReconfigureResponse\l::serialize" alt="" coords="419,165,578,221"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="sensor_msgs::NavSatFix::deserialize" name="sensor_msgs::NavSatFix::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="225,5,423,32"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_nav_sat_status.html#a0b5c6c525719e2f3333e42a7ea351bb4" title="sensor_msgs::NavSatStatus\l::deserialize" alt="" coords="229,57,419,98"/>
+<area shape="rect" id="node4" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="243,122,405,163"/>
+</map>

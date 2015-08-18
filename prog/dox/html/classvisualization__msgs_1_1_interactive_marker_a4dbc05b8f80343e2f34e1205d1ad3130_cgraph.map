@@ -1,0 +1,12 @@
+<map id="visualization_msgs::InteractiveMarker::deserialize" name="visualization_msgs::InteractiveMarker::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="598,5,797,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_pose.html#a17f97030f8c390c1f4351ccafa0edec8" title="geometry_msgs::Pose\l::deserialize" alt="" coords="621,223,774,265"/>
+<area shape="rect" id="node7" href="$classvisualization__msgs_1_1_menu_entry.html#aab453a17060fd08b8ffb4d0e118f6b10" title="visualization_msgs\l::MenuEntry::deserialize" alt="" coords="192,342,355,383"/>
+<area shape="rect" id="node8" href="$classvisualization__msgs_1_1_interactive_marker_control.html#a6cd4ca7a75042816a6e24a8872ab3c80" title="visualization_msgs\l::InteractiveMarkerControl\l::deserialize" alt="" coords="187,263,360,319"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point.html#a29b8448415203bbc983901c4e40df3cc" title="geometry_msgs::Point\l::deserialize" alt="" coords="862,71,1015,113"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_quaternion.html#ad2925053e238e52d8fd9fd06a962a5a8" title="geometry_msgs::Quaternion\l::deserialize" alt="" coords="845,223,1032,265"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="1080,137,1243,178"/>
+<area shape="rect" id="node9" href="$classvisualization__msgs_1_1_marker.html#acd73840bdc20ec14874f3c1d829b8921" title="visualization_msgs\l::Marker::deserialize" alt="" coords="409,133,549,174"/>
+<area shape="rect" id="node10" href="$classgeometry__msgs_1_1_vector3.html#aae9cb57e6b7550f30d193a1c298f9631" title="geometry_msgs::Vector3\l::deserialize" alt="" coords="855,137,1023,178"/>
+<area shape="rect" id="node11" href="$classstd__msgs_1_1_color_r_g_b_a.html#ac064c06e0a262fefcabbb858099a91a5" title="std_msgs::ColorRGBA\l::deserialize" alt="" coords="619,158,775,199"/>
+</map>

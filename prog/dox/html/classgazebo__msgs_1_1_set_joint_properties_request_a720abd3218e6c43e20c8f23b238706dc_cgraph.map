@@ -1,0 +1,4 @@
+<map id="gazebo_msgs::SetJointPropertiesRequest::serialize" name="gazebo_msgs::SetJointPropertiesRequest::serialize">
+<area shape="rect" id="node2" href="$classgazebo__msgs_1_1_o_d_e_joint_properties.html#ad90f92b210780679063ec1cc7257a06d" title="gazebo_msgs::ODEJointProperties\l::serialize" alt="" coords="272,5,499,46"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="547,12,739,39"/>
+</map>

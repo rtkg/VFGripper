@@ -1,0 +1,9 @@
+<map id="FollowJointTrajectoryGoal.h" name="FollowJointTrajectoryGoal.h">
+<area shape="rect" id="node5" href="$msg_8h.html" title="ros/msg.h" alt="" coords="340,245,419,272"/>
+<area shape="rect" id="node6" href="$_joint_trajectory_8h.html" title="trajectory_msgs/JointTrajectory.h" alt="" coords="316,80,532,107"/>
+<area shape="rect" id="node9" href="$duration_8h.html" title="ros/duration.h" alt="" coords="772,320,873,347"/>
+<area shape="rect" id="node12" href="$_joint_tolerance_8h.html" title="control_msgs/JointTolerance.h" alt="" coords="41,163,240,189"/>
+<area shape="rect" id="node7" href="$_header_8h.html" title="std_msgs/Header.h" alt="" coords="647,163,781,189"/>
+<area shape="rect" id="node11" href="$_joint_trajectory_point_8h.html" title="trajectory_msgs/JointTrajectory\lPoint.h" alt="" coords="417,155,623,197"/>
+<area shape="rect" id="node8" href="$time_8h.html" title="ros/time.h" alt="" coords="739,245,817,272"/>
+</map>

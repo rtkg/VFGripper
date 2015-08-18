@@ -1,0 +1,8 @@
+<map id="DiagnosticArray.h" name="DiagnosticArray.h">
+<area shape="rect" id="node5" href="$msg_8h.html" title="ros/msg.h" alt="" coords="641,245,720,272"/>
+<area shape="rect" id="node6" href="$_header_8h.html" title="std_msgs/Header.h" alt="" coords="265,171,400,197"/>
+<area shape="rect" id="node10" href="$_diagnostic_status_8h.html" title="diagnostic_msgs/Diagnostic\lStatus.h" alt="" coords="528,81,715,122"/>
+<area shape="rect" id="node7" href="$time_8h.html" title="ros/time.h" alt="" coords="60,245,139,272"/>
+<area shape="rect" id="node8" href="$duration_8h.html" title="ros/duration.h" alt="" coords="5,320,107,347"/>
+<area shape="rect" id="node11" href="$_key_value_8h.html" title="diagnostic_msgs/KeyValue.h" alt="" coords="578,171,768,197"/>
+</map>

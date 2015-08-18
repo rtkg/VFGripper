@@ -1,0 +1,17 @@
+digraph "src" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_2b5e8aa9ef8a5ad5c44c7f4af26a8e7d {
+    graph [ bgcolor="#ddddee", pencolor="black", label="prj" fontname="Helvetica", fontsize="10", URL="dir_2b5e8aa9ef8a5ad5c44c7f4af26a8e7d.html"]
+  subgraph clusterdir_d5ef0c089e55ecb162d8f5d61924357f {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_d5ef0c089e55ecb162d8f5d61924357f.html"];
+    dir_d5ef0c089e55ecb162d8f5d61924357f [shape=plaintext label="src"];
+    dir_a9e78a336a9656b8f8305fb90a86fdcf [shape=box label="libraries" color="red" fillcolor="white" style="filled" URL="dir_a9e78a336a9656b8f8305fb90a86fdcf.html"];
+    dir_1891f8217c0d294ddff641c9e0b96bb8 [shape=box label="matlab" color="black" fillcolor="white" style="filled" URL="dir_1891f8217c0d294ddff641c9e0b96bb8.html"];
+    dir_c55a49d424706a0e2abe19240eb71553 [shape=box label="PWM" color="black" fillcolor="white" style="filled" URL="dir_c55a49d424706a0e2abe19240eb71553.html"];
+    dir_44974a8bb613e97b1514aec75d164dfa [shape=box label="simple_interface" color="black" fillcolor="white" style="filled" URL="dir_44974a8bb613e97b1514aec75d164dfa.html"];
+    dir_fed9e59d5094473f4b7027d363d7305e [shape=box label="test" color="black" fillcolor="white" style="filled" URL="dir_fed9e59d5094473f4b7027d363d7305e.html"];
+  }
+  }
+}

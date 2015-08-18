@@ -1,0 +1,6 @@
+<map id="sensor_msgs::MultiEchoLaserScan" name="sensor_msgs::MultiEchoLaserScan">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="82,5,155,32"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_laser_echo.html" title="sensor_msgs::LaserEcho" alt="" coords="33,96,204,123"/>
+<area shape="rect" id="node4" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="229,96,357,123"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="255,5,331,32"/>
+</map>

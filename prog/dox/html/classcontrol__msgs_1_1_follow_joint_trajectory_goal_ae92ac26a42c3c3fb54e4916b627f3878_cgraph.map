@@ -1,0 +1,7 @@
+<map id="control_msgs::FollowJointTrajectoryGoal::serialize" name="control_msgs::FollowJointTrajectoryGoal::serialize">
+<area shape="rect" id="node2" href="$classtrajectory__msgs_1_1_joint_trajectory.html#a3e7b07999d5bcf5f64ac1cfceed2f48d" title="trajectory_msgs::JointTrajectory\l::serialize" alt="" coords="230,50,439,91"/>
+<area shape="rect" id="node6" href="$classcontrol__msgs_1_1_joint_tolerance.html#a732c970394762a711745e73fa4d627cd" title="control_msgs::JointTolerance\l::serialize" alt="" coords="238,115,431,157"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="501,5,686,32"/>
+<area shape="rect" id="node4" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html#a5d28baec8135375d3832c76d508a6e8a" title="trajectory_msgs::JointTrajectory\lPoint::serialize" alt="" coords="489,57,698,98"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="747,93,939,120"/>
+</map>

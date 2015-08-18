@@ -1,0 +1,10 @@
+<map id="visualization_msgs::MarkerArray::deserialize" name="visualization_msgs::MarkerArray::deserialize">
+<area shape="rect" id="node2" href="$classvisualization__msgs_1_1_marker.html#acd73840bdc20ec14874f3c1d829b8921" title="visualization_msgs\l::Marker::deserialize" alt="" coords="225,107,365,149"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="414,5,613,32"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_pose.html#a17f97030f8c390c1f4351ccafa0edec8" title="geometry_msgs::Pose\l::deserialize" alt="" coords="437,107,590,149"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_point.html#a29b8448415203bbc983901c4e40df3cc" title="geometry_msgs::Point\l::deserialize" alt="" coords="678,45,831,86"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_vector3.html#aae9cb57e6b7550f30d193a1c298f9631" title="geometry_msgs::Vector3\l::deserialize" alt="" coords="671,175,839,217"/>
+<area shape="rect" id="node9" href="$classstd__msgs_1_1_color_r_g_b_a.html#ac064c06e0a262fefcabbb858099a91a5" title="std_msgs::ColorRGBA\l::deserialize" alt="" coords="435,225,591,266"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_quaternion.html#ad2925053e238e52d8fd9fd06a962a5a8" title="geometry_msgs::Quaternion\l::deserialize" alt="" coords="661,110,848,151"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="896,110,1059,151"/>
+</map>

@@ -1,0 +1,15 @@
+digraph "sensor_msgs::RegionOfInterest::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="sensor_msgs::RegionOfInterest\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="sensor_msgs::CameraInfo\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_camera_info.html#a9866e8871b298bcc2843db57eb280405"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="sensor_msgs::SetCameraInfo\lRequest::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_set_camera_info_request.html#a30d2af505033f569573d95d046250413"];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="stereo_msgs::DisparityImage\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstereo__msgs_1_1_disparity_image.html#a59f946920c761dab6edf248f7d36c93f"];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="polled_camera::GetPolled\lImageRequest::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpolled__camera_1_1_get_polled_image_request.html#a7dfdac8c71de01636c54ec0bb100095d"];
+}

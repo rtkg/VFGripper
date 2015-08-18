@@ -1,0 +1,5 @@
+<map id="shape_msgs::Mesh" name="shape_msgs::Mesh">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="61,5,134,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="21,83,174,109"/>
+<area shape="rect" id="node4" href="$classshape__msgs_1_1_mesh_triangle.html" title="shape_msgs::MeshTriangle" alt="" coords="199,83,381,109"/>
+</map>

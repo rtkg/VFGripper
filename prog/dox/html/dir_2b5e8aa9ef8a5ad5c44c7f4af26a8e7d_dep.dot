@@ -1,0 +1,10 @@
+digraph "prj" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_2b5e8aa9ef8a5ad5c44c7f4af26a8e7d {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_2b5e8aa9ef8a5ad5c44c7f4af26a8e7d.html"];
+    dir_2b5e8aa9ef8a5ad5c44c7f4af26a8e7d [shape=plaintext label="prj"];
+    dir_d5ef0c089e55ecb162d8f5d61924357f [shape=box label="src" color="red" fillcolor="white" style="filled" URL="dir_d5ef0c089e55ecb162d8f5d61924357f.html"];
+  }
+}

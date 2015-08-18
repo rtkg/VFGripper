@@ -1,0 +1,7 @@
+<map id="nav_msgs::GetMapActionGoal" name="nav_msgs::GetMapActionGoal">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="202,5,275,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="397,96,555,123"/>
+<area shape="rect" id="node5" href="$classnav__msgs_1_1_get_map_goal.html" title="nav_msgs::GetMapGoal" alt="" coords="5,96,168,123"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="243,96,372,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="391,5,467,32"/>
+</map>

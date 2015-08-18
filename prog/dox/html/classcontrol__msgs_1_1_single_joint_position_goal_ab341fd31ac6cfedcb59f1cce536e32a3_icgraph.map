@@ -1,0 +1,4 @@
+<map id="control_msgs::SingleJointPositionGoal::deserialize" name="control_msgs::SingleJointPositionGoal::deserialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_single_joint_position_action_goal.html#a083d99bcf9773e2b32cacb793eba21a1" title="control_msgs::SingleJoint\lPositionActionGoal::deserialize" alt="" coords="227,5,429,46"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_single_joint_position_action.html#a3e1305ff12cc24b5aae139adb4c56325" title="control_msgs::SingleJoint\lPositionAction::deserialize" alt="" coords="477,5,653,46"/>
+</map>

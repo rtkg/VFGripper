@@ -1,0 +1,5 @@
+<map id="actionlib_tutorials::AveragingActionGoal::deserialize" name="actionlib_tutorials::AveragingActionGoal::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="206,5,405,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html#a34c08058b4c88f0e723307611d57d838" title="actionlib_msgs::GoalID\l::deserialize" alt="" coords="226,57,385,98"/>
+<area shape="rect" id="node4" href="$classactionlib__tutorials_1_1_averaging_goal.html#a09e0984eaf80f29648127e0c7d6c6b6c" title="actionlib_tutorials\l::AveragingGoal::deserialize" alt="" coords="213,122,398,163"/>
+</map>

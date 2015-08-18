@@ -1,0 +1,5 @@
+<map id="Pose.h" name="Pose.h">
+<area shape="rect" id="node5" href="$msg_8h.html" title="ros/msg.h" alt="" coords="216,155,295,181"/>
+<area shape="rect" id="node6" href="$_point_8h.html" title="geometry_msgs/Point.h" alt="" coords="308,80,467,107"/>
+<area shape="rect" id="node7" href="$_quaternion_8h.html" title="geometry_msgs/Quaternion.h" alt="" coords="39,80,232,107"/>
+</map>

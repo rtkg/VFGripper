@@ -1,0 +1,8 @@
+<map id="MultiDOFJointTrajectoryPoint.h" name="MultiDOFJointTrajectoryPoint.h">
+<area shape="rect" id="node5" href="$msg_8h.html" title="ros/msg.h" alt="" coords="64,229,143,256"/>
+<area shape="rect" id="node6" href="$_transform_8h.html" title="geometry_msgs/Transform.h" alt="" coords="407,80,596,107"/>
+<area shape="rect" id="node9" href="$_twist_8h.html" title="geometry_msgs/Twist.h" alt="" coords="74,80,236,107"/>
+<area shape="rect" id="node10" href="$duration_8h.html" title="ros/duration.h" alt="" coords="903,80,1004,107"/>
+<area shape="rect" id="node7" href="$_vector3_8h.html" title="geometry_msgs/Vector3.h" alt="" coords="130,155,304,181"/>
+<area shape="rect" id="node8" href="$_quaternion_8h.html" title="geometry_msgs/Quaternion.h" alt="" coords="432,155,624,181"/>
+</map>

@@ -1,0 +1,11 @@
+digraph "control_msgs::PointHeadGoal::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="control_msgs::PointHeadGoal\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="control_msgs::PointHeadAction\lGoal::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classcontrol__msgs_1_1_point_head_action_goal.html#a82b2838cd181d2515471f52211f6ecc6"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="control_msgs::PointHeadAction\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classcontrol__msgs_1_1_point_head_action.html#a3ab02dbe3e593381dd69f219b06facc1"];
+}

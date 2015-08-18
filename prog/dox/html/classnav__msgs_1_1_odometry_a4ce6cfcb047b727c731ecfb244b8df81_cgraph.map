@@ -1,0 +1,11 @@
+<map id="nav_msgs::Odometry::serialize" name="nav_msgs::Odometry::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="231,71,417,97"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_pose_with_covariance.html#a1c26ee24661f201474f43096a8eca25b" title="geometry_msgs::PoseWithCovariance\l::serialize" alt="" coords="201,122,447,163"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_twist_with_covariance.html#a0c2e8f02cc22da446148d914405cca7b" title="geometry_msgs::TwistWith\lCovariance::serialize" alt="" coords="233,187,415,229"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524" title="geometry_msgs::Pose\l::serialize" alt="" coords="497,70,650,111"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="933,136,1125,163"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="715,5,869,46"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="699,70,885,111"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_twist.html#a6b6773811c51714ffce0412ec15ff277" title="geometry_msgs::Twist\l::serialize" alt="" coords="496,238,651,279"/>
+<area shape="rect" id="node10" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="708,238,876,279"/>
+</map>

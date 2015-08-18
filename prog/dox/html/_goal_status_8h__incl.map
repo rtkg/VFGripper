@@ -1,0 +1,6 @@
+<map id="GoalStatus.h" name="GoalStatus.h">
+<area shape="rect" id="node5" href="$msg_8h.html" title="ros/msg.h" alt="" coords="20,155,99,181"/>
+<area shape="rect" id="node6" href="$_goal_i_d_8h.html" title="actionlib_msgs/GoalID.h" alt="" coords="110,80,274,107"/>
+<area shape="rect" id="node7" href="$time_8h.html" title="ros/time.h" alt="" coords="175,155,254,181"/>
+<area shape="rect" id="node8" href="$duration_8h.html" title="ros/duration.h" alt="" coords="210,229,311,256"/>
+</map>

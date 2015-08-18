@@ -1,0 +1,8 @@
+<map id="confirmCallback" name="confirmCallback">
+<area shape="rect" id="node2" href="$motor__control_8ino.html#ab9af91a54ce80f9ddafa2166009fc966" title="changeDirectionCallback" alt="" coords="171,5,338,32"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#a88a10c8c484df9684264e9c12f5721dc" title="setPwmCallback" alt="" coords="194,56,315,83"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#a36fbb2b4a7ff29fb9c29a48674b23bdb" title="setKpCallback" alt="" coords="201,107,308,133"/>
+<area shape="rect" id="node5" href="$motor__control_8ino.html#ab1cbb0ed9c66057283b1271483243e4e" title="setKiCallback" alt="" coords="203,157,306,184"/>
+<area shape="rect" id="node6" href="$motor__control_8ino.html#af5aa1c7f23083f296bd9edb127fd0624" title="setKdCallback" alt="" coords="201,208,308,235"/>
+<area shape="rect" id="node7" href="$motor__control_8ino.html#aa2fb0ad5f757ff98fd9669695420599d" title="setIdCallback" alt="" coords="203,259,306,285"/>
+</map>

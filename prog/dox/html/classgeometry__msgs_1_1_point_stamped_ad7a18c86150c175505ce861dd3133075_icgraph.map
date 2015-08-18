@@ -1,0 +1,5 @@
+<map id="geometry_msgs::PointStamped::serialize" name="geometry_msgs::PointStamped::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_point_head_goal.html#a0af990ae43a37be31e31d9c70dcf2d91" title="control_msgs::PointHeadGoal\l::serialize" alt="" coords="259,5,455,46"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_point_head_action_goal.html#a82b2838cd181d2515471f52211f6ecc6" title="control_msgs::PointHeadAction\lGoal::serialize" alt="" coords="505,5,711,46"/>
+<area shape="rect" id="node4" href="$classcontrol__msgs_1_1_point_head_action.html#a3ab02dbe3e593381dd69f219b06facc1" title="control_msgs::PointHeadAction\l::serialize" alt="" coords="761,5,967,46"/>
+</map>

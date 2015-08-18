@@ -1,0 +1,4 @@
+<map id="control_msgs::JointTrajectoryGoal::serialize" name="control_msgs::JointTrajectoryGoal::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_joint_trajectory_action_goal.html#af5371374175b6f8ae7efdd2bd349484e" title="control_msgs::JointTrajectory\lActionGoal::serialize" alt="" coords="248,5,443,46"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_joint_trajectory_action.html#ac250f15399e2404388207bcb90463cb3" title="control_msgs::JointTrajectory\lAction::serialize" alt="" coords="491,5,685,46"/>
+</map>

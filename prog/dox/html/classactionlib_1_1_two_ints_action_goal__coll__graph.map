@@ -1,0 +1,7 @@
+<map id="actionlib::TwoIntsActionGoal" name="actionlib::TwoIntsActionGoal">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="191,5,264,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="386,96,544,123"/>
+<area shape="rect" id="node5" href="$classactionlib_1_1_two_ints_goal.html" title="actionlib::TwoIntsGoal" alt="" coords="5,96,157,123"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="233,96,361,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="380,5,456,32"/>
+</map>

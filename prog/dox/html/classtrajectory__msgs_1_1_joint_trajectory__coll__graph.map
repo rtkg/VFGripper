@@ -1,0 +1,7 @@
+<map id="trajectory_msgs::JointTrajectory" name="trajectory_msgs::JointTrajectory">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="135,5,208,32"/>
+<area shape="rect" id="node3" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html" title="trajectory_msgs::JointTrajectory\lPoint" alt="" coords="210,97,419,138"/>
+<area shape="rect" id="node5" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="5,104,133,131"/>
+<area shape="rect" id="node4" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="266,5,363,32"/>
+<area shape="rect" id="node6" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="31,5,107,32"/>
+</map>

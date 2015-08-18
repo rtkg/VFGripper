@@ -1,0 +1,11 @@
+<map id="turtle_actionlib::ShapeAction::serialize" name="turtle_actionlib::ShapeAction::serialize">
+<area shape="rect" id="node2" href="$classturtle__actionlib_1_1_shape_action_goal.html#a9fc3d32fe63d4d9f83f96b5d7f42eada" title="turtle_actionlib::ShapeAction\lGoal::serialize" alt="" coords="243,62,431,103"/>
+<area shape="rect" id="node6" href="$classturtle__actionlib_1_1_shape_action_result.html#ad43642fcd36e7140f0c678f8b592e88a" title="turtle_actionlib::ShapeAction\lResult::serialize" alt="" coords="243,218,431,259"/>
+<area shape="rect" id="node9" href="$classturtle__actionlib_1_1_shape_action_feedback.html#a8f584bf46eea24fb15ae7d3533cd768e" title="turtle_actionlib::ShapeAction\lFeedback::serialize" alt="" coords="243,152,431,194"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="491,101,677,128"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="737,98,895,139"/>
+<area shape="rect" id="node5" href="$classturtle__actionlib_1_1_shape_goal.html#a7274e8e24a1ed0e1f64cc2e39adf955c" title="turtle_actionlib::ShapeGoal\l::serialize" alt="" coords="495,35,673,76"/>
+<area shape="rect" id="node7" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="493,218,675,259"/>
+<area shape="rect" id="node8" href="$classturtle__actionlib_1_1_shape_result.html#afc8f5c8df0a3a0c55e3e2e9ecb657f49" title="turtle_actionlib::ShapeResult\l::serialize" alt="" coords="489,283,679,324"/>
+<area shape="rect" id="node10" href="$classturtle__actionlib_1_1_shape_feedback.html#add3fb427cd22f2692ee0f010df39b3a0" title="turtle_actionlib::ShapeFeedback\l::serialize" alt="" coords="480,152,688,194"/>
+</map>

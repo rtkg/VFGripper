@@ -1,0 +1,3 @@
+<map id="geometry_msgs::Vector3::deserialize" name="geometry_msgs::Vector3::deserialize">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="221,5,384,46"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="grasp_planner::PlanGraspRequest" name="grasp_planner::PlanGraspRequest">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="87,5,159,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_pose.html" title="geometry_msgs::Pose" alt="" coords="47,187,199,213"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="30,96,217,123"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="241,96,394,123"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="419,96,547,123"/>
+<area shape="rect" id="node7" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="445,5,521,32"/>
+</map>

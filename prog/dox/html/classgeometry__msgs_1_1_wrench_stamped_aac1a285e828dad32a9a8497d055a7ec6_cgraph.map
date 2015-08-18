@@ -1,0 +1,6 @@
+<map id="geometry_msgs::WrenchStamped::serialize" name="geometry_msgs::WrenchStamped::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="275,5,461,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_wrench.html#a775fb20d263b4bf2bd4f3200fca1afec" title="geometry_msgs::Wrench\l::serialize" alt="" coords="284,57,452,98"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="509,57,677,98"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="725,64,917,91"/>
+</map>

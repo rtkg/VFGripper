@@ -1,0 +1,6 @@
+<map id="sensor_msgs::RegionOfInterest::serialize" name="sensor_msgs::RegionOfInterest::serialize">
+<area shape="rect" id="node2" href="$classsensor__msgs_1_1_camera_info.html#a9866e8871b298bcc2843db57eb280405" title="sensor_msgs::CameraInfo\l::serialize" alt="" coords="271,5,447,46"/>
+<area shape="rect" id="node4" href="$classstereo__msgs_1_1_disparity_image.html#a59f946920c761dab6edf248f7d36c93f" title="stereo_msgs::DisparityImage\l::serialize" alt="" coords="262,70,455,111"/>
+<area shape="rect" id="node5" href="$classpolled__camera_1_1_get_polled_image_request.html#a7dfdac8c71de01636c54ec0bb100095d" title="polled_camera::GetPolled\lImageRequest::serialize" alt="" coords="273,135,444,177"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_set_camera_info_request.html#a30d2af505033f569573d95d046250413" title="sensor_msgs::SetCameraInfo\lRequest::serialize" alt="" coords="505,5,701,46"/>
+</map>

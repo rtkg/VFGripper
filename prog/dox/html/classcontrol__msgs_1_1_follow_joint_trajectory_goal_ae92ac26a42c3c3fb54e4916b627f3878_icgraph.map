@@ -1,0 +1,4 @@
+<map id="control_msgs::FollowJointTrajectoryGoal::serialize" name="control_msgs::FollowJointTrajectoryGoal::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_follow_joint_trajectory_action_goal.html#a393489ca412a9f27d03ec457db36ec72" title="control_msgs::FollowJoint\lTrajectoryActionGoal::serialize" alt="" coords="229,5,429,46"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_follow_joint_trajectory_action.html#a2df0d37f15e4ec31d79844bdbea7433b" title="control_msgs::FollowJoint\lTrajectoryAction::serialize" alt="" coords="478,5,653,46"/>
+</map>

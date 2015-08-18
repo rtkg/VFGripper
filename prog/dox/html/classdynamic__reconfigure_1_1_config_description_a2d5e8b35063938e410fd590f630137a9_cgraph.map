@@ -1,0 +1,11 @@
+<map id="dynamic_reconfigure::ConfigDescription::serialize" name="dynamic_reconfigure::ConfigDescription::serialize">
+<area shape="rect" id="node2" href="$classdynamic__reconfigure_1_1_group.html#a10ada427623eb30ee10fd28c06f014bd" title="dynamic_reconfigure\l::Group::serialize" alt="" coords="198,50,341,91"/>
+<area shape="rect" id="node4" href="$classdynamic__reconfigure_1_1_config.html#aa41c00d165d1496b801a2c92acf40d64" title="dynamic_reconfigure\l::Config::serialize" alt="" coords="198,183,341,225"/>
+<area shape="rect" id="node3" href="$classdynamic__reconfigure_1_1_param_description.html#ac631c25b655387d354677edef2a47643" title="dynamic_reconfigure\l::ParamDescription::\lserialize" alt="" coords="411,5,554,61"/>
+<area shape="rect" id="node5" href="$classdynamic__reconfigure_1_1_bool_parameter.html#a22e9f326a451f4e38268693bc99e8857" title="dynamic_reconfigure\l::BoolParameter::serialize" alt="" coords="397,85,569,126"/>
+<area shape="rect" id="node6" href="$classdynamic__reconfigure_1_1_int_parameter.html#adf080d3eaf1d9484c5d56f7e29bb465f" title="dynamic_reconfigure\l::IntParameter::serialize" alt="" coords="402,150,563,191"/>
+<area shape="rect" id="node7" href="$classdynamic__reconfigure_1_1_str_parameter.html#a75c4d23b7ce43ce33c023d9c1b890b43" title="dynamic_reconfigure\l::StrParameter::serialize" alt="" coords="401,215,564,257"/>
+<area shape="rect" id="node8" href="$classdynamic__reconfigure_1_1_double_parameter.html#a61628c47d58d6944f8ae4b9f13fd90fa" title="dynamic_reconfigure\l::DoubleParameter::serialize" alt="" coords="389,281,576,322"/>
+<area shape="rect" id="node10" href="$classdynamic__reconfigure_1_1_group_state.html#a9ca15156c8465aee6cfc833235a3aba0" title="dynamic_reconfigure\l::GroupState::serialize" alt="" coords="407,346,559,387"/>
+<area shape="rect" id="node9" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="624,288,816,315"/>
+</map>

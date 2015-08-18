@@ -1,0 +1,16 @@
+digraph "ros::NodeHandle_::logfatal"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="ros::NodeHandle_::logfatal",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ros::NodeHandle_::log",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_node_handle__.html#a25b48e052c6c1ca56bcee3ff8af0bf75"];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ros::NodeHandle_::publish",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_node_handle__.html#ac4083fb8c4a983be2d1cd78243c6c815"];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="ros::Msg::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html#a59d90898711c6632ec494985f43ca709"];
+  Node3 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="ros::NodeHandle_::logerror",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_node_handle__.html#ab83e1d5c531d5399638f33351f094910"];
+  Node5 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

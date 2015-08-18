@@ -1,0 +1,11 @@
+<map id="actionlib::TwoIntsAction::serialize" name="actionlib::TwoIntsAction::serialize">
+<area shape="rect" id="node2" href="$classactionlib_1_1_two_ints_action_goal.html#a500d943d8a13443fd1f1145171b89ed8" title="actionlib::TwoIntsAction\lGoal::serialize" alt="" coords="216,60,379,102"/>
+<area shape="rect" id="node6" href="$classactionlib_1_1_two_ints_action_result.html#a300a541a124a326099f1a00a0f73782f" title="actionlib::TwoIntsAction\lResult::serialize" alt="" coords="216,216,379,258"/>
+<area shape="rect" id="node9" href="$classactionlib_1_1_two_ints_action_feedback.html#a88965bac35a08bbbab171c8033240b8c" title="actionlib::TwoIntsAction\lFeedback::serialize" alt="" coords="216,151,379,192"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="427,100,613,126"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="662,96,821,138"/>
+<area shape="rect" id="node5" href="$classactionlib_1_1_two_ints_goal.html#a8af0b60a6f49850e2bde42ad000be04d" title="actionlib::TwoIntsGoal\l::serialize" alt="" coords="444,34,596,75"/>
+<area shape="rect" id="node7" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="429,216,611,258"/>
+<area shape="rect" id="node8" href="$classactionlib_1_1_two_ints_result.html#ac9bec945a94d2679ced6439e6e96af70" title="actionlib::TwoIntsResult\l::serialize" alt="" coords="439,282,601,323"/>
+<area shape="rect" id="node10" href="$classactionlib_1_1_two_ints_feedback.html#af56eccfbff9b2e0ed0a45de7c5ad112b" title="actionlib::TwoIntsFeedback\l::serialize" alt="" coords="429,151,611,192"/>
+</map>

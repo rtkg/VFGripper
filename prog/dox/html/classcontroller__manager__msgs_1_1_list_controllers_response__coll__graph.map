@@ -1,0 +1,4 @@
+<map id="controller_manager_msgs::ListControllersResponse" name="controller_manager_msgs::ListControllersResponse">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="90,5,163,32"/>
+<area shape="rect" id="node3" href="$classcontroller__manager__msgs_1_1_controller_state.html" title="controller_manager\l_msgs::ControllerState" alt="" coords="127,83,283,125"/>
+</map>

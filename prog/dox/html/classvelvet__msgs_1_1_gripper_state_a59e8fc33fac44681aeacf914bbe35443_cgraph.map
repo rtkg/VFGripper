@@ -1,0 +1,4 @@
+<map id="velvet_msgs::GripperState::deserialize" name="velvet_msgs::GripperState::deserialize">
+<area shape="rect" id="node2" href="$classvelvet__msgs_1_1_encoder_state.html#a0f8b7ee485147c101ec2cb47417497c7" title="velvet_msgs::EncoderState\l::deserialize" alt="" coords="233,5,415,46"/>
+<area shape="rect" id="node3" href="$classvelvet__msgs_1_1_current_state.html#afac82acd185106452c2029b11569ac2c" title="velvet_msgs::CurrentState\l::deserialize" alt="" coords="235,70,413,111"/>
+</map>

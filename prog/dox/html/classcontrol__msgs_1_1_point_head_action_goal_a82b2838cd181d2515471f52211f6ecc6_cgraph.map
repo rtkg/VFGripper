@@ -1,0 +1,9 @@
+<map id="control_msgs::PointHeadActionGoal::serialize" name="control_msgs::PointHeadActionGoal::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="761,5,946,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="281,54,439,95"/>
+<area shape="rect" id="node4" href="$classcontrol__msgs_1_1_point_head_goal.html#a0af990ae43a37be31e31d9c70dcf2d91" title="control_msgs::PointHeadGoal\l::serialize" alt="" coords="262,119,458,161"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_point_stamped.html#ad7a18c86150c175505ce861dd3133075" title="geometry_msgs::PointStamped\l::serialize" alt="" coords="507,57,712,98"/>
+<area shape="rect" id="node7" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="995,123,1187,149"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="525,174,693,215"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="777,57,930,98"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="trajectory_msgs::MultiDOFJointTrajectoryPoint::deserialize" name="trajectory_msgs::MultiDOFJointTrajectoryPoint::deserialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_transform.html#aa86854904d1b5fb53e79124733dd8944" title="geometry_msgs::Transform\l::deserialize" alt="" coords="262,70,445,111"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_twist.html#a51f4b5ab24bdb3eb5b0690e6ffe03818" title="geometry_msgs::Twist\l::deserialize" alt="" coords="276,5,431,46"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_vector3.html#aae9cb57e6b7550f30d193a1c298f9631" title="geometry_msgs::Vector3\l::deserialize" alt="" coords="503,5,671,46"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_quaternion.html#ad2925053e238e52d8fd9fd06a962a5a8" title="geometry_msgs::Quaternion\l::deserialize" alt="" coords="493,70,680,111"/>
+<area shape="rect" id="node4" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="728,38,891,79"/>
+</map>

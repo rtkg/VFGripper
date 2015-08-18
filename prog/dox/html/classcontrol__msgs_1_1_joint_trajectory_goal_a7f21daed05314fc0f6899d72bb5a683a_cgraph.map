@@ -1,0 +1,6 @@
+<map id="control_msgs::JointTrajectoryGoal::deserialize" name="control_msgs::JointTrajectoryGoal::deserialize">
+<area shape="rect" id="node2" href="$classtrajectory__msgs_1_1_joint_trajectory.html#af32cecc2e5ce4fa19cae86083061b919" title="trajectory_msgs::JointTrajectory\l::deserialize" alt="" coords="249,27,458,69"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="513,5,711,32"/>
+<area shape="rect" id="node4" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html#a5eb1148ae1774fa75ca5bd31471347c7" title="trajectory_msgs::JointTrajectory\lPoint::deserialize" alt="" coords="507,57,717,98"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="765,57,928,98"/>
+</map>

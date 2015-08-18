@@ -1,0 +1,9 @@
+<map id="gazebo_msgs::GetLinkStateResponse::serialize" name="gazebo_msgs::GetLinkStateResponse::serialize">
+<area shape="rect" id="node2" href="$classgazebo__msgs_1_1_link_state.html#a4b49828457d29c7b4dfcb0cb934087a1" title="gazebo_msgs::LinkState\l::serialize" alt="" coords="241,103,407,145"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524" title="geometry_msgs::Pose\l::serialize" alt="" coords="457,70,610,111"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_twist.html#a6b6773811c51714ffce0412ec15ff277" title="geometry_msgs::Twist\l::serialize" alt="" coords="456,135,611,177"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="675,5,829,46"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="659,70,845,111"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="893,77,1085,104"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="668,135,836,177"/>
+</map>

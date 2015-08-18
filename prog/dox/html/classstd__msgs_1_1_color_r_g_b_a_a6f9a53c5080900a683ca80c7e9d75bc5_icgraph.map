@@ -1,0 +1,9 @@
+<map id="std_msgs::ColorRGBA::serialize" name="std_msgs::ColorRGBA::serialize">
+<area shape="rect" id="node2" href="$classvisualization__msgs_1_1_image_marker.html#ac84f2f6fbe087abad3a82c0d37786bf4" title="visualization_msgs\l::ImageMarker::serialize" alt="" coords="211,23,373,65"/>
+<area shape="rect" id="node3" href="$classvisualization__msgs_1_1_marker.html#a45a6ab6cb7a163b240bdff8ff937a13f" title="visualization_msgs\l::Marker::serialize" alt="" coords="225,89,359,130"/>
+<area shape="rect" id="node4" href="$classvisualization__msgs_1_1_interactive_marker_control.html#ae0551e8cc332a7f0a999966c4154e1e1" title="visualization_msgs\l::InteractiveMarkerControl\l::serialize" alt="" coords="421,45,595,101"/>
+<area shape="rect" id="node8" href="$classvisualization__msgs_1_1_marker_array.html#ae384695396a9747058da4a1913d05b27" title="visualization_msgs\l::MarkerArray::serialize" alt="" coords="429,125,587,166"/>
+<area shape="rect" id="node5" href="$classvisualization__msgs_1_1_interactive_marker.html#a4a9c12c8b833b36acb06f7fc8966ea07" title="visualization_msgs\l::InteractiveMarker\l::serialize" alt="" coords="643,45,776,101"/>
+<area shape="rect" id="node6" href="$classvisualization__msgs_1_1_interactive_marker_init.html#a10f8a90ceead7129fed8b030561f6d62" title="visualization_msgs\l::InteractiveMarkerInit\l::serialize" alt="" coords="836,5,985,61"/>
+<area shape="rect" id="node7" href="$classvisualization__msgs_1_1_interactive_marker_update.html#a66eb6edf924a5c22a67d43a892e0a874" title="visualization_msgs\l::InteractiveMarkerUpdate\l::serialize" alt="" coords="824,85,997,141"/>
+</map>

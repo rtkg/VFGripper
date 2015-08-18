@@ -1,0 +1,4 @@
+<map id="sensor_msgs::ChannelFloat32::deserialize" name="sensor_msgs::ChannelFloat32::deserialize">
+<area shape="rect" id="node2" href="$classsensor__msgs_1_1_point_cloud.html#a5358026ebf8bcf5aa859e32a86791414" title="sensor_msgs::PointCloud\l::deserialize" alt="" coords="254,5,426,46"/>
+<area shape="rect" id="node3" href="$classlaser__assembler_1_1_assemble_scans_response.html#a2eaccab40ad7727b1de19bdf70638685" title="laser_assembler::Assemble\lScansResponse::deserialize" alt="" coords="475,5,663,46"/>
+</map>

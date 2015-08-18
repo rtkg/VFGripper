@@ -1,0 +1,23 @@
+digraph "pcl_msgs::PolygonMesh"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="pcl_msgs::PolygonMesh",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ros::Msg",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" st_polygons\npolygons" ,fontname="Helvetica"];
+  Node3 [label="pcl_msgs::Vertices",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpcl__msgs_1_1_vertices.html"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" header" ,fontname="Helvetica"];
+  Node4 [label="std_msgs::Header",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_header.html"];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" stamp" ,fontname="Helvetica"];
+  Node5 [label="ros::Time",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_time.html"];
+  Node6 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" cloud" ,fontname="Helvetica"];
+  Node6 [label="sensor_msgs::PointCloud2",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_point_cloud2.html"];
+  Node2 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" st_fields\nfields" ,fontname="Helvetica"];
+  Node7 [label="sensor_msgs::PointField",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_point_field.html"];
+  Node2 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" header" ,fontname="Helvetica"];
+}

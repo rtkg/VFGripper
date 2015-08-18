@@ -1,0 +1,4 @@
+<map id="gazebo_msgs::SetJointPropertiesRequest" name="gazebo_msgs::SetJointPropertiesRequest">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="102,5,175,32"/>
+<area shape="rect" id="node3" href="$classgazebo__msgs_1_1_o_d_e_joint_properties.html" title="gazebo_msgs::ODEJointProperties" alt="" coords="131,83,357,109"/>
+</map>

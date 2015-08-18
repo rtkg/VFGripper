@@ -1,0 +1,11 @@
+digraph "gazebo_msgs::SetJointPropertiesRequest"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="gazebo_msgs::SetJointProperties\lRequest",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ros::Msg",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" ode_joint_config" ,fontname="Helvetica"];
+  Node3 [label="gazebo_msgs::ODEJointProperties",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgazebo__msgs_1_1_o_d_e_joint_properties.html"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

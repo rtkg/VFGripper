@@ -1,0 +1,5 @@
+<map id="geometry_msgs::PoseStamped::serialize" name="geometry_msgs::PoseStamped::serialize">
+<area shape="rect" id="node2" href="$classnav__msgs_1_1_get_plan_request.html#a49c31a4d0e46fd9d58ab4650c0e3c869" title="nav_msgs::GetPlanRequest\l::serialize" alt="" coords="259,5,445,46"/>
+<area shape="rect" id="node3" href="$classnav__msgs_1_1_path.html#a188ce73815c9f2458aa1c4a598babb08" title="nav_msgs::Path::serialize" alt="" coords="265,71,439,97"/>
+<area shape="rect" id="node4" href="$classnav__msgs_1_1_get_plan_response.html#af0b8af8911f7f6b68318cf7f6f600ccc" title="nav_msgs::GetPlanResponse\l::serialize" alt="" coords="494,63,690,105"/>
+</map>

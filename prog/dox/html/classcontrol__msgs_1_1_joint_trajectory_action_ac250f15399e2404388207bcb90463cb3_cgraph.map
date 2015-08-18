@@ -1,0 +1,14 @@
+<map id="control_msgs::JointTrajectoryAction::serialize" name="control_msgs::JointTrajectoryAction::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_joint_trajectory_action_goal.html#af5371374175b6f8ae7efdd2bd349484e" title="control_msgs::JointTrajectory\lActionGoal::serialize" alt="" coords="248,89,443,130"/>
+<area shape="rect" id="node9" href="$classcontrol__msgs_1_1_joint_trajectory_action_result.html#a5843c7481b13089059499c64e62c0efb" title="control_msgs::JointTrajectory\lActionResult::serialize" alt="" coords="248,231,443,273"/>
+<area shape="rect" id="node12" href="$classcontrol__msgs_1_1_joint_trajectory_action_feedback.html#a32db6cba7c107d02968971ba4c41dae8" title="control_msgs::JointTrajectory\lActionFeedback::serialize" alt="" coords="248,326,443,367"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="1005,155,1190,181"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="759,290,918,331"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_joint_trajectory_goal.html#a29ccd47a5d0e2e7fecddf80018d0912b" title="control_msgs::JointTrajectory\lGoal::serialize" alt="" coords="491,5,685,46"/>
+<area shape="rect" id="node6" href="$classtrajectory__msgs_1_1_joint_trajectory.html#a3e7b07999d5bcf5f64ac1cfceed2f48d" title="trajectory_msgs::JointTrajectory\l::serialize" alt="" coords="734,5,943,46"/>
+<area shape="rect" id="node7" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html#a5d28baec8135375d3832c76d508a6e8a" title="trajectory_msgs::JointTrajectory\lPoint::serialize" alt="" coords="993,5,1202,46"/>
+<area shape="rect" id="node8" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="1251,12,1443,39"/>
+<area shape="rect" id="node10" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="497,290,679,331"/>
+<area shape="rect" id="node11" href="$classcontrol__msgs_1_1_joint_trajectory_result.html#ad94ef4cc11d3b30815437a26f642a864" title="control_msgs::JointTrajectory\lResult::serialize" alt="" coords="491,173,685,214"/>
+<area shape="rect" id="node13" href="$classcontrol__msgs_1_1_joint_trajectory_feedback.html#ac435448dbdd7c437f00256ce35031bab" title="control_msgs::JointTrajectory\lFeedback::serialize" alt="" coords="491,355,685,397"/>
+</map>

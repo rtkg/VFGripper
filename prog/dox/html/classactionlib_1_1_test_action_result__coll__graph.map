@@ -1,0 +1,8 @@
+<map id="actionlib::TestActionResult" name="actionlib::TestActionResult">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="182,5,255,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html" title="actionlib_msgs::GoalStatus" alt="" coords="206,197,388,224"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="257,96,415,123"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="439,96,568,123"/>
+<area shape="rect" id="node7" href="$classactionlib_1_1_test_result.html" title="actionlib::TestResult" alt="" coords="5,147,147,173"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="381,5,457,32"/>
+</map>

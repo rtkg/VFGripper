@@ -1,0 +1,8 @@
+<map id="control_msgs::FollowJointTrajectoryActionFeedback::serialize" name="control_msgs::FollowJointTrajectoryActionFeedback::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="485,71,670,97"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="235,5,418,46"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_follow_joint_trajectory_feedback.html#aa54b6e8f9e1c9419548ff90865e5c059" title="control_msgs::FollowJoint\lTrajectoryFeedback::serialize" alt="" coords="230,122,423,163"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="498,5,657,46"/>
+<area shape="rect" id="node6" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html#a5d28baec8135375d3832c76d508a6e8a" title="trajectory_msgs::JointTrajectory\lPoint::serialize" alt="" coords="473,122,682,163"/>
+<area shape="rect" id="node7" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="731,129,923,156"/>
+</map>

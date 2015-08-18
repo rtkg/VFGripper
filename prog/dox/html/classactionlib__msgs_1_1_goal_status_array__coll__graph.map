@@ -1,0 +1,7 @@
+<map id="actionlib_msgs::GoalStatusArray" name="actionlib_msgs::GoalStatusArray">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="15,5,87,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html" title="actionlib_msgs::GoalStatus" alt="" coords="28,187,210,213"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="69,96,227,123"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="252,96,381,123"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="194,5,270,32"/>
+</map>

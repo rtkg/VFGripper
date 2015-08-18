@@ -1,0 +1,5 @@
+<map id="sensor_msgs::RelativeHumidity" name="sensor_msgs::RelativeHumidity">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="38,5,111,32"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="111,96,240,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="137,5,213,32"/>
+</map>

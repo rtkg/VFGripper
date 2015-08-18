@@ -1,0 +1,4 @@
+<map id="control_msgs::GripperCommandGoal::serialize" name="control_msgs::GripperCommandGoal::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_gripper_command_action_goal.html#a35d4090c4c4f2eb397d8395d5fe3ee1f" title="control_msgs::GripperCommand\lActionGoal::serialize" alt="" coords="264,5,475,46"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_gripper_command_action.html#acc4640f453b7ac0c9bd697a09578c08d" title="control_msgs::GripperCommand\lAction::serialize" alt="" coords="523,5,733,46"/>
+</map>

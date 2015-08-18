@@ -1,0 +1,4 @@
+<map id="controller_manager_msgs::ControllersStatistics::serialize" name="controller_manager_msgs::ControllersStatistics::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="241,5,426,32"/>
+<area shape="rect" id="node3" href="$classcontroller__manager__msgs_1_1_controller_statistics.html#a3483b08f6cecc3fea9e4dcfb225a4891" title="controller_manager\l_msgs::ControllerStatistics\l::serialize" alt="" coords="243,56,423,112"/>
+</map>

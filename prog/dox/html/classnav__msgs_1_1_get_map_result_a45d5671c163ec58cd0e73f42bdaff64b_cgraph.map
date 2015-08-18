@@ -1,0 +1,9 @@
+<map id="nav_msgs::GetMapResult::serialize" name="nav_msgs::GetMapResult::serialize">
+<area shape="rect" id="node2" href="$classnav__msgs_1_1_occupancy_grid.html#a04e853f4172d006b3bacd4f37ad44ea3" title="nav_msgs::OccupancyGrid\l::serialize" alt="" coords="230,27,410,69"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="459,5,645,32"/>
+<area shape="rect" id="node4" href="$classnav__msgs_1_1_map_meta_data.html#afc61f1b02486586b588bd9e20f3d20d4" title="nav_msgs::MapMetaData\l::serialize" alt="" coords="466,57,638,98"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524" title="geometry_msgs::Pose\l::serialize" alt="" coords="694,57,847,98"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="913,23,1066,65"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="896,89,1083,130"/>
+<area shape="rect" id="node7" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="1131,64,1323,91"/>
+</map>

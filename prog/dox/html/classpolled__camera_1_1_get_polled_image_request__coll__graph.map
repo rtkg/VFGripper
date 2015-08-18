@@ -1,0 +1,5 @@
+<map id="polled_camera::GetPolledImageRequest" name="polled_camera::GetPolledImageRequest">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="5,5,77,32"/>
+<area shape="rect" id="node4" href="$classsensor__msgs_1_1_region_of_interest.html" title="sensor_msgs::RegionOfInterest" alt="" coords="37,83,243,109"/>
+<area shape="rect" id="node3" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="267,83,364,109"/>
+</map>

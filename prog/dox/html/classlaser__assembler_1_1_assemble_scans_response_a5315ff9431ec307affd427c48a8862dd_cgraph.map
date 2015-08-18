@@ -1,0 +1,6 @@
+<map id="laser_assembler::AssembleScansResponse::serialize" name="laser_assembler::AssembleScansResponse::serialize">
+<area shape="rect" id="node2" href="$classsensor__msgs_1_1_point_cloud.html#a58f31982f867eb6e1c7d7587bbe65dcd" title="sensor_msgs::PointCloud\l::serialize" alt="" coords="238,57,410,98"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="466,5,651,32"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point32.html#ac373072aa9aae01c84844a2b961963e8" title="geometry_msgs::Point32\l::serialize" alt="" coords="475,57,642,98"/>
+<area shape="rect" id="node5" href="$classsensor__msgs_1_1_channel_float32.html#aefbe1f18b1336c38713715b7ef6d46d9" title="sensor_msgs::ChannelFloat32\l::serialize" alt="" coords="459,122,658,163"/>
+</map>

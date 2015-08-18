@@ -1,0 +1,4 @@
+<map id="sensor_msgs::MultiEchoLaserScan::serialize" name="sensor_msgs::MultiEchoLaserScan::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="254,5,439,32"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_laser_echo.html#ab8905c9804529e13e2c542be89625ad3" title="sensor_msgs::LaserEcho\l::serialize" alt="" coords="261,57,432,98"/>
+</map>

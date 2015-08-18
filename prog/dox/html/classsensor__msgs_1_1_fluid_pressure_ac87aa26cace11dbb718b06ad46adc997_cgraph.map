@@ -1,0 +1,4 @@
+<map id="sensor_msgs::FluidPressure::serialize" name="sensor_msgs::FluidPressure::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="246,5,431,32"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="243,56,435,83"/>
+</map>

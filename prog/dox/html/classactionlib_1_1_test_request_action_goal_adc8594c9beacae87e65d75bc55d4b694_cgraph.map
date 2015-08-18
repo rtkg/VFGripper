@@ -1,0 +1,5 @@
+<map id="actionlib::TestRequestActionGoal::serialize" name="actionlib::TestRequestActionGoal::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="246,5,431,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="259,57,418,98"/>
+<area shape="rect" id="node4" href="$classactionlib_1_1_test_request_goal.html#a11c4a44457833d184bbec0c597a5b2ee" title="actionlib::TestRequestGoal\l::serialize" alt="" coords="249,122,429,163"/>
+</map>

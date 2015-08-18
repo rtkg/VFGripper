@@ -1,0 +1,5 @@
+<map id="geometry_msgs::Pose::deserialize" name="geometry_msgs::Pose::deserialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_point.html#a29b8448415203bbc983901c4e40df3cc" title="geometry_msgs::Point\l::deserialize" alt="" coords="225,5,378,46"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_quaternion.html#ad2925053e238e52d8fd9fd06a962a5a8" title="geometry_msgs::Quaternion\l::deserialize" alt="" coords="208,70,395,111"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="443,38,605,79"/>
+</map>

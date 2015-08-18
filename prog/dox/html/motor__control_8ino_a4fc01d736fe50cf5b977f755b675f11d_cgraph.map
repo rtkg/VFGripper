@@ -1,0 +1,15 @@
+<map id="setup" name="setup">
+<area shape="rect" id="node2" href="$motor__control_8ino.html#ac97599ec868205d050503b0b461c828e" title="pub_counter" alt="" coords="131,5,224,32"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#a468f86fc63cec0f2ddee09f58238344e" title="pub_current" alt="" coords="132,56,223,83"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#adccfb3728da273dd6988fb4cf5886f0e" title="pub_filtered_current" alt="" coords="109,107,245,133"/>
+<area shape="rect" id="node5" href="$motor__control_8ino.html#a364742d38ed370534644fd3245119821" title="pub_error" alt="" coords="139,157,215,184"/>
+<area shape="rect" id="node6" href="$motor__control_8ino.html#a4fc3ea5e8d0c388539f9d48be8265062" title="pub_u" alt="" coords="149,208,206,235"/>
+<area shape="rect" id="node7" href="$motor__control_8ino.html#a530381e79aaa572962a7e20de422517a" title="pub_i_d" alt="" coords="144,259,211,285"/>
+<area shape="rect" id="node8" href="$motor__control_8ino.html#a96663074973a7dca9b0d3f9ccd714f90" title="sub_set_vel" alt="" coords="131,309,223,336"/>
+<area shape="rect" id="node9" href="$motor__control_8ino.html#a3cb597c40e590565bc48298759ade32e" title="sub_set_kp" alt="" coords="133,360,222,387"/>
+<area shape="rect" id="node10" href="$motor__control_8ino.html#a98d75c2d5215f71f28f197eb8d0843dd" title="sub_set_ki" alt="" coords="135,411,220,437"/>
+<area shape="rect" id="node11" href="$motor__control_8ino.html#a86dc2b7e681095867e9ade3fcd452fc6" title="sub_set_kd" alt="" coords="133,461,222,488"/>
+<area shape="rect" id="node12" href="$motor__control_8ino.html#afe59a52d515349fe7efcff495b63d376" title="sub_set_i_d" alt="" coords="131,512,223,539"/>
+<area shape="rect" id="node13" href="$motor__control_8ino.html#aa1743f608ebfb4adb76de80a2d16a66a" title="sub_change_dir" alt="" coords="121,563,234,589"/>
+<area shape="rect" id="node14" href="$class_motor.html#a796d663b03332952320f3500a68cca44" title="Sets PWM (=&gt; speed) for motor. " alt="" coords="122,613,233,640"/>
+</map>

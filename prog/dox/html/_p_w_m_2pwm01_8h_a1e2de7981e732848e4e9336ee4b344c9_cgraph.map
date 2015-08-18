@@ -1,0 +1,4 @@
+<map id="pwm_setup" name="pwm_setup">
+<area shape="rect" id="node2" href="$_p_w_m_2pwm01_8h.html#af9964c8abaf0931aa74d0561829b9f5a" title="pwm_set_clockA_freq" alt="" coords="145,5,295,32"/>
+<area shape="rect" id="node3" href="$_p_w_m_2pwm01_8h.html#a36dd422e30c8f0ed1cb39dbcdc318d7a" title="pwm_set_clockB_freq" alt="" coords="145,56,295,83"/>
+</map>

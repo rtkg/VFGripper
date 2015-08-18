@@ -1,0 +1,8 @@
+<map id="actionlib_tutorials::AveragingActionResult" name="actionlib_tutorials::AveragingActionResult">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="7,85,81,111"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html" title="actionlib_msgs::GoalStatus" alt="" coords="510,158,693,185"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="174,205,333,231"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="189,85,318,111"/>
+<area shape="rect" id="node7" href="$classactionlib__tutorials_1_1_averaging_result.html" title="actionlib_tutorials\l::AveragingResult" alt="" coords="358,27,485,68"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="5,199,83,226"/>
+</map>

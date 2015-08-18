@@ -1,0 +1,4 @@
+<map id="sensor_msgs::PointCloud2::deserialize" name="sensor_msgs::PointCloud2::deserialize">
+<area shape="rect" id="node2" href="$classlaser__assembler_1_1_assemble_scans2_response.html#a0b737de6bd6173a4c4582457b3b2e096" title="laser_assembler::Assemble\lScans2Response::deserialize" alt="" coords="232,5,427,46"/>
+<area shape="rect" id="node3" href="$classpcl__msgs_1_1_polygon_mesh.html#aea4e4a69861d4dcf0bff98699f473245" title="pcl_msgs::PolygonMesh\l::deserialize" alt="" coords="247,70,412,111"/>
+</map>

@@ -1,0 +1,13 @@
+digraph "std_msgs::Float64MultiArray::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="std_msgs::Float64MultiArray\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="std_msgs::MultiArrayLayout\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_multi_array_layout.html#a25caee993ee85cfa15ee06fbae3a8ce9"];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="std_msgs::MultiArrayDimension\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_multi_array_dimension.html#af62c038a02cc833a58dcc6c93a798eb4"];
+  Node1 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="ros::Msg::serializeAvrFloat64",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897",tooltip="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..."];
+}

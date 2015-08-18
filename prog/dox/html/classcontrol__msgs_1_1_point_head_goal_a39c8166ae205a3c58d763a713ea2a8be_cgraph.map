@@ -1,0 +1,7 @@
+<map id="control_msgs::PointHeadGoal::deserialize" name="control_msgs::PointHeadGoal::deserialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_point_stamped.html#a587aa4641c421bda20b85597b0abe856" title="geometry_msgs::PointStamped\l::deserialize" alt="" coords="251,57,456,98"/>
+<area shape="rect" id="node5" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="752,115,915,157"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_vector3.html#aae9cb57e6b7550f30d193a1c298f9631" title="geometry_msgs::Vector3\l::deserialize" alt="" coords="269,174,437,215"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="505,5,703,32"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point.html#a29b8448415203bbc983901c4e40df3cc" title="geometry_msgs::Point\l::deserialize" alt="" coords="527,57,681,98"/>
+</map>

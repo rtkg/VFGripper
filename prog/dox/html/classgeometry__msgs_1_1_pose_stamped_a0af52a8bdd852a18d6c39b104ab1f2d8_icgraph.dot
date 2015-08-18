@@ -1,0 +1,13 @@
+digraph "geometry_msgs::PoseStamped::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="geometry_msgs::PoseStamped\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="nav_msgs::GetPlanRequest\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classnav__msgs_1_1_get_plan_request.html#a49c31a4d0e46fd9d58ab4650c0e3c869"];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="nav_msgs::Path::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classnav__msgs_1_1_path.html#a188ce73815c9f2458aa1c4a598babb08"];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="nav_msgs::GetPlanResponse\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classnav__msgs_1_1_get_plan_response.html#af0b8af8911f7f6b68318cf7f6f600ccc"];
+}

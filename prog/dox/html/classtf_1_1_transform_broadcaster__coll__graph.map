@@ -1,0 +1,12 @@
+<map id="tf::TransformBroadcaster" name="tf::TransformBroadcaster">
+<area shape="rect" id="node2" href="$classros_1_1_publisher.html" title="ros::Publisher" alt="" coords="45,96,147,123"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="403,5,476,32"/>
+<area shape="rect" id="node5" href="$classtf_1_1tf_message.html" title="tf::tfMessage" alt="" coords="148,397,247,424"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_transform_stamped.html" title="geometry_msgs::Transform\lStamped" alt="" coords="555,278,737,319"/>
+<area shape="rect" id="node7" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="739,96,868,123"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_transform.html" title="geometry_msgs::Transform" alt="" coords="393,187,575,213"/>
+<area shape="rect" id="node10" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="477,96,664,123"/>
+<area shape="rect" id="node11" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="235,96,403,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_node_handle_base__.html" title="ros::NodeHandleBase_" alt="" coords="5,5,163,32"/>
+<area shape="rect" id="node8" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="765,5,841,32"/>
+</map>

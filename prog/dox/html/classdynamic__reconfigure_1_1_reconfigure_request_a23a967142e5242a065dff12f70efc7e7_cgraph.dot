@@ -1,0 +1,21 @@
+digraph "dynamic_reconfigure::ReconfigureRequest::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="dynamic_reconfigure\l::ReconfigureRequest\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="dynamic_reconfigure\l::Config::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdynamic__reconfigure_1_1_config.html#aa41c00d165d1496b801a2c92acf40d64"];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="dynamic_reconfigure\l::BoolParameter::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdynamic__reconfigure_1_1_bool_parameter.html#a22e9f326a451f4e38268693bc99e8857"];
+  Node2 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="dynamic_reconfigure\l::IntParameter::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdynamic__reconfigure_1_1_int_parameter.html#adf080d3eaf1d9484c5d56f7e29bb465f"];
+  Node2 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="dynamic_reconfigure\l::StrParameter::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdynamic__reconfigure_1_1_str_parameter.html#a75c4d23b7ce43ce33c023d9c1b890b43"];
+  Node2 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="dynamic_reconfigure\l::DoubleParameter::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdynamic__reconfigure_1_1_double_parameter.html#a61628c47d58d6944f8ae4b9f13fd90fa"];
+  Node6 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="ros::Msg::serializeAvrFloat64",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897",tooltip="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..."];
+  Node2 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="dynamic_reconfigure\l::GroupState::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdynamic__reconfigure_1_1_group_state.html#a9ca15156c8465aee6cfc833235a3aba0"];
+}

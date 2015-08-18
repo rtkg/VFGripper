@@ -1,0 +1,4 @@
+<map id="gazebo_msgs::LinkState::serialize" name="gazebo_msgs::LinkState::serialize">
+<area shape="rect" id="node2" href="$classgazebo__msgs_1_1_get_link_state_response.html#ad171e68bf9b115bd8cc8a6f8563b272b" title="gazebo_msgs::GetLinkState\lResponse::serialize" alt="" coords="221,5,408,46"/>
+<area shape="rect" id="node3" href="$classgazebo__msgs_1_1_set_link_state_request.html#a661df78bb0080bd8b17fe5f206f522fe" title="gazebo_msgs::SetLinkState\lRequest::serialize" alt="" coords="221,70,408,111"/>
+</map>

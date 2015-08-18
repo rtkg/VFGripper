@@ -1,0 +1,6 @@
+<map id="Motor" name="Motor">
+<area shape="rect" id="node2" href="$class_current_sensor.html" title="Class defining current sensor. " alt="" coords="5,96,112,123"/>
+<area shape="rect" id="node3" href="$class_motor_control_pins.html" title="Class defining motor control pins. " alt="" coords="136,96,259,123"/>
+<area shape="rect" id="node4" href="$class_current_control.html" title="Class defining current control. " alt="" coords="283,96,389,123"/>
+<area shape="rect" id="node5" href="$class_p_i_d_controller.html" title="Class defining PID Controller. " alt="" coords="285,5,387,32"/>
+</map>

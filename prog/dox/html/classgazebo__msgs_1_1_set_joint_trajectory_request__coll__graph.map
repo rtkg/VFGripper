@@ -1,0 +1,11 @@
+<map id="gazebo_msgs::SetJointTrajectoryRequest" name="gazebo_msgs::SetJointTrajectoryRequest">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="18,133,91,160"/>
+<area shape="rect" id="node3" href="$classtrajectory__msgs_1_1_joint_trajectory.html" title="trajectory_msgs::JointTrajectory" alt="" coords="574,211,783,237"/>
+<area shape="rect" id="node4" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html" title="trajectory_msgs::JointTrajectory\lPoint" alt="" coords="249,235,458,277"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="289,301,418,328"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_pose.html" title="geometry_msgs::Pose" alt="" coords="602,81,755,108"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="260,32,447,59"/>
+<area shape="rect" id="node10" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="277,83,430,109"/>
+<area shape="rect" id="node5" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="6,285,103,312"/>
+<area shape="rect" id="node7" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="16,336,93,363"/>
+</map>

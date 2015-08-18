@@ -1,0 +1,11 @@
+digraph "nodelet" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_90717b3c677f611b706863d5c86b90c7 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="ros_lib" fontname="Helvetica", fontsize="10", URL="dir_90717b3c677f611b706863d5c86b90c7.html"]
+  dir_23c1a67b8223614d399c804d4f42ca19 [shape=box, label="nodelet", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_23c1a67b8223614d399c804d4f42ca19.html"];
+  }
+  dir_74fd674bff593b67d15dde07bcd4f8f8 [shape=box label="ros" URL="dir_74fd674bff593b67d15dde07bcd4f8f8.html"];
+  dir_23c1a67b8223614d399c804d4f42ca19->dir_74fd674bff593b67d15dde07bcd4f8f8 [headlabel="3", labeldistance=1.5 headhref="dir_000040_000025.html"];
+}

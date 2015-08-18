@@ -1,0 +1,4 @@
+<map id="control_msgs::SingleJointPositionFeedback::serialize" name="control_msgs::SingleJointPositionFeedback::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_single_joint_position_action_feedback.html#aaf7f39e6c32642cb612e1d9029b15833" title="control_msgs::SingleJoint\lPositionActionFeedback\l::serialize" alt="" coords="238,4,410,60"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_single_joint_position_action.html#a6cd9a677b3ae58e6afe225f9e8eace63" title="control_msgs::SingleJoint\lPositionAction::serialize" alt="" coords="459,11,631,53"/>
+</map>

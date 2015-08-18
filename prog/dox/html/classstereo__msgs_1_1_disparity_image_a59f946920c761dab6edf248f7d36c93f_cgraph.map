@@ -1,0 +1,5 @@
+<map id="stereo_msgs::DisparityImage::serialize" name="stereo_msgs::DisparityImage::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="505,5,690,32"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_image.html#a5301935f7ef5a9d8e894e962fcb9f3ec" title="sensor_msgs::Image\l::serialize" alt="" coords="280,27,424,69"/>
+<area shape="rect" id="node4" href="$classsensor__msgs_1_1_region_of_interest.html#ab9ab44bf939d45e707bf60b33f48cd33" title="sensor_msgs::RegionOfInterest\l::serialize" alt="" coords="249,93,455,134"/>
+</map>

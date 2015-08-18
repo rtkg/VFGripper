@@ -1,0 +1,11 @@
+digraph "velvet_msgs::GripperState::deserialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="velvet_msgs::GripperState\l::deserialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="velvet_msgs::EncoderState\l::deserialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classvelvet__msgs_1_1_encoder_state.html#a0f8b7ee485147c101ec2cb47417497c7"];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="velvet_msgs::CurrentState\l::deserialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classvelvet__msgs_1_1_current_state.html#afac82acd185106452c2029b11569ac2c"];
+}

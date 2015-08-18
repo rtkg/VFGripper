@@ -1,0 +1,8 @@
+<map id="gazebo_msgs::ModelStates" name="gazebo_msgs::ModelStates">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="203,5,275,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_twist.html" title="geometry_msgs::Twist" alt="" coords="29,187,182,213"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="65,83,233,109"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_pose.html" title="geometry_msgs::Pose" alt="" coords="236,187,389,213"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="307,83,494,109"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="519,83,671,109"/>
+</map>

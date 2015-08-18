@@ -1,0 +1,4 @@
+<map id="control_msgs::GripperCommandGoal::deserialize" name="control_msgs::GripperCommandGoal::deserialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_gripper_command.html#a2a39245584c4c12afca89b8495ebfcc2" title="control_msgs::GripperCommand\l::deserialize" alt="" coords="264,5,475,46"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="523,5,685,46"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="nav_msgs::MapMetaData::serialize" name="nav_msgs::MapMetaData::serialize">
+<area shape="rect" id="node2" href="$classnav__msgs_1_1_occupancy_grid.html#a04e853f4172d006b3bacd4f37ad44ea3" title="nav_msgs::OccupancyGrid\l::serialize" alt="" coords="227,38,407,79"/>
+<area shape="rect" id="node3" href="$classnav__msgs_1_1_get_map_response.html#a8af5fd3aff6968ca0a7b36844dc6b780" title="nav_msgs::GetMapResponse\l::serialize" alt="" coords="456,5,651,46"/>
+<area shape="rect" id="node4" href="$classnav__msgs_1_1_get_map_result.html#a45d5671c163ec58cd0e73f42bdaff64b" title="nav_msgs::GetMapResult\l::serialize" alt="" coords="466,70,641,111"/>
+<area shape="rect" id="node5" href="$classnav__msgs_1_1_get_map_action_result.html#a894488d06f9e21a9d97d9dba6f5e55e3" title="nav_msgs::GetMapActionResult\l::serialize" alt="" coords="699,70,909,111"/>
+<area shape="rect" id="node6" href="$classnav__msgs_1_1_get_map_action.html#a7498cde713776b8fdcc54fbece0d2a3b" title="nav_msgs::GetMapAction\l::serialize" alt="" coords="957,70,1131,111"/>
+</map>

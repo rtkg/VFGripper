@@ -1,0 +1,29 @@
+digraph "nav_msgs::GetMapActionResult::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="nav_msgs::GetMapActionResult\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="std_msgs::Header::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e"];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="actionlib_msgs::GoalStatus\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555"];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="actionlib_msgs::GoalID\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94"];
+  Node1 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="nav_msgs::GetMapResult\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classnav__msgs_1_1_get_map_result.html#a45d5671c163ec58cd0e73f42bdaff64b"];
+  Node5 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="nav_msgs::OccupancyGrid\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classnav__msgs_1_1_occupancy_grid.html#a04e853f4172d006b3bacd4f37ad44ea3"];
+  Node6 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="nav_msgs::MapMetaData\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classnav__msgs_1_1_map_meta_data.html#afc61f1b02486586b588bd9e20f3d20d4"];
+  Node7 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="geometry_msgs::Pose\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524"];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="geometry_msgs::Point\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f"];
+  Node9 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="ros::Msg::serializeAvrFloat64",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897",tooltip="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..."];
+  Node8 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="geometry_msgs::Quaternion\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687"];
+  Node11 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

@@ -1,0 +1,5 @@
+<map id="gazebo_msgs::ApplyJointEffortRequest" name="gazebo_msgs::ApplyJointEffortRequest">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="5,5,77,32"/>
+<area shape="rect" id="node3" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="103,5,179,32"/>
+<area shape="rect" id="node4" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="205,5,301,32"/>
+</map>

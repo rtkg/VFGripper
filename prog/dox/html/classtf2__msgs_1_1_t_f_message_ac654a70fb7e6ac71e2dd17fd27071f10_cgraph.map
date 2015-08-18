@@ -1,0 +1,8 @@
+<map id="tf2_msgs::TFMessage::serialize" name="tf2_msgs::TFMessage::serialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_transform_stamped.html#a5803b357a7b8a769564bb20120c7746b" title="geometry_msgs::Transform\lStamped::serialize" alt="" coords="209,27,391,69"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="441,5,626,32"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_transform.html#a41af5075ee0d737a4af6e97da0bb6bed" title="geometry_msgs::Transform\l::serialize" alt="" coords="442,57,625,98"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="684,23,852,65"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="675,89,861,130"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="909,64,1101,91"/>
+</map>

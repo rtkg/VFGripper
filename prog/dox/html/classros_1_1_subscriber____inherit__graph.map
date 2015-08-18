@@ -1,0 +1,5 @@
+<map id="ros::Subscriber_" name="ros::Subscriber_">
+<area shape="rect" id="node2" href="$classros_1_1_service_client.html" title="ros::ServiceClient\l\&lt; MReq, MRes \&gt;" alt="" coords="191,5,318,46"/>
+<area shape="rect" id="node3" href="$classros_1_1_service_server.html" title="ros::ServiceServer\l\&lt; MReq, MRes \&gt;" alt="" coords="189,70,320,111"/>
+<area shape="rect" id="node4" href="$classros_1_1_subscriber.html" title="ros::Subscriber\&lt; MsgT \&gt;" alt="" coords="171,136,338,163"/>
+</map>

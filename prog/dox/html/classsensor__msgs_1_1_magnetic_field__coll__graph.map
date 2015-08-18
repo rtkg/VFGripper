@@ -1,0 +1,6 @@
+<map id="sensor_msgs::MagneticField" name="sensor_msgs::MagneticField">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="69,5,142,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="22,96,190,123"/>
+<area shape="rect" id="node4" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="214,96,343,123"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="240,5,316,32"/>
+</map>

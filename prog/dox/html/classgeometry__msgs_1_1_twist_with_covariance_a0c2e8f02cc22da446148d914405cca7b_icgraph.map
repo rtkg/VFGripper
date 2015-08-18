@@ -1,0 +1,4 @@
+<map id="geometry_msgs::TwistWithCovariance::serialize" name="geometry_msgs::TwistWithCovariance::serialize">
+<area shape="rect" id="node2" href="$classnav__msgs_1_1_odometry.html#a4ce6cfcb047b727c731ecfb244b8df81" title="nav_msgs::Odometry\l::serialize" alt="" coords="263,5,409,46"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_twist_with_covariance_stamped.html#a48c9910bf13418def2f8438a911e650b" title="geometry_msgs::TwistWith\lCovarianceStamped::serialize" alt="" coords="238,70,434,111"/>
+</map>

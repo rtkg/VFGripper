@@ -1,0 +1,6 @@
+<map id="gazebo_msgs::ApplyBodyWrenchRequest::serialize" name="gazebo_msgs::ApplyBodyWrenchRequest::serialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="495,5,649,46"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_wrench.html#a775fb20d263b4bf2bd4f3200fca1afec" title="geometry_msgs::Wrench\l::serialize" alt="" coords="272,67,440,109"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="704,45,896,72"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="488,70,656,111"/>
+</map>

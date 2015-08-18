@@ -1,0 +1,7 @@
+<map id="sensor_msgs::PointCloud" name="sensor_msgs::PointCloud">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="170,5,243,32"/>
+<area shape="rect" id="node3" href="$classsensor__msgs_1_1_channel_float32.html" title="sensor_msgs::ChannelFloat32" alt="" coords="26,96,224,123"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point32.html" title="geometry_msgs::Point32" alt="" coords="249,96,415,123"/>
+<area shape="rect" id="node5" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="439,96,568,123"/>
+<area shape="rect" id="node6" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="465,5,541,32"/>
+</map>

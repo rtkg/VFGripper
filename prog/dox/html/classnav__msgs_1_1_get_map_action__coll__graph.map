@@ -1,0 +1,18 @@
+<map id="nav_msgs::GetMapAction" name="nav_msgs::GetMapAction">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="7,495,81,521"/>
+<area shape="rect" id="node3" href="$classnav__msgs_1_1_get_map_action_result.html" title="nav_msgs::GetMapActionResult" alt="" coords="1784,495,1995,521"/>
+<area shape="rect" id="node4" href="$classnav__msgs_1_1_get_map_result.html" title="nav_msgs::GetMapResult" alt="" coords="1523,556,1698,583"/>
+<area shape="rect" id="node5" href="$classnav__msgs_1_1_occupancy_grid.html" title="nav_msgs::OccupancyGrid" alt="" coords="1222,556,1402,583"/>
+<area shape="rect" id="node6" href="$classnav__msgs_1_1_map_meta_data.html" title="nav_msgs::MapMetaData" alt="" coords="926,596,1098,623"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_pose.html" title="geometry_msgs::Pose" alt="" coords="626,672,779,699"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="173,647,360,673"/>
+<area shape="rect" id="node10" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="190,697,343,724"/>
+<area shape="rect" id="node11" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="202,116,331,143"/>
+<area shape="rect" id="node12" href="$classactionlib__msgs_1_1_goal_status.html" title="actionlib_msgs::GoalStatus" alt="" coords="611,487,794,513"/>
+<area shape="rect" id="node13" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="187,343,346,369"/>
+<area shape="rect" id="node14" href="$classnav__msgs_1_1_get_map_action_goal.html" title="nav_msgs::GetMapActionGoal" alt="" coords="603,257,803,284"/>
+<area shape="rect" id="node15" href="$classnav__msgs_1_1_get_map_goal.html" title="nav_msgs::GetMapGoal" alt="" coords="185,292,348,319"/>
+<area shape="rect" id="node16" href="$classnav__msgs_1_1_get_map_action_feedback.html" title="nav_msgs::GetMapActionFeedback" alt="" coords="897,309,1127,336"/>
+<area shape="rect" id="node17" href="$classnav__msgs_1_1_get_map_feedback.html" title="nav_msgs::GetMapFeedback" alt="" coords="385,411,578,437"/>
+<area shape="rect" id="node7" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="5,88,83,115"/>
+</map>

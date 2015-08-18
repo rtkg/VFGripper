@@ -1,0 +1,9 @@
+<map id="control_msgs::FollowJointTrajectoryGoal" name="control_msgs::FollowJointTrajectoryGoal">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="18,152,91,179"/>
+<area shape="rect" id="node3" href="$classtrajectory__msgs_1_1_joint_trajectory.html" title="trajectory_msgs::JointTrajectory" alt="" coords="702,180,911,207"/>
+<area shape="rect" id="node4" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html" title="trajectory_msgs::JointTrajectory\lPoint" alt="" coords="249,254,458,295"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="289,203,418,229"/>
+<area shape="rect" id="node8" href="$classcontrol__msgs_1_1_joint_tolerance.html" title="control_msgs::JointTolerance" alt="" coords="483,43,677,69"/>
+<area shape="rect" id="node5" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="6,323,103,349"/>
+<area shape="rect" id="node7" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="16,253,93,280"/>
+</map>

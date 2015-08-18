@@ -1,0 +1,10 @@
+<map id="sensor_msgs::MultiDOFJointState" name="sensor_msgs::MultiDOFJointState">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="7,225,81,252"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_twist.html" title="geometry_msgs::Twist" alt="" coords="489,149,644,176"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="183,225,351,252"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_wrench.html" title="geometry_msgs::Wrench" alt="" coords="483,225,651,252"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="202,21,331,48"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_transform.html" title="geometry_msgs::Transform" alt="" coords="475,333,658,360"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="173,349,360,376"/>
+<area shape="rect" id="node7" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="5,5,83,32"/>
+</map>

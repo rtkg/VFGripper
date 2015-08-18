@@ -1,0 +1,6 @@
+<map id="ros::ServiceClient::call" name="ros::ServiceClient::call">
+<area shape="rect" id="node2" href="$classros_1_1_node_handle_base__.html#a5cc43b2f731d3365393d8d892e9fa373" title="ros::NodeHandleBase\l_::connected" alt="" coords="182,5,333,46"/>
+<area shape="rect" id="node3" href="$classros_1_1_publisher.html#aac8e3ae3a334e5ec18a7e0186dc9d4a1" title="ros::Publisher::publish" alt="" coords="182,71,333,97"/>
+<area shape="rect" id="node5" href="$classros_1_1_node_handle_base__.html#a66dcd31f1a808ff7000582a475b9a5ff" title="ros::NodeHandleBase\l_::spinOnce" alt="" coords="182,122,333,163"/>
+<area shape="rect" id="node4" href="$classros_1_1_node_handle_base__.html#a078b6c706059c41cc778e56df8a3939a" title="ros::NodeHandleBase\l_::publish" alt="" coords="382,63,533,105"/>
+</map>

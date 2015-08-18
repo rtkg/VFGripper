@@ -1,0 +1,8 @@
+<map id="pcl_msgs::PolygonMesh" name="pcl_msgs::PolygonMesh">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="265,5,337,32"/>
+<area shape="rect" id="node3" href="$classpcl__msgs_1_1_vertices.html" title="pcl_msgs::Vertices" alt="" coords="5,148,139,175"/>
+<area shape="rect" id="node4" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="339,96,468,123"/>
+<area shape="rect" id="node6" href="$classsensor__msgs_1_1_point_cloud2.html" title="sensor_msgs::PointCloud2" alt="" coords="195,201,373,228"/>
+<area shape="rect" id="node7" href="$classsensor__msgs_1_1_point_field.html" title="sensor_msgs::PointField" alt="" coords="97,96,263,123"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="512,5,588,32"/>
+</map>

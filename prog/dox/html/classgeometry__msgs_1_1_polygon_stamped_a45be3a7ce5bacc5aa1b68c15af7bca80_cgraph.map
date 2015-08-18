@@ -1,0 +1,5 @@
+<map id="geometry_msgs::PolygonStamped::deserialize" name="geometry_msgs::PolygonStamped::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="278,5,477,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_polygon.html#ab9e6030b77f45d4db3dede421657ca01" title="geometry_msgs::Polygon\l::deserialize" alt="" coords="292,57,463,98"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point32.html#aea56159c42a0b304c52b8828782de673" title="geometry_msgs::Point32\l::deserialize" alt="" coords="526,57,693,98"/>
+</map>

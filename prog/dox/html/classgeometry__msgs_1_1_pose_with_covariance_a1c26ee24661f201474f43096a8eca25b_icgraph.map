@@ -1,0 +1,4 @@
+<map id="geometry_msgs::PoseWithCovariance::serialize" name="geometry_msgs::PoseWithCovariance::serialize">
+<area shape="rect" id="node2" href="$classnav__msgs_1_1_odometry.html#a4ce6cfcb047b727c731ecfb244b8df81" title="nav_msgs::Odometry\l::serialize" alt="" coords="352,5,499,46"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_pose_with_covariance_stamped.html#a2d534d79f5fb46b5497124f82048391f" title="geometry_msgs::PoseWithCovariance\lStamped::serialize" alt="" coords="302,70,549,111"/>
+</map>

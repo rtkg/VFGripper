@@ -1,0 +1,7 @@
+<map id="gazebo_msgs::ContactsState::serialize" name="gazebo_msgs::ContactsState::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="250,12,435,39"/>
+<area shape="rect" id="node3" href="$classgazebo__msgs_1_1_contact_state.html#a8b489e7cb9869ea321a369557d86006c" title="gazebo_msgs::ContactState\l::serialize" alt="" coords="249,63,437,105"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_wrench.html#a775fb20d263b4bf2bd4f3200fca1afec" title="geometry_msgs::Wrench\l::serialize" alt="" coords="485,5,653,46"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="701,55,869,97"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="917,92,1109,119"/>
+</map>

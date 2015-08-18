@@ -1,0 +1,6 @@
+<map id="geometry_msgs::QuaternionStamped" name="geometry_msgs::QuaternionStamped">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="79,5,152,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="22,96,209,123"/>
+<area shape="rect" id="node4" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="234,96,362,123"/>
+<area shape="rect" id="node5" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="260,5,336,32"/>
+</map>

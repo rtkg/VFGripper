@@ -1,0 +1,5 @@
+<map id="geometry_msgs::Pose" name="geometry_msgs::Pose">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="79,5,152,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="23,83,209,109"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="234,83,387,109"/>
+</map>

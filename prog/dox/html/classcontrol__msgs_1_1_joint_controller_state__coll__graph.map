@@ -1,0 +1,5 @@
+<map id="control_msgs::JointControllerState" name="control_msgs::JointControllerState">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="30,5,103,32"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="103,96,232,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="129,5,205,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="nav_msgs::GetMapActionGoal::deserialize" name="nav_msgs::GetMapActionGoal::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="254,5,453,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html#a34c08058b4c88f0e723307611d57d838" title="actionlib_msgs::GoalID\l::deserialize" alt="" coords="274,57,433,98"/>
+<area shape="rect" id="node4" href="$classnav__msgs_1_1_get_map_goal.html#a0a5e476f2f5588b198e140bff1f454a6" title="nav_msgs::GetMapGoal\l::deserialize" alt="" coords="272,122,435,163"/>
+</map>

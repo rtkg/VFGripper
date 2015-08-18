@@ -1,0 +1,5 @@
+<map id="diagnostic_msgs::SelfTestResponse" name="diagnostic_msgs::SelfTestResponse">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="63,5,136,32"/>
+<area shape="rect" id="node3" href="$classdiagnostic__msgs_1_1_diagnostic_status.html" title="diagnostic_msgs::Diagnostic\lStatus" alt="" coords="87,187,277,229"/>
+<area shape="rect" id="node4" href="$classdiagnostic__msgs_1_1_key_value.html" title="diagnostic_msgs::KeyValue" alt="" coords="137,83,321,109"/>
+</map>

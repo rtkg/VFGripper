@@ -1,0 +1,6 @@
+<map id="sensor_msgs::SetCameraInfoRequest::deserialize" name="sensor_msgs::SetCameraInfoRequest::deserialize">
+<area shape="rect" id="node2" href="$classsensor__msgs_1_1_camera_info.html#a36c517724c3605e23a3c57faee154a0d" title="sensor_msgs::CameraInfo\l::deserialize" alt="" coords="251,57,427,98"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="479,5,678,32"/>
+<area shape="rect" id="node4" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="497,57,660,98"/>
+<area shape="rect" id="node5" href="$classsensor__msgs_1_1_region_of_interest.html#a2dd6455d473b4ab51c11634fbe34f146" title="sensor_msgs::RegionOfInterest\l::deserialize" alt="" coords="475,122,682,163"/>
+</map>

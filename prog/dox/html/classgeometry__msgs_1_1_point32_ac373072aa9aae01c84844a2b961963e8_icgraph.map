@@ -1,0 +1,6 @@
+<map id="geometry_msgs::Point32::serialize" name="geometry_msgs::Point32::serialize">
+<area shape="rect" id="node2" href="$classsensor__msgs_1_1_point_cloud.html#a58f31982f867eb6e1c7d7587bbe65dcd" title="sensor_msgs::PointCloud\l::serialize" alt="" coords="222,5,394,46"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_polygon.html#ab6c7421f55ad3c04d9075d432fd9f86e" title="geometry_msgs::Polygon\l::serialize" alt="" coords="223,70,393,111"/>
+<area shape="rect" id="node3" href="$classlaser__assembler_1_1_assemble_scans_response.html#a5315ff9431ec307affd427c48a8862dd" title="laser_assembler::Assemble\lScansResponse::serialize" alt="" coords="463,5,646,46"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_polygon_stamped.html#a15dba8ed7aed89993f5be0ea09dd1099" title="geometry_msgs::PolygonStamped\l::serialize" alt="" coords="443,70,666,111"/>
+</map>

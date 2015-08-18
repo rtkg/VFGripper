@@ -1,0 +1,5 @@
+<map id="sensor_msgs::CameraInfo::serialize" name="sensor_msgs::CameraInfo::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="241,5,426,32"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="237,56,429,83"/>
+<area shape="rect" id="node4" href="$classsensor__msgs_1_1_region_of_interest.html#ab9ab44bf939d45e707bf60b33f48cd33" title="sensor_msgs::RegionOfInterest\l::serialize" alt="" coords="230,107,437,149"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="diagnostic_msgs::DiagnosticArray::serialize" name="diagnostic_msgs::DiagnosticArray::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="249,5,434,32"/>
+<area shape="rect" id="node3" href="$classdiagnostic__msgs_1_1_diagnostic_status.html#a288fd66f2e1d2aac68a41bb27b8c4985" title="diagnostic_msgs::Diagnostic\lStatus::serialize" alt="" coords="246,57,437,98"/>
+<area shape="rect" id="node4" href="$classdiagnostic__msgs_1_1_key_value.html#a6c2cfea0bb2580fc08d1565f35610cde" title="diagnostic_msgs::KeyValue\l::serialize" alt="" coords="485,57,669,98"/>
+</map>

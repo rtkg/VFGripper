@@ -1,0 +1,15 @@
+digraph "geometry_msgs::Point32::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="geometry_msgs::Point32\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="sensor_msgs::PointCloud\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_point_cloud.html#a58f31982f867eb6e1c7d7587bbe65dcd"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="laser_assembler::Assemble\lScansResponse::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classlaser__assembler_1_1_assemble_scans_response.html#a5315ff9431ec307affd427c48a8862dd"];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="geometry_msgs::Polygon\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_polygon.html#ab6c7421f55ad3c04d9075d432fd9f86e"];
+  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="geometry_msgs::PolygonStamped\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_polygon_stamped.html#a15dba8ed7aed89993f5be0ea09dd1099"];
+}

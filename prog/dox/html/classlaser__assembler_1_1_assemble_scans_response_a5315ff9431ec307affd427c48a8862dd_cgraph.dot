@@ -1,0 +1,15 @@
+digraph "laser_assembler::AssembleScansResponse::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="laser_assembler::Assemble\lScansResponse::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="sensor_msgs::PointCloud\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_point_cloud.html#a58f31982f867eb6e1c7d7587bbe65dcd"];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="std_msgs::Header::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e"];
+  Node2 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="geometry_msgs::Point32\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classgeometry__msgs_1_1_point32.html#ac373072aa9aae01c84844a2b961963e8"];
+  Node2 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="sensor_msgs::ChannelFloat32\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_channel_float32.html#aefbe1f18b1336c38713715b7ef6d46d9"];
+}

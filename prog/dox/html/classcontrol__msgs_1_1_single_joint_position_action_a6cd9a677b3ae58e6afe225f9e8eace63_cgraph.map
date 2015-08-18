@@ -1,0 +1,12 @@
+<map id="control_msgs::SingleJointPositionAction::serialize" name="control_msgs::SingleJointPositionAction::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_single_joint_position_action_goal.html#a1afbbd14b0aadfa89fc9614175c527e3" title="control_msgs::SingleJoint\lPositionActionGoal::serialize" alt="" coords="232,111,421,153"/>
+<area shape="rect" id="node7" href="$classcontrol__msgs_1_1_single_joint_position_action_result.html#a8c6d70cc8d56c0bc1d161493b2bbab4c" title="control_msgs::SingleJoint\lPositionActionResult::serialize" alt="" coords="227,329,427,370"/>
+<area shape="rect" id="node10" href="$classcontrol__msgs_1_1_single_joint_position_action_feedback.html#aaf7f39e6c32642cb612e1d9029b15833" title="control_msgs::SingleJoint\lPositionActionFeedback\l::serialize" alt="" coords="241,224,413,280"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="710,225,895,252"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="723,133,882,174"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_single_joint_position_goal.html#a800e57431a91d9d975f3277aaeafbe4f" title="control_msgs::SingleJoint\lPositionGoal::serialize" alt="" coords="481,5,653,46"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="707,27,899,53"/>
+<area shape="rect" id="node8" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="475,290,658,331"/>
+<area shape="rect" id="node9" href="$classcontrol__msgs_1_1_single_joint_position_result.html#a80a27c271a074911f40bcb76d3d509e0" title="control_msgs::SingleJoint\lPositionResult::serialize" alt="" coords="481,355,653,397"/>
+<area shape="rect" id="node11" href="$classcontrol__msgs_1_1_single_joint_position_feedback.html#a6b515cbafdfece78d7dad628d37e9ed4" title="control_msgs::SingleJoint\lPositionFeedback::serialize" alt="" coords="475,122,658,163"/>
+</map>

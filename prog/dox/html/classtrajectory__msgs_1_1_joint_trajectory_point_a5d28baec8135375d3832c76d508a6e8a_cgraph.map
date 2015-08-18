@@ -1,0 +1,3 @@
+<map id="trajectory_msgs::JointTrajectoryPoint::serialize" name="trajectory_msgs::JointTrajectoryPoint::serialize">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="264,12,456,39"/>
+</map>

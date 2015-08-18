@@ -1,0 +1,5 @@
+<map id="geometry_msgs::TwistWithCovariance" name="geometry_msgs::TwistWithCovariance">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="71,5,144,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_twist.html" title="geometry_msgs::Twist" alt="" coords="95,187,248,213"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="145,83,313,109"/>
+</map>

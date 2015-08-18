@@ -1,0 +1,14 @@
+<map id="visualization_msgs::InteractiveMarkerUpdate::serialize" name="visualization_msgs::InteractiveMarkerUpdate::serialize">
+<area shape="rect" id="node2" href="$classvisualization__msgs_1_1_interactive_marker.html#a4a9c12c8b833b36acb06f7fc8966ea07" title="visualization_msgs\l::InteractiveMarker\l::serialize" alt="" coords="227,135,360,191"/>
+<area shape="rect" id="node13" href="$classvisualization__msgs_1_1_interactive_marker_pose.html#a45218981e46a950c62730a8c74e13850" title="visualization_msgs\l::InteractiveMarkerPose\l::serialize" alt="" coords="630,4,791,60"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="841,84,1026,111"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524" title="geometry_msgs::Pose\l::serialize" alt="" coords="857,201,1010,242"/>
+<area shape="rect" id="node8" href="$classvisualization__msgs_1_1_menu_entry.html#ae30940c119b139a03dd08858547745d0" title="visualization_msgs\l::MenuEntry::serialize" alt="" coords="420,266,569,307"/>
+<area shape="rect" id="node9" href="$classvisualization__msgs_1_1_interactive_marker_control.html#ae0551e8cc332a7f0a999966c4154e1e1" title="visualization_msgs\l::InteractiveMarkerControl\l::serialize" alt="" coords="408,135,581,191"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="1091,245,1245,286"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="1075,179,1261,221"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="1309,252,1501,279"/>
+<area shape="rect" id="node10" href="$classvisualization__msgs_1_1_marker.html#a45a6ab6cb7a163b240bdff8ff937a13f" title="visualization_msgs\l::Marker::serialize" alt="" coords="644,266,777,307"/>
+<area shape="rect" id="node11" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="1084,310,1252,351"/>
+<area shape="rect" id="node12" href="$classstd__msgs_1_1_color_r_g_b_a.html#a6f9a53c5080900a683ca80c7e9d75bc5" title="std_msgs::ColorRGBA\l::serialize" alt="" coords="855,369,1011,410"/>
+</map>

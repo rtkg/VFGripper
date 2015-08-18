@@ -1,0 +1,11 @@
+<map id="geometry_msgs::Transform::serialize" name="geometry_msgs::Transform::serialize">
+<area shape="rect" id="node2" href="$classsensor__msgs_1_1_multi_d_o_f_joint_state.html#a6d318896c545c09bcb463b4d3066d331" title="sensor_msgs::MultiDOFJoint\lState::serialize" alt="" coords="245,5,437,46"/>
+<area shape="rect" id="node3" href="$classtrajectory__msgs_1_1_multi_d_o_f_joint_trajectory_point.html#af30b25913bb65e77102777ce3c8a6a47" title="trajectory_msgs::MultiDOFJoint\lTrajectoryPoint::serialize" alt="" coords="238,70,445,111"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_transform_stamped.html#a5803b357a7b8a769564bb20120c7746b" title="geometry_msgs::Transform\lStamped::serialize" alt="" coords="250,167,433,209"/>
+<area shape="rect" id="node4" href="$classtrajectory__msgs_1_1_multi_d_o_f_joint_trajectory.html#a284fb63e9e681068ceff57d2c2c63d60" title="trajectory_msgs::MultiDOFJoint\lTrajectory::serialize" alt="" coords="494,53,701,94"/>
+<area shape="rect" id="node6" href="$classtf2__msgs_1_1_lookup_transform_result.html#af084a215cc61efbf840a23dd9854566d" title="tf2_msgs::LookupTransform\lResult::serialize" alt="" coords="505,118,690,159"/>
+<area shape="rect" id="node9" href="$classtf2__msgs_1_1_t_f_message.html#ac654a70fb7e6ac71e2dd17fd27071f10" title="tf2_msgs::TFMessage\l::serialize" alt="" coords="521,183,674,225"/>
+<area shape="rect" id="node10" href="$classtf_1_1tf_message.html#a8ff1d808b77eba7635da49c8d0817522" title="tf::tfMessage::serialize" alt="" coords="520,249,675,276"/>
+<area shape="rect" id="node7" href="$classtf2__msgs_1_1_lookup_transform_action_result.html#a523937865c7544102a3e0b236bbca3c0" title="tf2_msgs::LookupTransform\lActionResult::serialize" alt="" coords="750,118,935,159"/>
+<area shape="rect" id="node8" href="$classtf2__msgs_1_1_lookup_transform_action.html#a7c5880ab1d4af63ee270b5ddfad178b5" title="tf2_msgs::LookupTransform\lAction::serialize" alt="" coords="985,118,1170,159"/>
+</map>

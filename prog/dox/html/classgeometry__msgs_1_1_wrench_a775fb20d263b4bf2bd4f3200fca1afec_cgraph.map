@@ -1,0 +1,4 @@
+<map id="geometry_msgs::Wrench::serialize" name="geometry_msgs::Wrench::serialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="221,5,389,46"/>
+<area shape="rect" id="node3" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="437,12,629,39"/>
+</map>

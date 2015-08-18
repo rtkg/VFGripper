@@ -1,0 +1,4 @@
+<map id="std_msgs::Float32MultiArray::serialize" name="std_msgs::Float32MultiArray::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_multi_array_layout.html#a25caee993ee85cfa15ee06fbae3a8ce9" title="std_msgs::MultiArrayLayout\l::serialize" alt="" coords="243,5,429,46"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_multi_array_dimension.html#af62c038a02cc833a58dcc6c93a798eb4" title="std_msgs::MultiArrayDimension\l::serialize" alt="" coords="477,5,685,46"/>
+</map>

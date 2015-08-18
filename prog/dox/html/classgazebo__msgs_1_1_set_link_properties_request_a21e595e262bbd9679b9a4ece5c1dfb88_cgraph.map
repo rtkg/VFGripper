@@ -1,0 +1,6 @@
+<map id="gazebo_msgs::SetLinkPropertiesRequest::serialize" name="gazebo_msgs::SetLinkPropertiesRequest::serialize">
+<area shape="rect" id="node2" href="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524" title="geometry_msgs::Pose\l::serialize" alt="" coords="270,70,423,111"/>
+<area shape="rect" id="node4" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="707,77,899,104"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="489,5,642,46"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="472,70,659,111"/>
+</map>

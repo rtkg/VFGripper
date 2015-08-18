@@ -1,0 +1,5 @@
+<map id="changeDirectionCallback" name="changeDirectionCallback">
+<area shape="rect" id="node2" href="$class_motor.html#ae804085b9a09f64031558711bfd700ac" title="Drives motor in forward direction. " alt="" coords="227,5,333,32"/>
+<area shape="rect" id="node3" href="$class_motor.html#a1e1cfdd2808f7cb6a3816b8089e135db" title="Drives motor in reverse direction. " alt="" coords="227,56,333,83"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#a2f2b1f431be90060a56cd932e79d24f8" title="confirmCallback" alt="" coords="222,107,338,133"/>
+</map>

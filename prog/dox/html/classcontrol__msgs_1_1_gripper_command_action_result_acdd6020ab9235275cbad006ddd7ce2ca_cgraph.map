@@ -1,0 +1,7 @@
+<map id="control_msgs::GripperCommandActionResult::serialize" name="control_msgs::GripperCommandActionResult::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="277,5,462,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="278,57,461,98"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_gripper_command_result.html#a2f6ac02dd70b5f173201668ed28c5e7f" title="control_msgs::GripperCommand\lResult::serialize" alt="" coords="264,122,475,163"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="539,57,698,98"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="523,129,715,156"/>
+</map>

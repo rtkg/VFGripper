@@ -1,0 +1,9 @@
+<map id="trajectory_msgs::MultiDOFJointTrajectory::deserialize" name="trajectory_msgs::MultiDOFJointTrajectory::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="266,5,465,32"/>
+<area shape="rect" id="node3" href="$classtrajectory__msgs_1_1_multi_d_o_f_joint_trajectory_point.html#a3b0c7ce52e3b5f63b6a8f979e3f7462d" title="trajectory_msgs::MultiDOFJoint\lTrajectoryPoint::deserialize" alt="" coords="262,57,469,98"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_transform.html#aa86854904d1b5fb53e79124733dd8944" title="geometry_msgs::Transform\l::deserialize" alt="" coords="518,89,701,130"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_twist.html#a51f4b5ab24bdb3eb5b0690e6ffe03818" title="geometry_msgs::Twist\l::deserialize" alt="" coords="532,23,687,65"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_vector3.html#aae9cb57e6b7550f30d193a1c298f9631" title="geometry_msgs::Vector3\l::deserialize" alt="" coords="759,23,927,65"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_quaternion.html#ad2925053e238e52d8fd9fd06a962a5a8" title="geometry_msgs::Quaternion\l::deserialize" alt="" coords="749,89,936,130"/>
+<area shape="rect" id="node6" href="$classros_1_1_msg.html#a8494fc1e864aa11612757ba107792b11" title="This tricky function handles demoting a 64bit double to a 32bit float, so that AVR can understand mes..." alt="" coords="984,57,1147,98"/>
+</map>

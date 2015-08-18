@@ -1,0 +1,5 @@
+<map id="gazebo_msgs::GetPhysicsPropertiesResponse::serialize" name="gazebo_msgs::GetPhysicsPropertiesResponse::serialize">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="528,31,720,57"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="303,23,471,65"/>
+<area shape="rect" id="node4" href="$classgazebo__msgs_1_1_o_d_e_physics.html#a58afb2d053acc3d2f694d82a426754da" title="gazebo_msgs::ODEPhysics\l::serialize" alt="" coords="293,89,480,130"/>
+</map>

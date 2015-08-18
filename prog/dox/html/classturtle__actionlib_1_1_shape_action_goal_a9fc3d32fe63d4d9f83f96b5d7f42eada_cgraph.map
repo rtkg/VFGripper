@@ -1,0 +1,5 @@
+<map id="turtle_actionlib::ShapeActionGoal::serialize" name="turtle_actionlib::ShapeActionGoal::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="243,5,429,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="257,57,415,98"/>
+<area shape="rect" id="node4" href="$classturtle__actionlib_1_1_shape_goal.html#a7274e8e24a1ed0e1f64cc2e39adf955c" title="turtle_actionlib::ShapeGoal\l::serialize" alt="" coords="247,122,425,163"/>
+</map>

@@ -1,0 +1,11 @@
+digraph "turtlesim" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_90717b3c677f611b706863d5c86b90c7 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="ros_lib" fontname="Helvetica", fontsize="10", URL="dir_90717b3c677f611b706863d5c86b90c7.html"]
+  dir_353524e59fad8b78ea013efa175493f2 [shape=box, label="turtlesim", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_353524e59fad8b78ea013efa175493f2.html"];
+  }
+  dir_74fd674bff593b67d15dde07bcd4f8f8 [shape=box label="ros" URL="dir_74fd674bff593b67d15dde07bcd4f8f8.html"];
+  dir_353524e59fad8b78ea013efa175493f2->dir_74fd674bff593b67d15dde07bcd4f8f8 [headlabel="7", labeldistance=1.5 headhref="dir_000017_000025.html"];
+}

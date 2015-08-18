@@ -1,0 +1,18 @@
+<map id="geometry_msgs::Twist::serialize" name="geometry_msgs::Twist::serialize">
+<area shape="rect" id="node2" href="$classgazebo__msgs_1_1_get_model_state_response.html#adecda3e43fd03a9cf2ed6e53a4e4823f" title="gazebo_msgs::GetModelState\lResponse::serialize" alt="" coords="213,5,411,46"/>
+<area shape="rect" id="node3" href="$classgazebo__msgs_1_1_link_state.html#a4b49828457d29c7b4dfcb0cb934087a1" title="gazebo_msgs::LinkState\l::serialize" alt="" coords="229,70,395,111"/>
+<area shape="rect" id="node6" href="$classgazebo__msgs_1_1_link_states.html#a90b009133b549e9ce9cf79df20976eed" title="gazebo_msgs::LinkStates\l::serialize" alt="" coords="225,135,399,177"/>
+<area shape="rect" id="node7" href="$classgazebo__msgs_1_1_model_state.html#a829e391d8bafff5ac5d352dee85d8583" title="gazebo_msgs::ModelState\l::serialize" alt="" coords="223,201,401,242"/>
+<area shape="rect" id="node9" href="$classgazebo__msgs_1_1_model_states.html#ad95008cc25081cd1475156fceae14ec1" title="gazebo_msgs::ModelStates\l::serialize" alt="" coords="220,266,404,307"/>
+<area shape="rect" id="node10" href="$classsensor__msgs_1_1_multi_d_o_f_joint_state.html#a6d318896c545c09bcb463b4d3066d331" title="sensor_msgs::MultiDOFJoint\lState::serialize" alt="" coords="216,331,408,373"/>
+<area shape="rect" id="node11" href="$classtrajectory__msgs_1_1_multi_d_o_f_joint_trajectory_point.html#af30b25913bb65e77102777ce3c8a6a47" title="trajectory_msgs::MultiDOFJoint\lTrajectoryPoint::serialize" alt="" coords="209,397,415,438"/>
+<area shape="rect" id="node13" href="$classgeometry__msgs_1_1_twist_stamped.html#a6de03c9b9035adc3e988aa7dabc75185" title="geometry_msgs::TwistStamped\l::serialize" alt="" coords="209,462,415,503"/>
+<area shape="rect" id="node14" href="$classgeometry__msgs_1_1_twist_with_covariance.html#a0c2e8f02cc22da446148d914405cca7b" title="geometry_msgs::TwistWith\lCovariance::serialize" alt="" coords="221,527,403,569"/>
+<area shape="rect" id="node17" href="$classgazebo__msgs_1_1_world_state.html#a9068559088deb85a987b5ae6b5c18f3a" title="gazebo_msgs::WorldState\l::serialize" alt="" coords="224,593,400,634"/>
+<area shape="rect" id="node4" href="$classgazebo__msgs_1_1_get_link_state_response.html#ad171e68bf9b115bd8cc8a6f8563b272b" title="gazebo_msgs::GetLinkState\lResponse::serialize" alt="" coords="475,38,661,79"/>
+<area shape="rect" id="node5" href="$classgazebo__msgs_1_1_set_link_state_request.html#a661df78bb0080bd8b17fe5f206f522fe" title="gazebo_msgs::SetLinkState\lRequest::serialize" alt="" coords="475,103,661,145"/>
+<area shape="rect" id="node8" href="$classgazebo__msgs_1_1_set_model_state_request.html#af3531f1e517d58293e2384fe6f919dde" title="gazebo_msgs::SetModelState\lRequest::serialize" alt="" coords="469,201,667,242"/>
+<area shape="rect" id="node12" href="$classtrajectory__msgs_1_1_multi_d_o_f_joint_trajectory.html#a284fb63e9e681068ceff57d2c2c63d60" title="trajectory_msgs::MultiDOFJoint\lTrajectory::serialize" alt="" coords="465,397,671,438"/>
+<area shape="rect" id="node15" href="$classnav__msgs_1_1_odometry.html#a4ce6cfcb047b727c731ecfb244b8df81" title="nav_msgs::Odometry\l::serialize" alt="" coords="495,495,641,537"/>
+<area shape="rect" id="node16" href="$classgeometry__msgs_1_1_twist_with_covariance_stamped.html#a48c9910bf13418def2f8438a911e650b" title="geometry_msgs::TwistWith\lCovarianceStamped::serialize" alt="" coords="470,561,666,602"/>
+</map>

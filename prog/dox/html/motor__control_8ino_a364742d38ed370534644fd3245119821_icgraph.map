@@ -1,0 +1,4 @@
+<map id="pub_error" name="pub_error">
+<area shape="rect" id="node2" href="$motor__control_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Sets up code after every reset of the Arduino Board. " alt="" coords="131,5,186,32"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="135,56,182,83"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="trajectory_msgs::JointTrajectory::serialize" name="trajectory_msgs::JointTrajectory::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_follow_joint_trajectory_goal.html#ae92ac26a42c3c3fb54e4916b627f3878" title="control_msgs::FollowJoint\lTrajectoryGoal::serialize" alt="" coords="286,5,461,46"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_joint_trajectory_goal.html#a29ccd47a5d0e2e7fecddf80018d0912b" title="control_msgs::JointTrajectory\lGoal::serialize" alt="" coords="276,70,471,111"/>
+<area shape="rect" id="node8" href="$classgazebo__msgs_1_1_set_joint_trajectory_request.html#af3a4b0b6c70b0806ecbc2d86083d22ce" title="gazebo_msgs::SetJointTrajectory\lRequest::serialize" alt="" coords="265,135,482,177"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_follow_joint_trajectory_action_goal.html#a393489ca412a9f27d03ec457db36ec72" title="control_msgs::FollowJoint\lTrajectoryActionGoal::serialize" alt="" coords="531,5,731,46"/>
+<area shape="rect" id="node4" href="$classcontrol__msgs_1_1_follow_joint_trajectory_action.html#a2df0d37f15e4ec31d79844bdbea7433b" title="control_msgs::FollowJoint\lTrajectoryAction::serialize" alt="" coords="789,5,963,46"/>
+<area shape="rect" id="node6" href="$classcontrol__msgs_1_1_joint_trajectory_action_goal.html#af5371374175b6f8ae7efdd2bd349484e" title="control_msgs::JointTrajectory\lActionGoal::serialize" alt="" coords="533,70,728,111"/>
+<area shape="rect" id="node7" href="$classcontrol__msgs_1_1_joint_trajectory_action.html#ac250f15399e2404388207bcb90463cb3" title="control_msgs::JointTrajectory\lAction::serialize" alt="" coords="779,70,973,111"/>
+</map>

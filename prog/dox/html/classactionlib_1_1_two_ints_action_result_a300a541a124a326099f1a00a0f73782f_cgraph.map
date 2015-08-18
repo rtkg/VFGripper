@@ -1,0 +1,6 @@
+<map id="actionlib::TwoIntsActionResult::serialize" name="actionlib::TwoIntsActionResult::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="217,5,402,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="218,57,401,98"/>
+<area shape="rect" id="node5" href="$classactionlib_1_1_two_ints_result.html#ac9bec945a94d2679ced6439e6e96af70" title="actionlib::TwoIntsResult\l::serialize" alt="" coords="228,122,391,163"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="451,57,610,98"/>
+</map>

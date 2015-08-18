@@ -1,0 +1,4 @@
+<map id="gazebo_msgs::ODEPhysics::serialize" name="gazebo_msgs::ODEPhysics::serialize">
+<area shape="rect" id="node2" href="$classgazebo__msgs_1_1_get_physics_properties_response.html#a5b77a89460911effdaa33f5b4cbdfb86" title="gazebo_msgs::GetPhysicsProperties\lResponse::serialize" alt="" coords="241,5,479,46"/>
+<area shape="rect" id="node3" href="$classgazebo__msgs_1_1_set_physics_properties_request.html#a5fa234ce35d12f6e6ebf1f7179a4613c" title="gazebo_msgs::SetPhysicsProperties\lRequest::serialize" alt="" coords="241,70,479,111"/>
+</map>

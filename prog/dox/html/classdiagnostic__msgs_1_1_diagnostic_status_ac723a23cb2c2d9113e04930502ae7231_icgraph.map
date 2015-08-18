@@ -1,0 +1,4 @@
+<map id="diagnostic_msgs::DiagnosticStatus::deserialize" name="diagnostic_msgs::DiagnosticStatus::deserialize">
+<area shape="rect" id="node2" href="$classdiagnostic__msgs_1_1_diagnostic_array.html#a5f539e5d7f2f4553b8ec497cbc64f65a" title="diagnostic_msgs::Diagnostic\lArray::deserialize" alt="" coords="246,5,437,46"/>
+<area shape="rect" id="node3" href="$classdiagnostic__msgs_1_1_self_test_response.html#a2dab49a212f5a9260ad1ab03c2d477a3" title="diagnostic_msgs::SelfTest\lResponse::deserialize" alt="" coords="253,70,430,111"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="control_msgs::GripperCommandGoal" name="control_msgs::GripperCommandGoal">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="109,5,181,32"/>
+<area shape="rect" id="node3" href="$classcontrol__msgs_1_1_gripper_command.html" title="control_msgs::GripperCommand" alt="" coords="139,83,348,109"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="ros::normalizeSecNSecSigned" name="ros::normalizeSecNSecSigned">
+<area shape="rect" id="node2" href="$classros_1_1_duration.html#a385d35178d4fdd99758915098c522c83" title="ros::Duration::operator+=" alt="" coords="253,5,421,32"/>
+<area shape="rect" id="node3" href="$classros_1_1_duration.html#a428292250454bfcf6671e89e30678d47" title="ros::Duration::operator&#45;=" alt="" coords="255,56,419,83"/>
+<area shape="rect" id="node4" href="$classros_1_1_duration.html#ac328f7d46dbbf99deb7b6edac4e254bf" title="ros::Duration::operator*=" alt="" coords="255,107,420,133"/>
+<area shape="rect" id="node5" href="$classros_1_1_duration.html#a623121b0d2944ff7d7894e3e81a15798" title="ros::Duration::Duration" alt="" coords="260,157,415,184"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="actionlib_tutorials::FibonacciActionGoal::serialize" name="actionlib_tutorials::FibonacciActionGoal::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="206,5,391,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="219,57,378,98"/>
+<area shape="rect" id="node4" href="$classactionlib__tutorials_1_1_fibonacci_goal.html#adef7915eb9d99ff06d8aef3f68d8f4d3" title="actionlib_tutorials\l::FibonacciGoal::serialize" alt="" coords="214,122,383,163"/>
+</map>

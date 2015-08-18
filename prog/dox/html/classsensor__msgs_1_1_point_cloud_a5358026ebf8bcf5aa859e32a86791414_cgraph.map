@@ -1,0 +1,5 @@
+<map id="sensor_msgs::PointCloud::deserialize" name="sensor_msgs::PointCloud::deserialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a077354cf11d752b6f4fc7c437ec29ac2" title="std_msgs::Header::deserialize" alt="" coords="227,5,426,32"/>
+<area shape="rect" id="node3" href="$classgeometry__msgs_1_1_point32.html#aea56159c42a0b304c52b8828782de673" title="geometry_msgs::Point32\l::deserialize" alt="" coords="243,57,410,98"/>
+<area shape="rect" id="node4" href="$classsensor__msgs_1_1_channel_float32.html#a1aec784f9812648abd7aab04853f4dc5" title="sensor_msgs::ChannelFloat32\l::deserialize" alt="" coords="227,122,426,163"/>
+</map>

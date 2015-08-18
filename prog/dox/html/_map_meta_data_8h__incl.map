@@ -1,0 +1,8 @@
+<map id="MapMetaData.h" name="MapMetaData.h">
+<area shape="rect" id="node5" href="$msg_8h.html" title="ros/msg.h" alt="" coords="5,229,84,256"/>
+<area shape="rect" id="node6" href="$time_8h.html" title="ros/time.h" alt="" coords="649,80,728,107"/>
+<area shape="rect" id="node9" href="$geometry__msgs_2_pose_8h.html" title="geometry_msgs/Pose.h" alt="" coords="263,80,421,107"/>
+<area shape="rect" id="node7" href="$duration_8h.html" title="ros/duration.h" alt="" coords="713,155,815,181"/>
+<area shape="rect" id="node10" href="$_point_8h.html" title="geometry_msgs/Point.h" alt="" coords="263,155,421,181"/>
+<area shape="rect" id="node11" href="$_quaternion_8h.html" title="geometry_msgs/Quaternion.h" alt="" coords="45,155,237,181"/>
+</map>

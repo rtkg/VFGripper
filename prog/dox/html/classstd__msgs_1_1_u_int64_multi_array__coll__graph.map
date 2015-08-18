@@ -1,0 +1,5 @@
+<map id="std_msgs::UInt64MultiArray" name="std_msgs::UInt64MultiArray">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="69,5,141,32"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_multi_array_layout.html" title="std_msgs::MultiArrayLayout" alt="" coords="93,187,277,213"/>
+<area shape="rect" id="node4" href="$classstd__msgs_1_1_multi_array_dimension.html" title="std_msgs::MultiArrayDimension" alt="" coords="143,83,351,109"/>
+</map>

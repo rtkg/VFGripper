@@ -1,0 +1,15 @@
+<map id="control_msgs::PointHeadAction::serialize" name="control_msgs::PointHeadAction::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_point_head_action_goal.html#a82b2838cd181d2515471f52211f6ecc6" title="control_msgs::PointHeadAction\lGoal::serialize" alt="" coords="262,175,469,216"/>
+<area shape="rect" id="node10" href="$classcontrol__msgs_1_1_point_head_action_result.html#a9d738583f1709042d1c91009dcea7bc6" title="control_msgs::PointHeadAction\lResult::serialize" alt="" coords="262,319,469,360"/>
+<area shape="rect" id="node13" href="$classcontrol__msgs_1_1_point_head_action_feedback.html#a3b67eb50ac241b10da436bd8f009b794" title="control_msgs::PointHeadAction\lFeedback::serialize" alt="" coords="262,413,469,455"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="1049,215,1234,242"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="807,205,966,247"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_point_head_goal.html#a0af990ae43a37be31e31d9c70dcf2d91" title="control_msgs::PointHeadGoal\l::serialize" alt="" coords="523,59,719,100"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_point_stamped.html#ad7a18c86150c175505ce861dd3133075" title="geometry_msgs::PointStamped\l::serialize" alt="" coords="784,88,989,129"/>
+<area shape="rect" id="node8" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="1283,74,1475,101"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_vector3.html#a9efc8f24d66f04a2c74710aec1cb611a" title="geometry_msgs::Vector3\l::serialize" alt="" coords="1057,33,1225,75"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="1065,99,1218,140"/>
+<area shape="rect" id="node11" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="530,384,713,425"/>
+<area shape="rect" id="node12" href="$classcontrol__msgs_1_1_point_head_result.html#ae023c6dcb398329b8a1d4d1012dc97a5" title="control_msgs::PointHeadResult\l::serialize" alt="" coords="518,319,725,360"/>
+<area shape="rect" id="node14" href="$classcontrol__msgs_1_1_point_head_feedback.html#aca6d8f281bfd18ec93e67395f1dea7e9" title="control_msgs::PointHeadFeedback\l::serialize" alt="" coords="773,501,1000,543"/>
+</map>

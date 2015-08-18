@@ -1,0 +1,8 @@
+<map id="trajectory_msgs::MultiDOFJointTrajectoryPoint" name="trajectory_msgs::MultiDOFJointTrajectoryPoint">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="134,5,206,32"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_twist.html" title="geometry_msgs::Twist" alt="" coords="29,187,182,213"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="86,83,254,109"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_transform.html" title="geometry_msgs::Transform" alt="" coords="208,187,390,213"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="329,83,516,109"/>
+<area shape="rect" id="node3" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="415,187,512,213"/>
+</map>

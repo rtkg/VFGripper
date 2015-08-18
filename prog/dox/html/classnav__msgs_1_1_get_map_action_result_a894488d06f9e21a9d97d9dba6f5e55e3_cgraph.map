@@ -1,0 +1,12 @@
+<map id="nav_msgs::GetMapActionResult::serialize" name="nav_msgs::GetMapActionResult::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="726,9,911,35"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="265,27,447,68"/>
+<area shape="rect" id="node5" href="$classnav__msgs_1_1_get_map_result.html#a45d5671c163ec58cd0e73f42bdaff64b" title="nav_msgs::GetMapResult\l::serialize" alt="" coords="269,92,443,133"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="507,27,666,68"/>
+<area shape="rect" id="node6" href="$classnav__msgs_1_1_occupancy_grid.html#a04e853f4172d006b3bacd4f37ad44ea3" title="nav_msgs::OccupancyGrid\l::serialize" alt="" coords="497,92,677,133"/>
+<area shape="rect" id="node7" href="$classnav__msgs_1_1_map_meta_data.html#afc61f1b02486586b588bd9e20f3d20d4" title="nav_msgs::MapMetaData\l::serialize" alt="" coords="733,92,905,133"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_pose.html#aa19cafeb54ccb2474066c9d181138524" title="geometry_msgs::Pose\l::serialize" alt="" coords="961,92,1114,133"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_point.html#a00024cb4ba801f58a690351352c7736f" title="geometry_msgs::Point\l::serialize" alt="" coords="1179,59,1333,100"/>
+<area shape="rect" id="node11" href="$classgeometry__msgs_1_1_quaternion.html#a0f1aa1b8b10fffdc9cfb69eb5198a687" title="geometry_msgs::Quaternion\l::serialize" alt="" coords="1163,124,1349,165"/>
+<area shape="rect" id="node10" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="1397,99,1589,126"/>
+</map>

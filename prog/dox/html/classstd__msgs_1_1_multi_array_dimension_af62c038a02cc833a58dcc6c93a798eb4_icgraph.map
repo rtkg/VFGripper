@@ -1,0 +1,14 @@
+<map id="std_msgs::MultiArrayDimension::serialize" name="std_msgs::MultiArrayDimension::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_multi_array_layout.html#a25caee993ee85cfa15ee06fbae3a8ce9" title="std_msgs::MultiArrayLayout\l::serialize" alt="" coords="262,331,447,373"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_byte_multi_array.html#a31a78d9eb51721eb6def76a87c7a090f" title="std_msgs::ByteMultiArray\l::serialize" alt="" coords="504,5,677,46"/>
+<area shape="rect" id="node4" href="$classstd__msgs_1_1_float32_multi_array.html#ae0396fc4bd3ad49ed16daf1a56695b7e" title="std_msgs::Float32MultiArray\l::serialize" alt="" coords="496,70,685,111"/>
+<area shape="rect" id="node5" href="$classstd__msgs_1_1_float64_multi_array.html#a4511dc2e7cb54b4e22c0dfbf365ccc1f" title="std_msgs::Float64MultiArray\l::serialize" alt="" coords="496,135,685,177"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_int16_multi_array.html#afa90d6cf1eb792a79e9a7edd8b2d679e" title="std_msgs::Int16MultiArray\l::serialize" alt="" coords="503,201,678,242"/>
+<area shape="rect" id="node7" href="$classstd__msgs_1_1_int32_multi_array.html#afc0636ec1692cf0b44e5daca58d3251a" title="std_msgs::Int32MultiArray\l::serialize" alt="" coords="503,266,678,307"/>
+<area shape="rect" id="node8" href="$classstd__msgs_1_1_int64_multi_array.html#a29b81824921c77e1479c72c59dda81bd" title="std_msgs::Int64MultiArray\l::serialize" alt="" coords="503,331,678,373"/>
+<area shape="rect" id="node9" href="$classstd__msgs_1_1_int8_multi_array.html#aa09a64d95a071768352490899253a13e" title="std_msgs::Int8MultiArray\l::serialize" alt="" coords="507,397,675,438"/>
+<area shape="rect" id="node10" href="$classstd__msgs_1_1_u_int16_multi_array.html#a28c8017b23579351aca180f795023b7f" title="std_msgs::UInt16MultiArray\l::serialize" alt="" coords="498,462,683,503"/>
+<area shape="rect" id="node11" href="$classstd__msgs_1_1_u_int32_multi_array.html#a2d9bdaccac1c3f2328d2fe8bbfd1ead0" title="std_msgs::UInt32MultiArray\l::serialize" alt="" coords="498,527,683,569"/>
+<area shape="rect" id="node12" href="$classstd__msgs_1_1_u_int64_multi_array.html#a63fed90e4f3ba054d3eae6cf145327cc" title="std_msgs::UInt64MultiArray\l::serialize" alt="" coords="498,593,683,634"/>
+<area shape="rect" id="node13" href="$classstd__msgs_1_1_u_int8_multi_array.html#a65361059aca91209fb73f6b8a400440f" title="std_msgs::UInt8MultiArray\l::serialize" alt="" coords="501,658,680,699"/>
+</map>

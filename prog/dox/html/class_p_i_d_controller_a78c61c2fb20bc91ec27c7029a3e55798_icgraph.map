@@ -1,0 +1,4 @@
+<map id="PIDController::pid" name="PIDController::pid">
+<area shape="rect" id="node2" href="$class_current_control.html#aef2bf63a00372e1f27ed4aca4aa4ded8" title="Current control feedback. " alt="" coords="181,5,379,32"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="427,5,474,32"/>
+</map>

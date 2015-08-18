@@ -1,0 +1,9 @@
+digraph "sensor_msgs::JoyFeedbackArray::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="sensor_msgs::JoyFeedback\lArray::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="sensor_msgs::JoyFeedback\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classsensor__msgs_1_1_joy_feedback.html#a989e2dca78ad1b043c7b1b922afcc60c"];
+}

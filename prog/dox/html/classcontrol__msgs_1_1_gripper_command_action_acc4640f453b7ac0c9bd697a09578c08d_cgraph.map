@@ -1,0 +1,13 @@
+<map id="control_msgs::GripperCommandAction::serialize" name="control_msgs::GripperCommandAction::serialize">
+<area shape="rect" id="node2" href="$classcontrol__msgs_1_1_gripper_command_action_goal.html#a35d4090c4c4f2eb397d8395d5fe3ee1f" title="control_msgs::GripperCommand\lActionGoal::serialize" alt="" coords="264,78,475,119"/>
+<area shape="rect" id="node8" href="$classcontrol__msgs_1_1_gripper_command_action_result.html#acdd6020ab9235275cbad006ddd7ce2ca" title="control_msgs::GripperCommand\lActionResult::serialize" alt="" coords="264,223,475,265"/>
+<area shape="rect" id="node11" href="$classcontrol__msgs_1_1_gripper_command_action_feedback.html#acc2a23cbed8c719c819bc79f83916918" title="control_msgs::GripperCommand\lActionFeedback::serialize" alt="" coords="264,158,475,199"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="535,172,721,199"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="807,189,966,230"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_gripper_command_goal.html#a25827b3d1d4d54944c07fde01a2b318d" title="control_msgs::GripperCommand\lGoal::serialize" alt="" coords="523,5,733,46"/>
+<area shape="rect" id="node6" href="$classcontrol__msgs_1_1_gripper_command.html#a45ec83d767c915f2ce186e8d2b77f8b4" title="control_msgs::GripperCommand\l::serialize" alt="" coords="781,27,992,69"/>
+<area shape="rect" id="node7" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="1040,121,1232,148"/>
+<area shape="rect" id="node9" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="537,223,719,265"/>
+<area shape="rect" id="node10" href="$classcontrol__msgs_1_1_gripper_command_result.html#a2f6ac02dd70b5f173201668ed28c5e7f" title="control_msgs::GripperCommand\lResult::serialize" alt="" coords="781,273,992,314"/>
+<area shape="rect" id="node12" href="$classcontrol__msgs_1_1_gripper_command_feedback.html#a97ecf1a0ea3363b744cadb22ad11a143" title="control_msgs::GripperCommand\lFeedback::serialize" alt="" coords="781,114,992,155"/>
+</map>

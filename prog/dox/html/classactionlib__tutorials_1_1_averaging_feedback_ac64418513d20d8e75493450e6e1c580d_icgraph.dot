@@ -1,0 +1,11 @@
+digraph "actionlib_tutorials::AveragingFeedback::serialize"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="actionlib_tutorials\l::AveragingFeedback\l::serialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="actionlib_tutorials\l::AveragingActionFeedback\l::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classactionlib__tutorials_1_1_averaging_action_feedback.html#a34eb955b0fb1c3d8d98ab7281c0b3b3b"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="actionlib_tutorials\l::AveragingAction::serialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classactionlib__tutorials_1_1_averaging_action.html#a5285dbc242000ddc64aeac2bced02a11"];
+}

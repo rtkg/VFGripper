@@ -1,0 +1,8 @@
+<map id="control_msgs::SingleJointPositionActionGoal" name="control_msgs::SingleJointPositionActionGoal">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="18,123,91,149"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="239,88,398,115"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_single_joint_position_goal.html" title="control_msgs::SingleJoint\lPositionGoal" alt="" coords="233,190,405,231"/>
+<area shape="rect" id="node7" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="254,37,383,64"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="16,5,93,32"/>
+<area shape="rect" id="node6" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="6,207,103,233"/>
+</map>

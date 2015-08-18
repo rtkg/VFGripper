@@ -1,0 +1,5 @@
+<map id="sensor_msgs::Range" name="sensor_msgs::Range">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="7,5,80,32"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="81,96,209,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="107,5,183,32"/>
+</map>

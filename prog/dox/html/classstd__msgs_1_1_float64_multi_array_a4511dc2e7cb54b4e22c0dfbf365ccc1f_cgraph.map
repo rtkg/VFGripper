@@ -1,0 +1,5 @@
+<map id="std_msgs::Float64MultiArray::serialize" name="std_msgs::Float64MultiArray::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_multi_array_layout.html#a25caee993ee85cfa15ee06fbae3a8ce9" title="std_msgs::MultiArrayLayout\l::serialize" alt="" coords="246,5,431,46"/>
+<area shape="rect" id="node4" href="$classros_1_1_msg.html#a3fff55e17efd60a7195a14857ff44897" title="This tricky function handles promoting a 32bit float to a 64bit double, so that AVR can publish messa..." alt="" coords="243,71,435,97"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_multi_array_dimension.html#af62c038a02cc833a58dcc6c93a798eb4" title="std_msgs::MultiArrayDimension\l::serialize" alt="" coords="483,5,691,46"/>
+</map>

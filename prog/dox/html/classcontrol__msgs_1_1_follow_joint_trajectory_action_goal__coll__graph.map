@@ -1,0 +1,11 @@
+<map id="control_msgs::FollowJointTrajectoryActionGoal" name="control_msgs::FollowJointTrajectoryActionGoal">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="18,232,91,259"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_i_d.html" title="actionlib_msgs::GoalID" alt="" coords="274,412,433,439"/>
+<area shape="rect" id="node5" href="$classcontrol__msgs_1_1_follow_joint_trajectory_goal.html" title="control_msgs::FollowJoint\lTrajectoryGoal" alt="" coords="1019,174,1194,215"/>
+<area shape="rect" id="node6" href="$classtrajectory__msgs_1_1_joint_trajectory.html" title="trajectory_msgs::JointTrajectory" alt="" coords="702,181,911,208"/>
+<area shape="rect" id="node7" href="$classtrajectory__msgs_1_1_joint_trajectory_point.html" title="trajectory_msgs::JointTrajectory\lPoint" alt="" coords="249,65,458,106"/>
+<area shape="rect" id="node9" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="289,361,418,388"/>
+<area shape="rect" id="node10" href="$classcontrol__msgs_1_1_joint_tolerance.html" title="control_msgs::JointTolerance" alt="" coords="483,128,677,155"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="16,435,93,461"/>
+<area shape="rect" id="node8" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="6,32,103,59"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="nav_msgs::MapMetaData" name="nav_msgs::MapMetaData">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="15,5,87,32"/>
+<area shape="rect" id="node4" href="$classgeometry__msgs_1_1_pose.html" title="geometry_msgs::Pose" alt="" coords="32,173,185,200"/>
+<area shape="rect" id="node5" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="49,83,235,109"/>
+<area shape="rect" id="node6" href="$classgeometry__msgs_1_1_point.html" title="geometry_msgs::Point" alt="" coords="260,83,413,109"/>
+<area shape="rect" id="node3" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="209,173,285,200"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="trajectory_msgs::MultiDOFJointTrajectory" name="trajectory_msgs::MultiDOFJointTrajectory">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="311,5,384,32"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="5,96,133,123"/>
+<area shape="rect" id="node5" href="$classtrajectory__msgs_1_1_multi_d_o_f_joint_trajectory_point.html" title="trajectory_msgs::MultiDOFJoint\lTrajectoryPoint" alt="" coords="270,334,476,375"/>
+<area shape="rect" id="node7" href="$classgeometry__msgs_1_1_twist.html" title="geometry_msgs::Twist" alt="" coords="209,200,363,227"/>
+<area shape="rect" id="node8" href="$classgeometry__msgs_1_1_vector3.html" title="geometry_msgs::Vector3" alt="" coords="264,96,432,123"/>
+<area shape="rect" id="node9" href="$classgeometry__msgs_1_1_transform.html" title="geometry_msgs::Transform" alt="" coords="510,200,692,227"/>
+<area shape="rect" id="node10" href="$classgeometry__msgs_1_1_quaternion.html" title="geometry_msgs::Quaternion" alt="" coords="507,96,693,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="31,5,107,32"/>
+<area shape="rect" id="node6" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="389,200,485,227"/>
+</map>

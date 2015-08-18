@@ -1,0 +1,6 @@
+<map id="nav_msgs::GetMapActionFeedback::serialize" name="nav_msgs::GetMapActionFeedback::serialize">
+<area shape="rect" id="node2" href="$classstd__msgs_1_1_header.html#a200c6f9d2576b1a237a19bc2d769925e" title="std_msgs::Header::serialize" alt="" coords="290,5,475,32"/>
+<area shape="rect" id="node3" href="$classactionlib__msgs_1_1_goal_status.html#ad0c10d1613330ab5dff49d15d843d555" title="actionlib_msgs::GoalStatus\l::serialize" alt="" coords="291,57,474,98"/>
+<area shape="rect" id="node5" href="$classnav__msgs_1_1_get_map_feedback.html#ab5adc499e3d6cd5c091ae1b9415260df" title="nav_msgs::GetMapFeedback\l::serialize" alt="" coords="286,122,479,163"/>
+<area shape="rect" id="node4" href="$classactionlib__msgs_1_1_goal_i_d.html#a74c8333830562d918493b976bc23fe94" title="actionlib_msgs::GoalID\l::serialize" alt="" coords="529,57,687,98"/>
+</map>

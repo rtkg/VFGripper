@@ -1,0 +1,5 @@
+<map id="control_msgs::SingleJointPositionFeedback" name="control_msgs::SingleJointPositionFeedback">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="19,5,92,32"/>
+<area shape="rect" id="node3" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="93,96,221,123"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="119,5,195,32"/>
+</map>

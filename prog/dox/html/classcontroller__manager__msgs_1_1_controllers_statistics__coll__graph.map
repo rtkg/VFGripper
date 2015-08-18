@@ -1,0 +1,7 @@
+<map id="controller_manager_msgs::ControllersStatistics" name="controller_manager_msgs::ControllersStatistics">
+<area shape="rect" id="node2" href="$classros_1_1_msg.html" title="ros::Msg" alt="" coords="27,5,100,32"/>
+<area shape="rect" id="node3" href="$classcontroller__manager__msgs_1_1_controller_statistics.html" title="controller_manager\l_msgs::ControllerStatistics" alt="" coords="187,126,367,167"/>
+<area shape="rect" id="node6" href="$classstd__msgs_1_1_header.html" title="std_msgs::Header" alt="" coords="34,133,163,160"/>
+<area shape="rect" id="node4" href="$classros_1_1_time.html" title="ros::Time" alt="" coords="149,5,225,32"/>
+<area shape="rect" id="node5" href="$classros_1_1_duration.html" title="ros::Duration" alt="" coords="330,5,427,32"/>
+</map>

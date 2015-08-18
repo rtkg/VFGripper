@@ -10,7 +10,7 @@ const int M1_D2  = 6;  // PWM pin
 
 const int BIT_RESOLUTION = 12;
 
-int count = 0;  // TODO what does it count?
+int count = 0;
 
 int cs_m1 = 0; //value of the current sensor for motor 1 
  

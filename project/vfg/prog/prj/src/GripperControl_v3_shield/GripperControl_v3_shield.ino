@@ -2,6 +2,9 @@
 //Robert Krug, Todor Stoyanov 13/06/2014
 
 #include <limits.h>
+// TODO
+#include <ros/ros.h> // just for syntax completion
+
 #include <DueFlashStorage.h>
 #include <ros.h>
 #include <velvet_msgs/GripperState.h>

@@ -6,7 +6,7 @@
  * \date    August 2015
  * \pre     roscore
  * \bug     
- * \warning Unfinished current control. Works but not perfect.
+ * \warning TODO PID Calibration 
  *
  * rosserial_python node
  * Publishes:
@@ -43,7 +43,7 @@ const int M1_FB  = A0; // Analog input A0 for current sensing on Motor 1
 const int EN     = 25; // Driver board enable pin
 const int M1_D2  = 8;  // PWM pin to control output voltage
 
-const int ledPin = 13; // LED pin to visualize  
+const int LED_PIN = 13; // LED pin to visualize  
 
 /*=============== Constants ===============*/
 const int BIT_RESOLUTION = 12; // 12 => [0; 4095], analogWrite(pin, PWM value)
@@ -55,16 +55,18 @@ const int DELAY_MS = 1; // Delay time [ms]
 const float ALPHA_CURRENT = 0.95;   // Value for filtering current
 const float DESIRED_CURRENT = 0.02; // Desired current (=> torque)
 
-const float KP = 500.0; // PID value
-const float KI = 70.0;  // PID value
-const float KD = 1.0;   // PID value
-const float DEAD_SPACE = 0.005; // >= 0 TODO
-const float DT = 1e-3;  // Time step [s]
+const float KP = 1000000.0; //! PID value
+const float KI = 70.0;   //! PID value
+const float KD = 0.0;   //! PID value
+const float DEAD_SPACE = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
+const float DT = 1e-3;  //! Time step [s]
 
-const int V_MAX = 24;   // Maximum value for our maxxon motor [V] 
+const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
+const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
+const int OFFSET  = mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX); //! V_MIN converted to PWM value
 
 /*=============== Global variables ===============*/
-int pwmValue = 0; // [%]
+int pwm_duty_cycle = 0; //! PWM duty cycle [%]
 int t_old = 0; //! Timer value for calculating time steps
 int t_new = 0; //! Timer value for calculating time steps
 
@@ -112,15 +114,15 @@ public:
    * \param[in] Kp - PID proportional part
    * \param[in] Ki - PID integral part
    * \param[in] Kd - PID derivative part
-   * \param[in] u_max - maximum value of control variable
    * \param[in] u_min - minimum value of control variable
+   * \param[in] u_max - maximum value of control variable
    * \param[in] I - memory for the integral term
-   * \param[in] dead_space - TODO
+   * \param[in] dead_space - dead area around setpoint 
    */
   PIDController(float Kp, float Ki, float Kd, 
-                float u_max, float u_min, 
-                float I, float dead_space=-1) : 
-    Kp_(Kp), Kd_(Kd), Ki_(Ki), u_max_(u_max), u_min_(u_min), I_(I), dead_space_(dead_space) {};
+                float u_min, float u_max, 
+                float I, float dead_space=0) : 
+    Kp_(Kp), Kd_(Kd), Ki_(Ki), u_min_(u_min), u_max_(u_max), I_(I), dead_space_(dead_space) {};
   
   /*!
    * \brief Calculates PID control variable.
@@ -135,43 +137,40 @@ public:
   float Kp_;          //! PID proportional part
   float Kd_;          //! PID integral part
   float Ki_;          //! PID derivative part
-  float u_max_;       //! Maximum controller output (<= V_MAX or PWM_MAX)
-  float u_min_;       //! Minimum controller output (>= -(V_MAX or PWM_MAX))
+  float u_min_;       //! Minimum controller output
+  float u_max_;       //! Maximum controller output 
   float I_;           //! Serves as memory for the integral term [i.e., I=dT*(Ki*e_0, ... , Ki*e_t)]
-  float dead_space_;  //! TODO +/- error around desired value
+  float dead_space_;  //! Calculated output must leave the deadband before the actual output will change; >=0
 };
 
-// TODO
 float PIDController::pid(const float error, const float d_error) {
-  I_ += Ki_*error;  // Update integral
-  float u = Kp_*error + I_ + Kd_*d_error; // Calculate control
+  I_ += error;                                // Update integral
+  float u = Kp_*error + Ki_*I_ + Kd_*d_error; // Calculate control
   
-  // TODO.
-  // Do something when dead space is > < 
-  if (dead_space_ > 0) { 
-    if (abs(error) > dead_space_) {
-      u = I_ + Kd_*d_error;
+  if (dead_space_ > 0) {             // If there is a deadband 
+    if (abs(error) < dead_space_) {  // And process variable is inside it
+      u = Ki_*I_ + Kd_*d_error;      // Then update control value without P-term
     }
-    else {
-      int dir = error < 0 ? -1 : 1; // Set direction
-      u = Kp_ * (error - dir*dead_space_) + I_ + Kd_*d_error;
+    else {                           // If PV is outside deadband
+                                     // Then update CV with smaller error and all PID terms
+      u = Kp_ * (error - (error<0 ? -1 : 1)*dead_space_) + Ki_*I_ + Kd_*d_error;
     }
   }
   
-  // Clamp the control value and recalculate the Integral term (the latter to avoid windup)
-  if (u > u_max_) {
-    I_ -= Ki_*error;
-    u = u_max_;
+  // Clamp the CV and recalculate the Integral term (the latter to avoid windup)
+  if (u > u_max_) {      // If CV is biggger than maximum feasible value
+    I_ -= error;         // Back-calculate the I-term to constrain the regulator output within feasible bounds
+    u = u_max_;          // Clamp the CV
   } 
-  else if (u < u_min_) {
-    I_ -= Ki_*error; //p->u_min_ - u;
-    u = u_min_;
+  else if (u < u_min_) { // If CV is smaller than minimum feasible value
+    I_ -= error;         // Back-calculate the I-term to constrain the regulator output within feasible bounds
+    u = u_min_;          // Clamp the CV
   }
   
   //u = mapFloat(u, u_min_, u_max_, PWM_MIN, PWM_MAX); // TODO -+ values
-  u = mapFloat(u, 0, u_max_, PWM_MIN, PWM_MAX);
-  u = constrain(u, PWM_MIN, PWM_MAX);
-  return u;  // Return control value (in PWM resolution).
+  // u = mapFloat(u, 0, u_max_, PWM_MIN, PWM_MAX);
+  u = constrain(u, PWM_MIN+OFFSET, PWM_MAX); // TODO
+  return u;  // Return control value (in +/- PWM resolution).
 }
 
 /*============================================================*/
@@ -194,7 +193,7 @@ public:
    * \param[in] filtered_current - filtered current [A]
    */ 
   CurrentSensor(float alpha, int sensed_value, float current, float filtered_current) :
-    alpha_(ALPHA_CURRENT), sensed_value_(sensed_value), 
+    alpha_(alpha), sensed_value_(sensed_value), 
     current_(current), filtered_current_(filtered_current) {};
   
   /*!
@@ -268,9 +267,9 @@ public:
 // TODO
 float CurrentControl::currentControl(const float current) {
   // TODO What about minimum Jerk???
-  //float dT = ros::now();
+  //TODO float dT = ros::now();
   float error   =  i_d_ - current;              // Current error 
-  float d_error = (error - last_error_)/DT;     // Derivative of the current error
+  float d_error = (error - last_error_); // TODO /DT;     // Derivative of the current error
   last_error_ = error;                          // Update last error
   return pid_.pid(error, d_error);              // Return control value 
   // TODO + c_s->R_ * c_s->r_ * VOLTAGE_FACTOR; //compute control with feedforward term
@@ -368,14 +367,14 @@ void Motor::reverse() {
 }
 
 int Motor::setPwm(const int pwm_val) {
-  analogWrite(m_pins_.D2_, pwm_val); // TODO Motor::pwm_pin_
+  analogWrite(m_pins_.D2_, pwm_val); 
   return pwm_val;
 }
 
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(0, 0, 0, ALPHA_CURRENT),
          CurrentControl(DESIRED_CURRENT, 0.0,
-                        PIDController(KP, KI, KD, V_MAX, -V_MAX, 0.0, 0.0)));
+                        PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0)));
 
 /*=============== ROS ===============*/
 // TODO documentation for this part
@@ -393,10 +392,12 @@ std_msgs::Float32 u_msg;
 ros::Publisher pub_u("u", &u_msg);
 std_msgs::Float32 i_d_msg;
 ros::Publisher pub_i_d("i_d", &i_d_msg);
+std_msgs::Float32 integral_msg;
+ros::Publisher pub_integral("integral", &integral_msg);
 
 int counter = 0;
 void confirmCallback() {
-  digitalWrite(ledPin, counter % 2 ? HIGH : LOW); // blink the led
+  digitalWrite(LED_PIN, counter % 2 ? HIGH : LOW); // blink the led
   counter++;
 }
 
@@ -412,16 +413,12 @@ void changeDirectionCallback( const std_msgs::Empty& empty_msg ) {
 }
 ros::Subscriber<std_msgs::Empty> sub_change_dir("change_dir", &changeDirectionCallback);
 
-// TODO remove
-int pwm = 0;
-
 /* Change speed of the motor when receives a message.
  * pwm_msg - [0; 100] %
  */
 void setPwmCallback( const std_msgs::Int8& pwm_msg ) {
   int pwmValue = pwmPercentToVal(pwm_msg.data);
-  analogWrite(M1_D2, pwmValue);
-  
+  analogWrite(M1_D2, pwmValue);  
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Int8> sub_set_vel("set_vel", &setPwmCallback);
@@ -467,6 +464,7 @@ void setup()
   nh.advertise(pub_error);
   nh.advertise(pub_u);
   nh.advertise(pub_i_d);
+  nh.advertise(pub_integral);
   
   nh.subscribe(sub_set_vel);
   nh.subscribe(sub_set_kp);
@@ -488,7 +486,7 @@ void setup()
   digitalWrite(m1.m_pins_.EN_,  HIGH);
   digitalWrite(m1.m_pins_.IN1_, HIGH);
   digitalWrite(m1.m_pins_.IN2_, LOW);
-  pinMode(ledPin, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
   
   /* Set PWM resolution */
   analogWriteResolution(BIT_RESOLUTION);
@@ -520,6 +518,8 @@ void loop()
   pub_error.publish( &error_msg );
   i_d_msg.data = m1.cc_.i_d_;
   pub_i_d.publish( &i_d_msg );
+  integral_msg.data = m1.cc_.pid_.I_;
+  pub_integral.publish( &integral_msg );
   
   nh.spinOnce();
   delay(DELAY_MS);

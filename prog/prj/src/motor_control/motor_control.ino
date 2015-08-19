@@ -6,7 +6,7 @@
  * \date    August 2015
  * \pre     roscore
  * \bug     
- * \warning TODO PID Calibration 
+ * \warning TODO PID Calibration. +/- control variable values
  *
  * rosserial_python node
  * Publishes:
@@ -14,8 +14,6 @@
  * 
  * Subscribes:
  * TODO
- * Change direction on callback.
- * Change speed on callback.
  * 
  * How to run?
  * 1) roscore 
@@ -27,6 +25,7 @@
  * TODO
  * - finish current control
  * - publisher/subscriber -> services
+ * - private classes
  */
 
 #define USE_USBCON            // Has to be declared if there are problems with serial communication
@@ -50,20 +49,20 @@ const int BIT_RESOLUTION = 12; // 12 => [0; 4095], analogWrite(pin, PWM value)
 const int PWM_MIN = 0;         // PWM minimum value
 const int PWM_MAX = 4095;      // PWM maximum value
 
-const int DELAY_MS = 1; // Delay time [ms]
+const int DELAY = 1; // Delay time [ms]
 
-const float ALPHA_CURRENT = 0.95;   // Value for filtering current
-const float DESIRED_CURRENT = 0.02; // Desired current (=> torque)
+const float ALPHA_CURRENT = 0.99;   // Value for filtering current
+const float DESIRED_CURRENT = 0.015; // Desired current (=> torque)
 
-const float KP = 1000000.0; //! PID value
-const float KI = 70.0;   //! PID value
-const float KD = 0.0;   //! PID value
+const float KP = 100.0; //! PID value
+const float KI = 30.0;   //! PID value
+const float KD = 300.0;   //! PID value
 const float DEAD_SPACE = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 const float DT = 1e-3;  //! Time step [s]
 
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
-const int OFFSET  = mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX); //! V_MIN converted to PWM value
+/*const*/ int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
@@ -105,7 +104,6 @@ float mapFloat(const float x, const float in_min, const float in_max,
  * Class defining PID Controller.
  */
 class PIDController {
-  //TODO private
 public:
   /*!
    * \brief Parametrized constructor.
@@ -121,7 +119,7 @@ public:
    */
   PIDController(float Kp, float Ki, float Kd, 
                 float u_min, float u_max, 
-                float I, float dead_space=0) : 
+                float I, float dead_space=-1) : 
     Kp_(Kp), Kd_(Kd), Ki_(Ki), u_min_(u_min), u_max_(u_max), I_(I), dead_space_(dead_space) {};
   
   /*!
@@ -167,9 +165,6 @@ float PIDController::pid(const float error, const float d_error) {
     u = u_min_;          // Clamp the CV
   }
   
-  //u = mapFloat(u, u_min_, u_max_, PWM_MIN, PWM_MAX); // TODO -+ values
-  // u = mapFloat(u, 0, u_max_, PWM_MIN, PWM_MAX);
-  u = constrain(u, PWM_MIN+OFFSET, PWM_MAX); // TODO
   return u;  // Return control value (in +/- PWM resolution).
 }
 
@@ -180,8 +175,6 @@ float PIDController::pid(const float error, const float d_error) {
  * Class defining current sensor.
  */
 class CurrentSensor {
-  //TODO public -> private
-  //private:
 public:
   /*!
    *\brief Parametrized constructor. 
@@ -238,18 +231,18 @@ float CurrentSensor::filterCurrent() {
  * Class defining current control.
  */
 class CurrentControl {
-  //TODO private
 public:
   /*!
    * \brief Parametrized constructor. 
    *
    * Parametrized constructor.
    * \param[in] i_d - desired current [A]
-   * \param[in] last_error - last error 
+   * \param[in] last_error - last error
+   * \param[in] u - control variable 
    * \param[in] pid - PID controller
    */ 
-  CurrentControl(float i_d, float last_error, const PIDController& pid) :  
-    i_d_(i_d), last_error_(last_error), pid_(pid) {};
+  CurrentControl(float i_d, float last_error, int u, const PIDController& pid) :  
+  i_d_(i_d), last_error_(last_error), u_(u), pid_(pid) {};
   
   /*!
    * \brief Current control feedback.
@@ -261,18 +254,33 @@ public:
   
   float i_d_;         //! Desired current [A]
   float last_error_;  //! Last error (to calculate d_error)
+  int u_;             //! Control variable (in PWM range)
   PIDController pid_; //! PID controller for closed loop
 };
 
 // TODO
 float CurrentControl::currentControl(const float current) {
-  // TODO What about minimum Jerk???
-  //TODO float dT = ros::now();
+  // TODO What about this part with position and minimum Jerk???
   float error   =  i_d_ - current;              // Current error 
-  float d_error = (error - last_error_); // TODO /DT;     // Derivative of the current error
+  float d_error = (error - last_error_);        // Derivative of the current error
   last_error_ = error;                          // Update last error
-  return pid_.pid(error, d_error);              // Return control value 
-  // TODO + c_s->R_ * c_s->r_ * VOLTAGE_FACTOR; //compute control with feedforward term
+  u_ = pid_.pid(error, d_error);                // Set new control value
+  //u_>=0 ? u_+=OFFSET : u_-=OFFSET;               // TODO Add resistance of the motor                      
+  //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));      // TODO Clamp 
+  // u_ += c_s->R_ * c_s->r_ * VOLTAGE_FACTOR;  // TODO ??? Compute control with feedforward term
+  
+  //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));     
+  // TODO what with <0 values? PWM can't have negative values
+  //constrain(u_, 0, static_cast<int>(pid_.u_max_)); // TODO WHY THIRD OPERAND HAS NO EFFECT???
+  
+  if (u_ > pid_.u_max_) {
+    u_ = pid_.u_max_;
+  }
+  else if (u_ < 0) u_ = 0;
+  //else if (u_ < pid_.u_min_) {
+  //  u_ = pid_.u_min_;
+  //}
+  return u_;    // Return CV
 }
 
 /*============================================================*/
@@ -312,7 +320,6 @@ public:
  * Class defining DC Motor.
  */
 class Motor {
-  //TODO private
 public:
   /*!
    * \brief Parametrized constructor. 
@@ -373,8 +380,9 @@ int Motor::setPwm(const int pwm_val) {
 
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(0, 0, 0, ALPHA_CURRENT),
-         CurrentControl(DESIRED_CURRENT, 0.0,
-                        PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0)));
+         CurrentControl(DESIRED_CURRENT, 0.0, 0,
+                        PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0))
+        );
 
 /*=============== ROS ===============*/
 // TODO documentation for this part
@@ -447,6 +455,18 @@ void setIdCallback( const std_msgs::Float32& i_d_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_i_d("set_i_d", &setIdCallback);
 
+void setOffsetCallback( const std_msgs::Float32& offset_msg ) {
+  OFFSET = offset_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_offset("set_offset", &setOffsetCallback);
+
+void setDeadSpaceCallback( const std_msgs::Float32& dead_msg ) {
+  m1.cc_.pid_.dead_space_ = dead_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_dead("set_dead", &setDeadSpaceCallback);
+
 /*============================================================*/
 /*!
  * \brief Sets up code after every reset of the Arduino Board. 
@@ -471,6 +491,8 @@ void setup()
   nh.subscribe(sub_set_ki);
   nh.subscribe(sub_set_kd);
   nh.subscribe(sub_set_i_d);
+  nh.subscribe(sub_set_offset);
+  nh.subscribe(sub_set_dead);
   nh.subscribe(sub_change_dir);
   
   /* Arduino */
@@ -510,10 +532,9 @@ void loop()
   pub_current.publish( &current_msg );
   filtered_current_msg.data = m1.cs_.filterCurrent();
   pub_filtered_current.publish( &filtered_current_msg );
-  count_msg.data = counter;
-  pub_counter.publish( &count_msg );
   u_msg.data =  m1.setPwm(m1.cc_.currentControl(m1.cs_.filtered_current_));
   pub_u.publish( &u_msg );
+  
   error_msg.data = m1.cc_.last_error_;
   pub_error.publish( &error_msg );
   i_d_msg.data = m1.cc_.i_d_;
@@ -521,6 +542,9 @@ void loop()
   integral_msg.data = m1.cc_.pid_.I_;
   pub_integral.publish( &integral_msg );
   
+  count_msg.data = counter;
+  pub_counter.publish( &count_msg );
+  
   nh.spinOnce();
-  delay(DELAY_MS);
+  delay(DELAY);
 }

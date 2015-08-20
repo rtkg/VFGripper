@@ -62,12 +62,13 @@ const float DT = 1e-3;  //! Time step [s]
 
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
-/*const*/ int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
+const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
 int t_old = 0; //! Timer value for calculating time steps
 int t_new = 0; //! Timer value for calculating time steps
+int offset = OFFSET; //! Offset for PWM value
 
 /*=============== Functions ===============*/
 /*!
@@ -265,7 +266,7 @@ float CurrentControl::currentControl(const float current) {
   float d_error = (error - last_error_);        // Derivative of the current error
   last_error_ = error;                          // Update last error
   u_ = pid_.pid(error, d_error);                // Set new control value
-  //u_>=0 ? u_+=OFFSET : u_-=OFFSET;               // TODO Add resistance of the motor                      
+  //u_>=0 ? u_+=offset : u_-=offset;               // TODO Add resistance of the motor                      
   //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));      // TODO Clamp 
   // u_ += c_s->R_ * c_s->r_ * VOLTAGE_FACTOR;  // TODO ??? Compute control with feedforward term
   
@@ -379,7 +380,7 @@ int Motor::setPwm(const int pwm_val) {
 }
 
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
-         CurrentSensor(0, 0, 0, ALPHA_CURRENT),
+         CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
          CurrentControl(DESIRED_CURRENT, 0.0, 0,
                         PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0))
         );
@@ -456,7 +457,7 @@ void setIdCallback( const std_msgs::Float32& i_d_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_i_d("set_i_d", &setIdCallback);
 
 void setOffsetCallback( const std_msgs::Float32& offset_msg ) {
-  OFFSET = offset_msg.data;
+  offset = offset_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_offset("set_offset", &setOffsetCallback);
@@ -532,8 +533,10 @@ void loop()
   pub_current.publish( &current_msg );
   filtered_current_msg.data = m1.cs_.filterCurrent();
   pub_filtered_current.publish( &filtered_current_msg );
-  u_msg.data =  m1.setPwm(m1.cc_.currentControl(m1.cs_.filtered_current_));
-  pub_u.publish( &u_msg );
+  //u_msg.data =  m1.setPwm(m1.cc_.currentControl(m1.cs_.filtered_current_));
+  //pub_u.publish( &u_msg );
+  
+  m1.setPwm(3000);
   
   error_msg.data = m1.cc_.last_error_;
   pub_error.publish( &error_msg );

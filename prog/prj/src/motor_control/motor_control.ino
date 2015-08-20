@@ -6,7 +6,12 @@
  * \date    August 2015
  * \pre     roscore
  * \bug     
- * \warning TODO PID Calibration. +/- control variable values
+ * \warning TODO Feedforward term - verify (V_MAX?)
+ *               add jerk, 
+ *               H-Bridge changes - test, 
+ *               PID Calibration, 
+ *               frequency PWM
+ *               class SensorPins,
  *
  * rosserial_python node
  * Publishes:
@@ -44,6 +49,14 @@ const int M1_D2  = 8;  // PWM pin to control output voltage
 
 const int LED_PIN = 13; // LED pin to visualize  
 
+/*=============== Controller modes ===============*/
+enum {
+  POSITION_MODE, // Position controller
+  VELOCITY_MODE, // Velocity controller 
+  CURRENT_MODE,  // Current controller
+  NO_MODE        // Without controller
+};
+
 /*=============== Constants ===============*/
 const int BIT_RESOLUTION = 12; // 12 => [0; 4095], analogWrite(pin, PWM value)
 const int PWM_MIN = 0;         // PWM minimum value
@@ -51,18 +64,19 @@ const int PWM_MAX = 4095;      // PWM maximum value
 
 const int DELAY = 1; // Delay time [ms]
 
-const float ALPHA_CURRENT = 0.95;   // Value for filtering current
+const float ALPHA_CURRENT = 0.99;   // Value for filtering current
 const float DESIRED_CURRENT = 0.015; // Desired current (=> torque)
 
-const float KP = 100.0; //! PID value
-const float KI = 30.0;   //! PID value
-const float KD = 300.0;   //! PID value
+const float KP = 1000000.0; //! PID value
+const float KI = 10.0;   //! PID value
+const float KD = 0.02;   //! PID value
 const float DEAD_SPACE = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 const float DT = 1e-3;  //! Time step [s]
 
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
 const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
+const float R_MOTOR = 7.25; //! Terminal resistance of the motor
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
@@ -97,6 +111,80 @@ float mapFloat(const float x, const float in_min, const float in_max,
                const float out_min, const float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+/*!
+ * \brief Calculates minimum jerk trajectory point.
+ * 
+ * Calculates minimum jerk trajectory point. 
+ * Allows to avoid step response and hence to obtain smoother trajectory.
+ * The smaller T, the more rapid response. 
+ * Similar to step response achieved by higher order systems.
+ * 
+ * \param[in] t0 - time of initializing the motion
+ * \param[in] t - current time of execution 
+ * \param[in] T - time for executing the loop
+ * \param[in] q0 - initial state
+ * \param[in] qf - final state
+ * \return    minimum jerk trajectory point
+ */
+float minimumJerk(float t0, float t, float T, float q0, float qf)
+{
+  if (t > t0 + T) {
+    t = T + t0; // Make sure the ouput stays at qf after T has passed
+  }
+  // Return smoother value
+  // TODO What with dividing by 0?
+  return q0 + (qf - q0) * (10 * pow((t - t0) / T, 3) - 15 * pow((t - t0) / T, 4) + 6 * pow((t - t0) / T, 5));
+}
+
+// TODO use this class
+/*============================================================*/
+/*!
+ * \brief Class defining Control Variables.
+ * 
+ * Class defining Control Variables.
+ */
+class ControlStates
+{
+public:
+  float r_;  //! Setpoint (reference) value at current iteration
+  float rf_; //! Final setpoint value
+  float ri_; //! Initial setpoint value
+  float e_;  //! Error
+  float de_; //! Error derivative
+  
+  float ti_; //! Time when we initialized motion [s]
+  float T_;  //! Time for executing the loop
+  
+  float u_; //! Computed control
+  
+  float R_; //! Motor resistance for current control [ohm]
+  
+  bool active_; //! Flag indicating whether the corresponding controller is active or not
+  int mode_;    //! Position/current/velocity controller at the moment 
+  
+  /* Parametrized constructor */
+  /*!
+   * \brief Parametrized constructor.
+   * 
+   * Parametrized constructor.
+   * \param[in] r - setpoint (reference) value at current iteration
+   * \param[in] rf - final setpoint value
+   * \param[in] ri - initial setpoint value
+   * \param[in] e - error
+   * \param[in] de - error derivative
+   * \param[in] ti - time when we initialized motion [s]
+   * \param[in] T - time for executing the loop
+   * \param[in] u - computed control
+   * \param[in] R - motor resistance for current control [ohm]
+   * \param[in] active - flag indicating whether the corresponding controller is active or not
+   * \param[in] mode - position/current/velocity controller at the moment 
+   */
+  ControlStates(float r, float rf, float ri, float e, float de, 
+                float ti, float T, int u, int R, bool active, int mode) : 
+    r_(r), rf_(rf), ri_(ri), e_(e), de_(de), 
+    ti_(ti), T_(T), u_(u), R_(R), active_(active), mode_(mode) {};
+};
 
 /*============================================================*/
 /*!
@@ -204,12 +292,13 @@ public:
    * \brief Filters measured current.
    * 
    * Filters measured current.
+   * \pre current_ has to be measured before
    * \post filtered_current_ has a new value 
    * \return measured current [A]
    */
   float filterCurrent();
   
-  const float alpha_;       //! First order filter parameter, 0<=alpha<=1, alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time
+  float alpha_;             //! First order filter parameter, 0<=alpha<=1, alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time
   int sensed_value_;        //! analogRead maps input voltages between 0 and 3.3 V into int [0; 4095].
   float current_;           //! Sensed current in [A].
   float filtered_current_;  //! Filtered current in [A].
@@ -266,22 +355,19 @@ float CurrentControl::currentControl(const float current) {
   float d_error = (error - last_error_);        // Derivative of the current error
   last_error_ = error;                          // Update last error
   u_ = pid_.pid(error, d_error);                // Set new control value
-  //u_>=0 ? u_+=offset : u_-=offset;               // TODO Add resistance of the motor                      
-  //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));      // TODO Clamp 
-  // u_ += c_s->R_ * c_s->r_ * VOLTAGE_FACTOR;  // TODO ??? Compute control with feedforward term
   
-  //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));     
-  // TODO what with <0 values? PWM can't have negative values
-  //constrain(u_, 0, static_cast<int>(pid_.u_max_)); // TODO WHY THIRD OPERAND HAS NO EFFECT???
+  float feedforward = R_MOTOR * current; // V = L*di/dt + RI + E  
+                                         // We hold the motor => w=0 => E=0; di/dt == 0
+                                         // => V = RI
+  mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct???
+  // TODO do we need 1.0*???
+  u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
   
-  if (u_ > pid_.u_max_) {
-    u_ = pid_.u_max_;
-  }
-  else if (u_ < 0) u_ = 0;
-  //else if (u_ < pid_.u_min_) {
-  //  u_ = pid_.u_min_;
-  //}
-  return u_;    // Return CV
+  //u_>=0 ? u_+=offset : u_-=offset;              // TODO Add resistance of the motor                      
+  //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));      // TODO Clamp after that
+  
+  constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  return u_;    // Return CV (can be negative!)
 }
 
 /*============================================================*/
@@ -327,11 +413,12 @@ public:
    *
    * Parametrized constructor.
    * \param[in] m_pins - motor control pins
-   * \param[in] cs - current sensor
+   * \param[in] curr_s - current sensor
    * \param[in] cc - current control
    */ 
-  Motor(const MotorControlPins& m_pins, const CurrentSensor& cs, const CurrentControl& cc) :
-    m_pins_(m_pins), cs_(cs), cc_(cc) {};
+  Motor(const MotorControlPins& m_pins, const CurrentSensor& curr_s, 
+        const ControlStates cs, const CurrentControl& cc) :
+    m_pins_(m_pins), curr_s_(curr_s), cs_(cs), cc_(cc) {};
   
   /*!
    * \brief Drives motor in forward direction. 
@@ -359,8 +446,19 @@ public:
    */
   int setPwm(const int pwm_val);
   
+  /*! 
+   * \brief Adjust direction depending on the control varaible sign and set speed.
+   * 
+   * Adjust direction depending on the control varaible sign and set speed.
+   * \param[in] cv - control variable
+   * \return true - status flag HIGH -> good
+   *         false - status flag LOW -> bad
+   */
+  bool actuate(const float cv); 
+  
   MotorControlPins m_pins_; //! Motor control pins
-  CurrentSensor cs_;        //! Current sensor
+  CurrentSensor curr_s_;        //! Current sensor
+  ControlStates cs_;         //! Control states of the motor
   CurrentControl cc_;       //! Current control
 };
 
@@ -379,8 +477,22 @@ int Motor::setPwm(const int pwm_val) {
   return pwm_val;
 }
 
+bool Motor::actuate(const float cv) {
+  // Set direction
+  if (cv > 0.0) {
+    forward();
+  }
+  else {
+    reverse();
+  }
+  setPwm(static_cast<int>(abs(cv) + 0.5f)); // Set speed
+  return digitalRead(m_pins_.SF_); // Return status flag 
+}
+
+/*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
+         ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, R_MOTOR, false, CURRENT_MODE), // TODO ??? false -> true?
          CurrentControl(DESIRED_CURRENT, 0.0, 0,
                         PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0))
         );
@@ -468,6 +580,12 @@ void setDeadSpaceCallback( const std_msgs::Float32& dead_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_dead("set_dead", &setDeadSpaceCallback);
 
+void setAlphaCallback( const std_msgs::Float32& alpha_msg ) {
+  m1.curr_s_.alpha_ = alpha_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_alpha("set_alpha", &setAlphaCallback);
+
 /*============================================================*/
 /*!
  * \brief Sets up code after every reset of the Arduino Board. 
@@ -494,6 +612,7 @@ void setup()
   nh.subscribe(sub_set_i_d);
   nh.subscribe(sub_set_offset);
   nh.subscribe(sub_set_dead);
+  nh.subscribe(sub_set_alpha);
   nh.subscribe(sub_change_dir);
   
   /* Arduino */
@@ -515,7 +634,7 @@ void setup()
   analogWriteResolution(BIT_RESOLUTION);
   analogReadResolution(BIT_RESOLUTION);
   
-  m1.setPwm(20);
+  m1.setPwm(2000);
   
   /* Open a serial connection */
   //Serial.begin(57600);
@@ -529,14 +648,15 @@ void setup()
  */
 void loop()
 {
-  current_msg.data = m1.cs_.senseCurrent(m1.m_pins_.FB_);
+  current_msg.data = m1.curr_s_.senseCurrent(m1.m_pins_.FB_);
   pub_current.publish( &current_msg );
-  filtered_current_msg.data = m1.cs_.filterCurrent();
+  filtered_current_msg.data = m1.curr_s_.filterCurrent();
   pub_filtered_current.publish( &filtered_current_msg );
-  //u_msg.data =  m1.setPwm(m1.cc_.currentControl(m1.cs_.filtered_current_));
-  //pub_u.publish( &u_msg );
+  u_msg.data =  m1.cc_.currentControl(m1.curr_s_.filtered_current_);
+  pub_u.publish( &u_msg );
   
-  m1.setPwm(3000);
+  m1.actuate(u_msg.data);
+  //m1.setPwm(3000);
   
   error_msg.data = m1.cc_.last_error_;
   pub_error.publish( &error_msg );

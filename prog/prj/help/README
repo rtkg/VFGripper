@@ -1,0 +1,6 @@
+To change PWM frequency:
+Find file variant.h
+~/.arduino15/packages/arduino/hardware/sam/1.6.4/variants/arduino_due_x/variant.h
+And change
+#define PWM_FREQUENCY        20000 (instead of 1000)
+#define TC_FREQUENCY         20000 (instead of 1000)

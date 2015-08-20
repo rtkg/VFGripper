@@ -51,7 +51,7 @@ const int PWM_MAX = 4095;      // PWM maximum value
 
 const int DELAY = 1; // Delay time [ms]
 
-const float ALPHA_CURRENT = 0.99;   // Value for filtering current
+const float ALPHA_CURRENT = 0.95;   // Value for filtering current
 const float DESIRED_CURRENT = 0.015; // Desired current (=> torque)
 
 const float KP = 100.0; //! PID value

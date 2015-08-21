@@ -235,23 +235,31 @@ public:
 };
 
 float PIDController::pid(const float error, const float d_error) {
-  I_ += error;                                // Update integral
-  float u = Kp_*error + Ki_*I_ + Kd_*d_error; // Calculate control
-  
+  float u;                          // Control variable
+  I_ += error;                      // Update integral
+  /* TODO Add this part??? Set boundaries */
+  /*
+  if (I_ > I_max_ || I < I_min_) {  
+    constrain(I_, I_min_, I_max_);  // Keep the integral within some boundaries
+  }
+ */ 
+  if ( !(dead_space_> 0) ) {              // If there is no deadband
+    u = Kp_*error + Ki_*I_ + Kd_*d_error; // Calculate control
+  }
   // TODO I don't fully understand this part ;/
-  if (dead_space_ > 0) {             // If there is a deadband 
+  else {                             // If there is a deadband 
     if (abs(error) < dead_space_) {  // And process variable is inside it
-      u = Ki_*I_ + Kd_*d_error;      // Then update control value without P-term
+      u = Ki_*I_ + Kd_*d_error;      // Then update control value without P-term (just ID) TODO why???
     }
     else {                           // If PV is outside deadband
-                                     // Then update CV with smaller error and all PID terms
+                                     // Then update CV with smaller error TODO why??? and all PID terms 
       u = Kp_ * (error - (error<0 ? -1 : 1)*dead_space_) + Ki_*I_ + Kd_*d_error;
     }
   }
   
   // Clamp the CV and recalculate the Integral term (the latter to avoid windup)
   if (u > u_max_ || u < u_min_) {     // If CV is bigger/smaller than max/min feasible value
-    I_ -= error;                      // Back-calculate the I-term to constrain the regulator output within feasible bounds
+    I_ -= error;                      // Back-calculate the I-term to avoid wind up
     u = constrain(u, u_min_, u_max_); // Clamp the CV
   }
   

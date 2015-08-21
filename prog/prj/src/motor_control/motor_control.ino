@@ -52,32 +52,34 @@
 */
 
 /*=============== Declarations of pins ===============*/
-const int M1_IN1 = 6;  // Motor input 1
-const int M1_IN2 = 7;  // Motor input 2
-const int M1_SF  = 24; // Motor status flag
-const int M1_FB  = A0; // Analog input A0 for current sensing on Motor 1
-const int EN     = 25; // Driver board enable pin
-const int M1_D2  = 8;  // PWM pin to control output voltage
+const int M1_IN1 = 6;  //! Motor input 1
+const int M1_IN2 = 7;  //! Motor input 2
+const int M1_SF  = 24; //! Motor status flag
+const int M1_FB  = A0; //! Analog input A0 for current sensing on Motor 1
+const int EN     = 25; //! Driver board enable pin
+const int M1_D2  = 8;  //! PWM pin to control output voltage
 
-const int LED_PIN = 13; // LED pin to visualize  
+const int LED_PIN = 13; //! LED pin to visualize  
 
 /*=============== Controller modes ===============*/
-enum ControllerMode {
-  POSITION_MODE, // Position controller
-  VELOCITY_MODE, // Velocity controller 
-  CURRENT_MODE,  // Current controller
-  NO_MODE        // Without controller
+enum ControlMode {
+  POSITION_MODE, //! Position controller
+  VELOCITY_MODE, //! Velocity controller 
+  CURRENT_MODE,  //! Current controller
+  NO_MODE        //! Without controller
 };
 
 /*=============== Constants ===============*/
-const int BIT_RESOLUTION = 12; // 12 => [0; 4095], analogWrite(pin, PWM value)
-const int PWM_MIN = 0;         // PWM minimum value
-const int PWM_MAX = 4095;      // PWM maximum value
+const int BIT_RESOLUTION = 12; //! 12 => [0; 4095], analogWrite(pin, PWM value)
+const int PWM_MIN = 0;         //! PWM minimum value
+const int PWM_MAX = 4095;      //! PWM maximum value
 
 const int DELAY = 1; // Delay time [ms]
 
-const float ALPHA_CURRENT = 0.99;   // Value for filtering current
-const float DESIRED_CURRENT = 0.015; // Desired current (=> torque)
+const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
+const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque)
+
+const float T_JERK = 0.0;       //! Time for executing the loop
 
 const float KP = 1000000.0; //! PID value
 const float KI = 10.0;   //! PID value
@@ -124,32 +126,8 @@ float mapFloat(const float x, const float in_min, const float in_max,
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-/*!
- * \brief Calculates minimum jerk trajectory point.
- * 
- * Calculates minimum jerk trajectory point. 
- * Allows to avoid step response and hence to obtain smoother trajectory.
- * The smaller T, the more rapid response. 
- * Similar to step response achieved by higher order systems.
- * 
- * \param[in] t0 - time of initializing the motion
- * \param[in] t - current time of execution 
- * \param[in] T - time for executing the loop
- * \param[in] q0 - initial state
- * \param[in] qf - final state
- * \return    minimum jerk trajectory point
- */
-float minimumJerk(float t0, float t, float T, float q0, float qf)
-{
-  if (t > t0 + T) {
-    t = T + t0; // Make sure the ouput stays at qf after T has passed
-  }
-  // Return smoother value
-  // TODO What with dividing by 0?
-  return q0 + (qf - q0) * (10 * pow((t - t0) / T, 3) - 15 * pow((t - t0) / T, 4) + 6 * pow((t - t0) / T, 5));
-}
-
-// TODO use this class
+// TODO Use this class
+// TODO Put it into [Current, ?]Controller??? I think so
 /*============================================================*/
 /*!
  * \brief Class defining Control Variables.
@@ -159,21 +137,6 @@ float minimumJerk(float t0, float t, float T, float q0, float qf)
 class ControlStates
 {
 public:
-  float r_;  //! Setpoint (reference) value at current iteration
-  float rf_; //! Final setpoint value
-  float ri_; //! Initial setpoint value
-  float e_;  //! Error
-  float de_; //! Error derivative
-  
-  float ti_; //! Time when we initialized motion [s]
-  float T_;  //! Time for executing the loop
-  
-  int u_; //! Computed control
-  
-  bool active_; //! Flag indicating whether the corresponding controller is active or not
-  ControllerMode mode_;    //! Position/current/velocity controller at the moment 
-  
-  /* Parametrized constructor */
   /*!
    * \brief Parametrized constructor.
    * 
@@ -187,13 +150,45 @@ public:
    * \param[in] T - time for executing the loop
    * \param[in] u - computed control
    * \param[in] active - flag indicating whether the corresponding controller is active or not
-   * \param[in] mode - position/current/velocity controller at the moment 
    */
   ControlStates(float r, float rf, float ri, float e, float de, 
-                float ti, float T, int u, bool active, ControllerMode mode) : 
-    r_(r), rf_(rf), ri_(ri), e_(e), de_(de), 
-    ti_(ti), T_(T), u_(u), active_(active), mode_(mode) {};
+                float ti, float T, int u, bool active) : 
+  r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), u_(u), active_(active) {};
+  
+  /*!
+   * \brief Calculates minimum jerk trajectory point.
+   * 
+   * Calculates minimum jerk trajectory point. 
+   * Allows to avoid step response and hence to obtain smoother trajectory.
+   * The smaller T, the more rapid response. 
+   * Similar to step response achieved by higher order systems.
+   * 
+   * \return minimum jerk trajectory point
+   */
+  float minimumJerk(float t);
+  
+  float r_;  //! Setpoint (reference) value at current iteration
+  float rf_; //! Final setpoint value
+  float ri_; //! Initial setpoint value
+  float e_;  //! Error
+  float de_; //! Error derivative
+  
+  float ti_; //! Time when we initialized motion [s]
+  float T_;  //! Time for executing the loop
+  
+  int u_; //! Computed control
+  
+  bool active_; //! Flag indicating whether the corresponding controller is active or not
 };
+
+float ControlStates::minimumJerk(float t) {
+  if (t > ti_ + T_) {
+    t = T_ + ti_;       // Make sure the ouput stays at qf after T has passed
+  }
+  // Return smoother value
+  // TODO What with dividing by 0?
+  return ri_ + (rf_-ri_)*(10*pow((t-ti_)/T_, 3) - 15*pow((t-ti_)/T_, 4) + 6*pow((t-ti_)/T_, 5));
+}
 
 /*============================================================*/
 /*!
@@ -335,14 +330,12 @@ public:
    * \brief Parametrized constructor. 
    *
    * Parametrized constructor.
-   * \param[in] i_d - desired current [A]
-   * \param[in] last_error - last error
    * \param[in] r_motor - terminal resistance of the motor [ohm]
-   * \param[in] u - control variable 
+   * \param[in] cs - control states of the current control 
    * \param[in] pid - PID controller
    */ 
-  CurrentControl(float i_d, float last_error, float r_motor, int u, const PIDController& pid) :  
-  i_d_(i_d), last_error_(last_error), r_motor_(r_motor), u_(u), pid_(pid) {};
+  CurrentControl(float r_motor, const ControlStates& cs, const PIDController& pid) :  
+  r_motor_(r_motor), cs_(cs), pid_(pid) {};
   
   /*!
    * \brief Current control feedback.
@@ -352,34 +345,62 @@ public:
    */  
   float currentControl(const float current);
   
+  float r_motor_;     //! Terminal resistance of the motor [ohm] (to calculate the feedforward term)
+  ControlStates cs_;  //! Control states of the current control
+  PIDController pid_; //! PID controller for closed loop
+  // TODO
+  /*
   float i_d_;         //! Desired current [A]
   float last_error_;  //! Last error (to calculate d_error)
-  float r_motor_;     //! Terminal resistance of the motor [ohm] (to calculate the feedforward term)
   int u_;             //! Control variable (in PWM range)
-  PIDController pid_; //! PID controller for closed loop
+  */
 };
 
 // TODO
 float CurrentControl::currentControl(const float current) {
-  // TODO What about this part with position and minimum Jerk???
-  float error   =  i_d_ - current;              // Current error 
-  float d_error = (error - last_error_);        // Derivative of the current error
-  last_error_ = error;                          // Update last error
-  u_ = pid_.pid(error, d_error);                // Set new control value
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] 
+  //TODO ??? ??? And later part with dir on v3?
+  //float dir =  c_s->r_ >= 0 ? 1 : -1;
+  //float current = dir * curr_s->v_;
+  cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error
+  cs_.e_ =  cs_.r_ - current;             // Current error
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
   
   float feedforward = r_motor_ * current; // V = L*di/dt + RI + E  
-                                         // We hold the motor => w=0 => E=0; di/dt == 0
-                                         // => V = RI
+                                          // We hold the motor => w=0 => E=0; di/dt == 0
+                                          // => V = RI
   mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct???
   // TODO do we need 1.0*???
-  u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
+  cs_.u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
   
   //u_>=0 ? u_+=offset : u_-=offset;              // TODO Add resistance of the motor                      
   //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));      // TODO Clamp after that
   
-  constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  return u_;    // Return CV (can be negative!)
+  constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  return cs_.u_;    // Return CV (can be negative!)
 }
+
+/*============================================================*/
+/*!
+ * \brief Class defining control.
+ * 
+ * Class defining control.
+ */
+class Control {
+public:
+  /*!
+   * \brief Parametrized constructor.
+   * 
+   * Parametrized constructor.
+   * \param[in] mode - position/current/velocity controller
+   * \param[in] cc - current control
+   */
+  Control(ControlMode mode, const CurrentControl& cc) :
+  mode_(mode), cc_(cc) {};
+  
+  ControlMode mode_;    //! Position/current/velocity controller at the moment 
+  CurrentControl cc_;   //! Current control
+};
 
 /*============================================================*/
 /*!
@@ -425,11 +446,11 @@ public:
    * Parametrized constructor.
    * \param[in] m_pins - motor control pins
    * \param[in] curr_s - current sensor
-   * \param[in] cc - current control
+   * \param[in] c - control of the motor
    */ 
   Motor(const MotorControlPins& m_pins, const CurrentSensor& curr_s, 
-        const ControlStates cs, const CurrentControl& cc) :
-    m_pins_(m_pins), curr_s_(curr_s), cs_(cs), cc_(cc) {};
+        const Control& c) :
+    m_pins_(m_pins), curr_s_(curr_s), c_(c) {};
   
   /*!
    * \brief Drives motor in forward direction. 
@@ -468,9 +489,8 @@ public:
   bool actuate(const float cv); 
   
   MotorControlPins m_pins_; //! Motor control pins
-  CurrentSensor curr_s_;        //! Current sensor
-  ControlStates cs_;         //! Control states of the motor
-  CurrentControl cc_;       //! Current control
+  CurrentSensor curr_s_;    //! Current sensor
+  Control c_;               //! Control of the motor
 };
 
 void Motor::forward() {
@@ -503,10 +523,13 @@ bool Motor::actuate(const float cv) {
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
-         ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, CURRENT_MODE), // TODO ??? false -> true?
-         CurrentControl(DESIRED_CURRENT, 0.0, R_MOTOR, 0,
-                        PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0))
-        );
+         Control(CURRENT_MODE, 
+                 CurrentControl(R_MOTOR,
+                                ControlStates(0.0, DESIRED_CURRENT, 0.0, 0.0, 0.0, 0.0, T_JERK, 0, true),
+                                PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0)
+                                )
+                 )
+         );
 
 /*=============== ROS ===============*/
 // TODO documentation for this part
@@ -556,25 +579,25 @@ void setPwmCallback( const std_msgs::Int8& pwm_msg ) {
 ros::Subscriber<std_msgs::Int8> sub_set_vel("set_vel", &setPwmCallback);
 
 void setKpCallback( const std_msgs::Float32& Kp_msg ) {
-  m1.cc_.pid_.Kp_ = Kp_msg.data;
+  m1.c_.cc_.pid_.Kp_ = Kp_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_kp("set_kp", &setKpCallback);
 
 void setKiCallback( const std_msgs::Float32& Ki_msg ) {
-  m1.cc_.pid_.Ki_ = Ki_msg.data;
+  m1.c_.cc_.pid_.Ki_ = Ki_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_ki("set_ki", &setKiCallback);
 
 void setKdCallback( const std_msgs::Float32& Kd_msg ) {
-  m1.cc_.pid_.Kd_ = Kd_msg.data;
+  m1.c_.cc_.pid_.Kd_ = Kd_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_kd("set_kd", &setKdCallback);
 
 void setIdCallback( const std_msgs::Float32& i_d_msg ) {
-  m1.cc_.i_d_ = i_d_msg.data;
+  m1.c_.cc_.cs_.rf_ = i_d_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_i_d("set_i_d", &setIdCallback);
@@ -586,7 +609,7 @@ void setOffsetCallback( const std_msgs::Float32& offset_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_offset("set_offset", &setOffsetCallback);
 
 void setDeadSpaceCallback( const std_msgs::Float32& dead_msg ) {
-  m1.cc_.pid_.dead_space_ = dead_msg.data;
+  m1.c_.cc_.pid_.dead_space_ = dead_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_dead("set_dead", &setDeadSpaceCallback);
@@ -663,17 +686,17 @@ void loop()
   pub_current.publish( &current_msg );
   filtered_current_msg.data = m1.curr_s_.filterCurrent();
   pub_filtered_current.publish( &filtered_current_msg );
-  u_msg.data =  m1.cc_.currentControl(m1.curr_s_.filtered_current_);
+  u_msg.data =  m1.c_.cc_.currentControl(m1.curr_s_.filtered_current_);
   pub_u.publish( &u_msg );
   
   m1.actuate(u_msg.data);
   //m1.setPwm(3000);
   
-  error_msg.data = m1.cc_.last_error_;
+  error_msg.data = m1.c_.cc_.cs_.e_;
   pub_error.publish( &error_msg );
-  i_d_msg.data = m1.cc_.i_d_;
+  i_d_msg.data = m1.c_.cc_.cs_.rf_;
   pub_i_d.publish( &i_d_msg );
-  integral_msg.data = m1.cc_.pid_.I_;
+  integral_msg.data = m1.c_.cc_.pid_.I_;
   pub_integral.publish( &integral_msg );
   
   count_msg.data = counter;

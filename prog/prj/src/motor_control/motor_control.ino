@@ -238,6 +238,7 @@ float PIDController::pid(const float error, const float d_error) {
   I_ += error;                                // Update integral
   float u = Kp_*error + Ki_*I_ + Kd_*d_error; // Calculate control
   
+  // TODO I don't fully understand this part ;/
   if (dead_space_ > 0) {             // If there is a deadband 
     if (abs(error) < dead_space_) {  // And process variable is inside it
       u = Ki_*I_ + Kd_*d_error;      // Then update control value without P-term
@@ -249,13 +250,9 @@ float PIDController::pid(const float error, const float d_error) {
   }
   
   // Clamp the CV and recalculate the Integral term (the latter to avoid windup)
-  if (u > u_max_) {      // If CV is biggger than maximum feasible value
-    I_ -= error;         // Back-calculate the I-term to constrain the regulator output within feasible bounds
-    u = u_max_;          // Clamp the CV
-  } 
-  else if (u < u_min_) { // If CV is smaller than minimum feasible value
-    I_ -= error;         // Back-calculate the I-term to constrain the regulator output within feasible bounds
-    u = u_min_;          // Clamp the CV
+  if (u > u_max_ || u < u_min_) {     // If CV is bigger/smaller than max/min feasible value
+    I_ -= error;                      // Back-calculate the I-term to constrain the regulator output within feasible bounds
+    u = constrain(u, u_min_, u_max_); // Clamp the CV
   }
   
   return u;  // Return control value (in +/- PWM resolution).

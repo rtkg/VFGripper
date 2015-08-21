@@ -35,9 +35,21 @@
 
 #define USE_USBCON            // Has to be declared if there are problems with serial communication
 #include <ros.h>              // ROS stuff for Arduino
+
 #include <std_msgs/Empty.h>   // Message type
 #include <std_msgs/Int8.h>    // Message type
 #include <std_msgs/Float32.h> // Message type
+
+// TODO How to include them?
+/*
+#include <velvet_msgs/GripperState.h>
+#include <velvet_msgs/GripperState.h>
+#include <velvet_msgs/SetPos.h>
+#include <velvet_msgs/SetCur.h>
+#include <velvet_msgs/SetVel.h>
+#include <velvet_msgs/SetPID.h>
+#include <std_srvs/Empty.h>
+*/
 
 /*=============== Declarations of pins ===============*/
 const int M1_IN1 = 6;  // Motor input 1
@@ -50,7 +62,7 @@ const int M1_D2  = 8;  // PWM pin to control output voltage
 const int LED_PIN = 13; // LED pin to visualize  
 
 /*=============== Controller modes ===============*/
-enum {
+enum ControllerMode {
   POSITION_MODE, // Position controller
   VELOCITY_MODE, // Velocity controller 
   CURRENT_MODE,  // Current controller
@@ -156,12 +168,10 @@ public:
   float ti_; //! Time when we initialized motion [s]
   float T_;  //! Time for executing the loop
   
-  float u_; //! Computed control
-  
-  float R_; //! Motor resistance for current control [ohm]
+  int u_; //! Computed control
   
   bool active_; //! Flag indicating whether the corresponding controller is active or not
-  int mode_;    //! Position/current/velocity controller at the moment 
+  ControllerMode mode_;    //! Position/current/velocity controller at the moment 
   
   /* Parametrized constructor */
   /*!
@@ -176,14 +186,13 @@ public:
    * \param[in] ti - time when we initialized motion [s]
    * \param[in] T - time for executing the loop
    * \param[in] u - computed control
-   * \param[in] R - motor resistance for current control [ohm]
    * \param[in] active - flag indicating whether the corresponding controller is active or not
    * \param[in] mode - position/current/velocity controller at the moment 
    */
   ControlStates(float r, float rf, float ri, float e, float de, 
-                float ti, float T, int u, int R, bool active, int mode) : 
+                float ti, float T, int u, bool active, ControllerMode mode) : 
     r_(r), rf_(rf), ri_(ri), e_(e), de_(de), 
-    ti_(ti), T_(T), u_(u), R_(R), active_(active), mode_(mode) {};
+    ti_(ti), T_(T), u_(u), active_(active), mode_(mode) {};
 };
 
 /*============================================================*/
@@ -328,11 +337,12 @@ public:
    * Parametrized constructor.
    * \param[in] i_d - desired current [A]
    * \param[in] last_error - last error
+   * \param[in] r_motor - terminal resistance of the motor [ohm]
    * \param[in] u - control variable 
    * \param[in] pid - PID controller
    */ 
-  CurrentControl(float i_d, float last_error, int u, const PIDController& pid) :  
-  i_d_(i_d), last_error_(last_error), u_(u), pid_(pid) {};
+  CurrentControl(float i_d, float last_error, float r_motor, int u, const PIDController& pid) :  
+  i_d_(i_d), last_error_(last_error), r_motor_(r_motor), u_(u), pid_(pid) {};
   
   /*!
    * \brief Current control feedback.
@@ -344,6 +354,7 @@ public:
   
   float i_d_;         //! Desired current [A]
   float last_error_;  //! Last error (to calculate d_error)
+  float r_motor_;     //! Terminal resistance of the motor [ohm] (to calculate the feedforward term)
   int u_;             //! Control variable (in PWM range)
   PIDController pid_; //! PID controller for closed loop
 };
@@ -356,7 +367,7 @@ float CurrentControl::currentControl(const float current) {
   last_error_ = error;                          // Update last error
   u_ = pid_.pid(error, d_error);                // Set new control value
   
-  float feedforward = R_MOTOR * current; // V = L*di/dt + RI + E  
+  float feedforward = r_motor_ * current; // V = L*di/dt + RI + E  
                                          // We hold the motor => w=0 => E=0; di/dt == 0
                                          // => V = RI
   mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct???
@@ -492,8 +503,8 @@ bool Motor::actuate(const float cv) {
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
-         ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, R_MOTOR, false, CURRENT_MODE), // TODO ??? false -> true?
-         CurrentControl(DESIRED_CURRENT, 0.0, 0,
+         ControlStates(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, CURRENT_MODE), // TODO ??? false -> true?
+         CurrentControl(DESIRED_CURRENT, 0.0, R_MOTOR, 0,
                         PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0))
         );
 

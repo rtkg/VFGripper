@@ -40,6 +40,8 @@
 #include <std_msgs/Int8.h>    // Message type
 #include <std_msgs/Float32.h> // Message type
 
+#include <cmath>
+
 // TODO How to include them?
 /*
 #include <velvet_msgs/GripperState.h>
@@ -79,12 +81,14 @@ const int DELAY = 1; // Delay time [ms]
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque)
 
+const float ALPHA_ENCODER = 0.7; //! TODO
+
 const float T_JERK = 0.0;       //! Time for executing the loop
 
 const float KP = 1000000.0; //! PID value
 const float KI = 10.0;   //! PID value
 const float KD = 0.02;   //! PID value
-const float DEAD_SPACE = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
+const float DEAD_SPACE = 0.0; //(1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 const float DT = 1e-3;  //! Time step [s]
 
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
@@ -219,6 +223,7 @@ public:
    * \brief Calculates PID control variable.
    * 
    * Calculates PID control variable.
+   * Computes the controls from error e, error derivative de and PID parameters.
    * \param[in] error - error = setpoint - process variable
    * \param[in] d_error - error change in time 
    * \return control variable in range [-PWM_MAX, PWM_MAX]
@@ -258,7 +263,7 @@ float PIDController::pid(const float error, const float d_error) {
   }
   
   // Clamp the CV and recalculate the Integral term (the latter to avoid windup)
-  if (u > u_max_ || u < u_min_) {     // If CV is bigger/smaller than max/min feasible value
+  if ((u > u_max_) || (u < u_min_)) {     // If CV is bigger/smaller than max/min feasible value
     I_ -= error;                      // Back-calculate the I-term to avoid wind up
     u = constrain(u, u_min_, u_max_); // Clamp the CV
   }
@@ -353,22 +358,18 @@ public:
   float r_motor_;     //! Terminal resistance of the motor [ohm] (to calculate the feedforward term)
   ControlStates cs_;  //! Control states of the current control
   PIDController pid_; //! PID controller for closed loop
-  // TODO
-  /*
-  float i_d_;         //! Desired current [A]
-  float last_error_;  //! Last error (to calculate d_error)
-  int u_;             //! Control variable (in PWM range)
-  */
 };
 
 // TODO
 float CurrentControl::currentControl(const float current) {
-  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] 
+  // cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] (filtered) TODO nan!!!
   //TODO ??? ??? And later part with dir on v3?
   //float dir =  c_s->r_ >= 0 ? 1 : -1;
   //float current = dir * curr_s->v_;
-  cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error
+  cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error (already a bit filtered)
+  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-current)); // TODO Or filtereven more?
   cs_.e_ =  cs_.r_ - current;             // Current error
+  // TODO Maybe add set point weighting?
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
   
   float feedforward = r_motor_ * current; // V = L*di/dt + RI + E  
@@ -409,6 +410,105 @@ public:
 
 /*============================================================*/
 /*!
+ * \brief Class defining sensor pins.
+ * 
+ * Class defining sensor pins.
+ */
+class SensorPins {
+public:
+  int D_;  //! Sensor data pin
+  int CK_; //! Clock pin
+  int S_;  //! Select pin
+  
+  /*!
+   * \brief Parametrized constructor.
+   * 
+   * Parametrized constructor.
+   * \param[in] D - sensor data pin
+   * \param[in] CK - clock pin
+   * \param[in] S - select pin
+   */
+  SensorPins(int D, int CK, int S) : 
+    D_(D), CK_(CK), S_(S) {};
+    
+  // Read in a byte of dapta from the digital input corresponding to the given sensor
+  byte shiftIn(const SensorPins* s_pins, int readBits); 
+};
+
+/*============================================================*/
+/*!
+ * \brief Class defining encoder.
+ * 
+ * Class defining encoder.
+ */
+class Encoder {
+public:
+  // TODO check types!!!
+  int raw_ticks_;  //! Raw encoder ticks
+  float p_raw_;    //! Encoder ticks (filtered)
+  float p_;        //! Converted value
+  float dp_;       //! Time-derivative of the converted value
+  int k_;          //! Rollover counter
+  int res_;        //! Resolution (i.e., number of ticks per revolution)
+  float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
+  int offset_;     //! Used for zeroing
+  float alpha_;    //! First order filter parameter, 0<=alpha<=1
+  
+  /*!
+   * \brief Parametrized constructor.
+   * 
+   * Parametrized constructor.
+   * \param[in] raw_ticks - raw encoder ticks
+   * \param[in] p_raw - encoder ticks (filtered)
+   * \param[in] p - converted value
+   * \param[in] dp - time-derivative of the converted value
+   * \param[in] k - rollover counter
+   * \param[in] res - resolution (i.e., number of ticks per revolution)
+   * \param[in] scale - scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
+   * \param[in] offset - used for zeroing
+   * \param[in] alpha - first order filter parameter, 0<=alpha<=1
+   */
+  Encoder(int raw_ticks, float p_raw, float p, float dp, int k, int res, float scale, int offset, float alpha) : 
+  raw_ticks_(raw_ticks), p_raw_(p_raw), p_(p), dp_(dp), k_(k), res_(res), scale_(scale), offset_(offset), alpha_(alpha) {};
+  
+  /*!
+   * \brief TODO 
+   * 
+   * TODO Converts to angles???
+   */ 
+  void convertSensorReading(int raw_ticks_new);
+  
+  // TODO
+  // Read the current position from the sensor connected to the given pins
+  int readEncoder(const SensorPins* s_pins); 
+  
+  //TODO
+  // Converts the encoder readings and computes derivatives
+  int computeEncoder(Encoder* e_s, const SensorPins* s_pins); 
+};
+
+// TODO understand this part
+// TODO int - int , int / 2 ???
+void Encoder::convertSensorReading(int raw_ticks_new) {
+  if ((raw_ticks_new - raw_ticks_) < -res_ / 2) { 
+    k_++; // delta is smaller than minus half the resolution -> positive rollover
+  }
+  if ((raw_ticks_new - raw_ticks_) > res_ / 2) {
+    k_--; // delta is larger than half the resolution -> negative rollover
+  }
+  // TODO what's this part?
+  raw_ticks_ = raw_ticks_new; // Update ticks counter
+  p_raw_ = 2 * M_PI * // TODO what's that?
+           ((static_cast<float>(raw_ticks_) - static_cast<float>(offset_)) / (float)res_ + (float)k_) * scale_; // TODO why casting?
+  float p_temp = alpha_ * p_ + (1 - alpha_) * p_raw_; //first order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
+  float dT=1; // FIXME
+  float dp_raw = (p_temp - p_) / ((float)dT*1e-6);
+  dp_ = alpha_ * dp_ + (1 - alpha_) * dp_raw;
+  p_ = p_temp;
+}; // angle=2*pi*[(reading-offset)/res+k]
+
+/*============================================================*/
+/*!
  * \brief Class defining motor control pins.
  * 
  * Class defining motor control pins.
@@ -429,6 +529,8 @@ public:
   MotorControlPins(int IN1, int IN2, int SF, int EN, int FB, int D2) : 
   IN1_(IN1), IN2_(IN2), SF_(SF), EN_(EN), FB_(FB), D2_(D2) {};
   
+  void setupPins();
+  
   int IN1_; //! Motor input 1 pin, controls motor direction
   int IN2_; //! Motor input 2 pin, controls motor direction
   int SF_;  //! Motor status flag
@@ -436,6 +538,18 @@ public:
   int FB_;  //! Analog input pin for current feedback from H-Bridge
   int D2_;  //! Disable 2 PWM pin to control output voltage, controls speed
 };
+
+void MotorControlPins::setupPins()
+{
+  pinMode(IN1_, OUTPUT); // Controls motor direction
+  pinMode(IN2_, OUTPUT); // Controls motor direction
+  pinMode(SF_,  INPUT);  // Motor Status flag from H-Bridge
+  pinMode(FB_,  INPUT);  // Current feedback from H-Bridge
+  pinMode(EN_,  OUTPUT); // Enables motor
+  pinMode(D2_,  OUTPUT); // Controls speed
+  
+  digitalWrite(EN_,  HIGH); // Enables the driver board
+}
 
 /*============================================================*/
 /*!
@@ -487,6 +601,7 @@ public:
    * \brief Adjust direction depending on the control varaible sign and set speed.
    * 
    * Adjust direction depending on the control varaible sign and set speed.
+   * Send the sign-corrected input to the actuator and read the motor status flag.
    * \param[in] cv - control variable
    * \return true - status flag HIGH -> good
    *         false - status flag LOW -> bad
@@ -530,7 +645,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
          Control(CURRENT_MODE, 
                  CurrentControl(R_MOTOR,
-                                ControlStates(0.0, DESIRED_CURRENT, 0.0, 0.0, 0.0, 0.0, T_JERK, 0, true),
+                                ControlStates(DESIRED_CURRENT/*0.0*/, DESIRED_CURRENT, 0.0, 0.0, 0.0, 0.0, T_JERK, 0, true), // TODO
                                 PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0)
                                 )
                  )
@@ -602,7 +717,8 @@ void setKdCallback( const std_msgs::Float32& Kd_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_kd("set_kd", &setKdCallback);
 
 void setIdCallback( const std_msgs::Float32& i_d_msg ) {
-  m1.c_.cc_.cs_.rf_ = i_d_msg.data;
+  //m1.c_.cc_.cs_.rf_ = i_d_msg.data; // TODO
+  m1.c_.cc_.cs_.r_ = i_d_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_i_d("set_i_d", &setIdCallback);
@@ -655,16 +771,16 @@ void setup()
   nh.subscribe(sub_change_dir);
   
   /* Arduino */
-  pinMode(m1.m_pins_.IN1_, OUTPUT); // Controls motor direction
-  pinMode(m1.m_pins_.IN2_, OUTPUT); // Controls motor direction
-  pinMode(m1.m_pins_.SF_,  INPUT);  // Motor Status flag from H-Bridge
-  pinMode(m1.m_pins_.FB_,  INPUT);  // Current feedback from H-Bridge
-  pinMode(m1.m_pins_.EN_,  OUTPUT); // Enables motor
-  pinMode(m1.m_pins_.D2_,  OUTPUT); // Controls speed
-  //VDD = Arduino 3.3 V
+  // TODO setUpArduino();
+  
+  m1.m_pins_.setupPins();
+  
+  // TODO setUpEncoder();
+  //pinMode(VCC_PIN, OUTPUT);         // VCC pin for encoder
+  //digitalWrite(VCC_PIN, HIGH);               // Set 3.3 V on the pin
   
   /* Set default states */
-  digitalWrite(m1.m_pins_.EN_,  HIGH);
+  //digitalWrite(m1.m_pins_.EN_,  HIGH);
   digitalWrite(m1.m_pins_.IN1_, HIGH);
   digitalWrite(m1.m_pins_.IN2_, LOW);
   pinMode(LED_PIN, OUTPUT);
@@ -699,7 +815,7 @@ void loop()
   
   error_msg.data = m1.c_.cc_.cs_.e_;
   pub_error.publish( &error_msg );
-  i_d_msg.data = m1.c_.cc_.cs_.rf_;
+  i_d_msg.data = m1.c_.cc_.cs_.r_;
   pub_i_d.publish( &i_d_msg );
   integral_msg.data = m1.c_.cc_.pid_.I_;
   pub_integral.publish( &integral_msg );

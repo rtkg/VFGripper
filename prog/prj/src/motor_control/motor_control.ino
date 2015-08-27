@@ -41,7 +41,8 @@
 #include <std_msgs/Float32.h> // Message type
 
 #include <cmath>
-#include "../libraries/ros_lib/tests/array_test/array_test.pde"
+#include <limits.h>
+#include <limits>
 
 // TODO How to include them?
 /*
@@ -61,6 +62,11 @@ const int M1_SF  = 24; //! Motor status flag
 const int M1_FB  = A0; //! Analog input A0 for current sensing on Motor 1
 const int EN     = 25; //! Driver board enable pin
 const int M1_D2  = 8;  //! PWM pin to control output voltage
+
+// TODO Check!!!!!!!!!!!
+const int E1_CSn = 26;  //! Chip select pin
+const int E1_DO  = 27;  //! Sensor data output pin
+const int E1_CLK = 28;  //! Clock pin
 
 const int LED_PIN = 13; //! LED pin to visualize  
 
@@ -83,6 +89,8 @@ const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque)
 
 const float ALPHA_ENCODER = 0.7; //! TODO
+const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
+const float SCALE_ENCODER = 1; //! TODO
 
 const float T_JERK = 0.0;       //! Time for executing the loop
 
@@ -425,24 +433,59 @@ public:
  */
 class SensorPins {
 public:
-  int D_;  //! Sensor data pin
-  int CK_; //! Clock pin
-  int S_;  //! Select pin
+  int DO_;  //! Sensor data output pin
+  int CLK_; //! Clock pin
+  int CSn_;  //! Chip select pin
   
   /*!
    * \brief Parametrized constructor.
    * 
    * Parametrized constructor.
-   * \param[in] D - sensor data pin
-   * \param[in] CK - clock pin
-   * \param[in] S - select pin
+   * \param[in] DO - sensor data output pin
+   * \param[in] CLK - clock pin
+   * \param[in] CSn - chip select pin
    */
-  SensorPins(int D, int CK, int S) : 
-    D_(D), CK_(CK), S_(S) {};
+  SensorPins(int DO, int CLK, int CSn) : 
+    DO_(DO), CLK_(CLK), CSn_(CSn) {};
     
-  // Read in a byte of dapta from the digital input corresponding to the given sensor
-  byte shiftIn(const SensorPins* s_pins, int readBits); 
+  /*!
+   * TODO
+   */
+  void setUpPins();  
+    
+  /*!
+   * \brief Read in a byte (or less bits) of data from the digital input corresponding to the given sensor.
+   * 
+   * Read in a byte (or less bits) of data from the digital input corresponding to the given sensor.
+   * \param[in] readBits - number of bits to be read
+   * \return Byte containing all read bits.
+   */
+  byte shiftIn(int readBits); 
 };
+
+void SensorPins::setUpPins() {
+  pinMode(DO_,  INPUT);
+  pinMode(CLK_, OUTPUT);
+  pinMode(CSn_, OUTPUT);
+  
+  digitalWrite(CLK_, HIGH);  // Give some default value
+  digitalWrite(CSn_,  HIGH); // Give some default value
+}
+
+byte SensorPins::shiftIn(int readBits) {
+  byte data = 0;
+  for (int i = readBits - 1; i >= 0; i--) {
+    // Each subsequent rising CLK edge shifts out one bit of data
+    digitalWrite(CLK_, LOW);
+    delayMicroseconds(1);
+    digitalWrite(CLK_, HIGH);
+    delayMicroseconds(1);
+    
+    byte bit = digitalRead(DO_);
+    data = data | (bit << i); 
+  }
+  return data;
+}
 
 /*============================================================*/
 /*!
@@ -451,18 +494,7 @@ public:
  * Class defining encoder.
  */
 class Encoder {
-public:
-  // TODO check types!!!
-  int raw_ticks_;  //! Raw encoder ticks
-  float p_raw_;    //! Encoder ticks (filtered)
-  float p_;        //! Converted value
-  float dp_;       //! Time-derivative of the converted value
-  int k_;          //! Rollover counter
-  int res_;        //! Resolution (i.e., number of ticks per revolution)
-  float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
-  int offset_;     //! Used for zeroing
-  float alpha_;    //! First order filter parameter, 0<=alpha<=1
-  
+public: 
   /*!
    * \brief Parametrized constructor.
    * 
@@ -475,10 +507,21 @@ public:
    * \param[in] res - resolution (i.e., number of ticks per revolution)
    * \param[in] scale - scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
    * \param[in] offset - used for zeroing
-   * \param[in] alpha - first order filter parameter, 0<=alpha<=1
+   * \param[in] alpha - first order filter parameter, 0<=alpha<=
+   * \param[in] s_pins - sensor pins of the encoder
    */
-  Encoder(int raw_ticks, float p_raw, float p, float dp, int k, int res, float scale, int offset, float alpha) : 
-  raw_ticks_(raw_ticks), p_raw_(p_raw), p_(p), dp_(dp), k_(k), res_(res), scale_(scale), offset_(offset), alpha_(alpha) {};
+  Encoder(int raw_ticks, float p_raw, float p, float dp, int k, int res, 
+          float scale, int offset, float alpha, SensorPins s_pins) : 
+  raw_ticks_(raw_ticks), p_raw_(p_raw), p_(p), dp_(dp), k_(k), res_(res), 
+  scale_(scale), offset_(offset), alpha_(alpha), s_pins_(s_pins) {};
+  
+  /*!
+   * \brief Read the current position from the sensor connected to the given pins.
+   * 
+   * Read the current position from the sensor connected to the given pins.
+   * \return Reading of the encoder or a failure status flag
+   */
+  int readEncoder(); 
   
   /*!
    * \brief TODO 
@@ -487,23 +530,77 @@ public:
    */ 
   void convertSensorReading(int raw_ticks_new);
   
-  // TODO
-  // Read the current position from the sensor connected to the given pins
-  int readEncoder(const SensorPins* s_pins); 
+  /*!
+   * \brief Converts the encoder readings and computes derivatives.
+   * 
+   * Converts the encoder readings and computes derivatives.
+   * \return Raw ticks > 0 or a status flag -5
+   */
+  int computeEncoder(); 
   
-  //TODO
-  // Converts the encoder readings and computes derivatives
-  int computeEncoder(Encoder* e_s, const SensorPins* s_pins); 
+  // TODO check types!!!
+  int raw_ticks_;  //! Raw encoder ticks
+  float p_raw_;    //! Encoder ticks (filtered)
+  float p_;        //! Converted value
+  float dp_;       //! Time-derivative of the converted value
+  int k_;          //! Rollover counter
+  int res_;        //! Resolution (i.e., number of ticks per revolution)
+  float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
+  int offset_;     //! Used for zeroing
+  float alpha_;    //! First order filter parameter, 0<=alpha<=1
+  SensorPins s_pins_; //! Sensor pins
 };
+
+int Encoder::readEncoder() {
+  unsigned int reading = 0;
+  
+  // If CSn changes to logic low, Data Out (DO) will change from high impedance (tri-state) to logic high 
+  // and the read-out will be initiated.
+  digitalWrite(s_pins_.CSn_, LOW);
+  //Propagation delay 384μs (slow mode) 96μs (fast mode) 
+  // System propagation delay absolute output : delay of ADC, DSP and absolute interface 
+  delayMicroseconds(1);
+  // Shift in our data (read: 18bits ( 12bits data + 6 bits status)
+  byte d1 = s_pins_.shiftIn(8);
+  byte d2 = s_pins_.shiftIn(8);
+  byte d3 = s_pins_.shiftIn(2);
+  // A subsequent measurement is initiated by a “high” pulse at CSn with a minimum duration of tCSn
+  digitalWrite(s_pins_.CSn_, HIGH);
+  
+  // Get our reading variable
+  reading = d1;
+  reading = reading << 8;
+  reading = reading | d2; 
+  // The first 12 bits are the angular information D[11:0]
+  reading = reading >> 4;
+  
+  // The subsequent 6 bits contain system information, 
+  // about the validity of data such as OCF, COF, LIN, Parity and Magnetic Field status.
+  if (!((d2 & B00001000) == B00001000)) { // Check the offset compensation flag: 1 == started up
+    reading = -1; // TODO enum
+  }
+  if (d2 & B00000100) { // Check the cordic overflow flag: 1 = error
+    reading = -2;
+  }
+  if (d2 & B00000010) { // Check the linearity alarm: 1 = error
+    reading = -3;
+  }
+  if ((d2 & B00000001) & (d3 & B10000000)) { // Check the magnet range: 11 = error
+    reading = -4;
+  }
+  //add the checksum bit TODO
+  
+  return reading;
+}
 
 // TODO understand this part
 // TODO int - int , int / 2 ???
 void Encoder::convertSensorReading(int raw_ticks_new) {
   if ((raw_ticks_new - raw_ticks_) < -res_ / 2) { 
-    k_++; // delta is smaller than minus half the resolution -> positive rollover
+    k_++; // Delta is smaller than minus half the resolution -> positive rollover
   }
   if ((raw_ticks_new - raw_ticks_) > res_ / 2) {
-    k_--; // delta is larger than half the resolution -> negative rollover
+    k_--; // Delta is larger than half the resolution -> negative rollover
   }
   // TODO what's this part?
   raw_ticks_ = raw_ticks_new; // Update ticks counter
@@ -515,6 +612,18 @@ void Encoder::convertSensorReading(int raw_ticks_new) {
   dp_ = alpha_ * dp_ + (1 - alpha_) * dp_raw;
   p_ = p_temp;
 }; // angle=2*pi*[(reading-offset)/res+k]
+
+int Encoder::computeEncoder()
+{
+  int t_new = readEncoder();
+  if ((k_ == std::numeric_limits<int>::max()) ||  (k_ == std::numeric_limits<int>::min())) {
+    raw_ticks_ = (-5); // Over/underflow of the rollover count variable TODO enum
+  }
+  //if (raw_ticks_ >= 0) { // Everything's OK
+    convertSensorReading(t_new);  // Update the sensor value (sets v_) 
+  //}
+  return raw_ticks_;
+}
 
 /*============================================================*/
 /*!
@@ -538,6 +647,9 @@ public:
   MotorControlPins(int IN1, int IN2, int SF, int EN, int FB, int D2) : 
   IN1_(IN1), IN2_(IN2), SF_(SF), EN_(EN), FB_(FB), D2_(D2) {};
   
+  /*!
+   * TODO
+   */
   void setUpPins();
   
   int IN1_; //! Motor input 1 pin, controls motor direction
@@ -548,8 +660,7 @@ public:
   int D2_;  //! Disable 2 PWM pin to control output voltage, controls speed
 };
 
-void MotorControlPins::setupPins()
-{
+void MotorControlPins::setUpPins() {
   pinMode(IN1_, OUTPUT); // Controls motor direction
   pinMode(IN2_, OUTPUT); // Controls motor direction
   pinMode(SF_,  INPUT);  // Motor Status flag from H-Bridge
@@ -558,6 +669,9 @@ void MotorControlPins::setupPins()
   pinMode(D2_,  OUTPUT); // Controls speed
   
   digitalWrite(EN_,  HIGH); // Enables the driver board
+  
+  digitalWrite(IN1_, HIGH); // Default state
+  digitalWrite(IN2_, LOW);
 }
 
 /*============================================================*/
@@ -574,11 +688,12 @@ public:
    * Parametrized constructor.
    * \param[in] m_pins - motor control pins
    * \param[in] curr_s - current sensor
+   * \param[in] e - encoder
    * \param[in] c - control of the motor
    */ 
   Motor(const MotorControlPins& m_pins, const CurrentSensor& curr_s, 
-        const Control& c) :
-    m_pins_(m_pins), curr_s_(curr_s), c_(c) {};
+        const Encoder& e, const Control& c) :
+    m_pins_(m_pins), curr_s_(curr_s), e_(e), c_(c) {};
   
   /*!
    * \brief Drives motor in forward direction. 
@@ -619,6 +734,7 @@ public:
   
   MotorControlPins m_pins_; //! Motor control pins
   CurrentSensor curr_s_;    //! Current sensor
+  Encoder e_;               //! Encoder
   Control c_;               //! Control of the motor
 };
 
@@ -652,6 +768,8 @@ bool Motor::actuate(const float cv) {
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
+         Encoder(0, 0.0, 0.0, 0.0, 0, ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, 0, ALPHA_ENCODER,
+                 SensorPins(E1_DO, E1_CLK, E1_CSn)), //TODO Change???
          Control(CURRENT_MODE, 
                  CurrentControl(R_MOTOR,
                                 ControlStates(DESIRED_CURRENT/*0.0*/, DESIRED_CURRENT, 0.0, 0.0, 0.0, 0.0, T_JERK, 0, true), // TODO
@@ -659,6 +777,15 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                                 )
                  )
          );
+/*
+Encoder(int raw_ticks, float p_raw, float p, float dp, int k, int res, 
+        float scale, int offset, float alpha, SensorPins s_pins) : 
+        raw_ticks_(raw_ticks), p_raw_(p_raw), p_(p), dp_(dp), k_(k), res_(res), 
+        scale_(scale), offset_(offset), alpha_(alpha), s_pins_(s_pins) {};
+SensorPins(int DO, int CLK, int CSn) : 
+        DO_(DO), CLK_(CLK), CSn_(CSn) {};
+EncoderStates(0, 0, 0.0 , 0.0, 0, enc_resolution, 0.167, 0, ENCODER_ALPHA); 
+*/
 
 /*=============== ROS ===============*/
 // TODO documentation for this part
@@ -678,6 +805,10 @@ std_msgs::Float32 i_d_msg;
 ros::Publisher pub_i_d("i_d", &i_d_msg);
 std_msgs::Float32 integral_msg;
 ros::Publisher pub_integral("integral", &integral_msg);
+std_msgs::Float32 enc_vel_msg;
+ros::Publisher pub_enc_vel("enc_vel", &enc_vel_msg);
+std_msgs::Float32 enc_pos_msg;
+ros::Publisher pub_enc_pos("enc_pos", &enc_pos_msg);
 
 int counter = 0;
 void confirmCallback() {
@@ -758,6 +889,8 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.advertise(pub_u);
   node_handler.advertise(pub_i_d);
   node_handler.advertise(pub_integral);
+  node_handler.advertise(pub_enc_vel);
+  node_handler.advertise(pub_enc_pos);
   
   node_handler.subscribe(sub_set_vel);
   node_handler.subscribe(sub_set_kp);
@@ -780,16 +913,14 @@ void setup()
 {
   /* ROS */
   nh.initNode();
-  setupRos(nh);
+  setUpRos(nh);
   
   /* Arduino */
   m1.m_pins_.setUpPins();
-  // TODO setUpEncoder();
+  m1.e_.s_pins_.setUpPins();
   
-  /* Set default states */
-  digitalWrite(m1.m_pins_.IN1_, HIGH);
-  digitalWrite(m1.m_pins_.IN2_, LOW);
   pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
   
   /* Set PWM resolution */
   setUpPwm();
@@ -823,6 +954,13 @@ void loop()
   pub_i_d.publish( &i_d_msg );
   integral_msg.data = m1.c_.cc_.pid_.I_;
   pub_integral.publish( &integral_msg );
+  
+  m1.e_.computeEncoder();
+  
+  enc_vel_msg.data = m1.e_.dp_;
+  pub_enc_vel.publish( &enc_vel_msg );
+  enc_pos_msg.data = m1.e_.p_;
+  pub_enc_pos.publish( &enc_pos_msg );
   
   count_msg.data = counter;
   pub_counter.publish( &count_msg );

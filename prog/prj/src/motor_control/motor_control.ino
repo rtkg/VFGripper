@@ -41,6 +41,7 @@
 #include <std_msgs/Float32.h> // Message type
 
 #include <cmath>
+#include "../libraries/ros_lib/tests/array_test/array_test.pde"
 
 // TODO How to include them?
 /*
@@ -103,6 +104,14 @@ int t_new = 0; //! Timer value for calculating time steps
 int offset = OFFSET; //! Offset for PWM value
 
 /*=============== Functions ===============*/
+/*!
+ * TODO
+ */
+void setUpPwm() {
+  analogWriteResolution(BIT_RESOLUTION);
+  analogReadResolution(BIT_RESOLUTION);
+}
+
 /*!
  * \brief Converts PWM width from [0; 100]% to PWM range value.
  * 
@@ -529,7 +538,7 @@ public:
   MotorControlPins(int IN1, int IN2, int SF, int EN, int FB, int D2) : 
   IN1_(IN1), IN2_(IN2), SF_(SF), EN_(EN), FB_(FB), D2_(D2) {};
   
-  void setupPins();
+  void setUpPins();
   
   int IN1_; //! Motor input 1 pin, controls motor direction
   int IN2_; //! Motor input 2 pin, controls motor direction
@@ -741,6 +750,26 @@ void setAlphaCallback( const std_msgs::Float32& alpha_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_alpha("set_alpha", &setAlphaCallback);
 
+void setUpRos(ros::NodeHandle & node_handler) {
+  node_handler.advertise(pub_counter);
+  node_handler.advertise(pub_current);
+  node_handler.advertise(pub_filtered_current);
+  node_handler.advertise(pub_error);
+  node_handler.advertise(pub_u);
+  node_handler.advertise(pub_i_d);
+  node_handler.advertise(pub_integral);
+  
+  node_handler.subscribe(sub_set_vel);
+  node_handler.subscribe(sub_set_kp);
+  node_handler.subscribe(sub_set_ki);
+  node_handler.subscribe(sub_set_kd);
+  node_handler.subscribe(sub_set_i_d);
+  node_handler.subscribe(sub_set_offset);
+  node_handler.subscribe(sub_set_dead);
+  node_handler.subscribe(sub_set_alpha);
+  node_handler.subscribe(sub_change_dir);
+}
+
 /*============================================================*/
 /*!
  * \brief Sets up code after every reset of the Arduino Board. 
@@ -751,44 +780,19 @@ void setup()
 {
   /* ROS */
   nh.initNode();
-  
-  nh.advertise(pub_counter);
-  nh.advertise(pub_current);
-  nh.advertise(pub_filtered_current);
-  nh.advertise(pub_error);
-  nh.advertise(pub_u);
-  nh.advertise(pub_i_d);
-  nh.advertise(pub_integral);
-  
-  nh.subscribe(sub_set_vel);
-  nh.subscribe(sub_set_kp);
-  nh.subscribe(sub_set_ki);
-  nh.subscribe(sub_set_kd);
-  nh.subscribe(sub_set_i_d);
-  nh.subscribe(sub_set_offset);
-  nh.subscribe(sub_set_dead);
-  nh.subscribe(sub_set_alpha);
-  nh.subscribe(sub_change_dir);
+  setupRos(nh);
   
   /* Arduino */
-  // TODO setUpArduino();
-  
-  m1.m_pins_.setupPins();
-  
+  m1.m_pins_.setUpPins();
   // TODO setUpEncoder();
-  //pinMode(VCC_PIN, OUTPUT);         // VCC pin for encoder
-  //digitalWrite(VCC_PIN, HIGH);               // Set 3.3 V on the pin
   
   /* Set default states */
-  //digitalWrite(m1.m_pins_.EN_,  HIGH);
   digitalWrite(m1.m_pins_.IN1_, HIGH);
   digitalWrite(m1.m_pins_.IN2_, LOW);
   pinMode(LED_PIN, OUTPUT);
   
   /* Set PWM resolution */
-  analogWriteResolution(BIT_RESOLUTION);
-  analogReadResolution(BIT_RESOLUTION);
-  
+  setUpPwm();
   m1.setPwm(2000);
   
   /* Open a serial connection */

@@ -113,7 +113,7 @@ int offset = OFFSET; //! Offset for PWM value
 
 /*=============== Functions ===============*/
 /*!
- * TODO
+ * TODO  /* Set PWM resolution 
  */
 void setUpPwm() {
   analogWriteResolution(BIT_RESOLUTION);
@@ -451,7 +451,7 @@ public:
   /*!
    * TODO
    */
-  void setUpPins();  
+  void setUp();  
     
   /*!
    * \brief Read in a byte (or less bits) of data from the digital input corresponding to the given sensor.
@@ -463,7 +463,7 @@ public:
   byte shiftIn(int readBits); 
 };
 
-void SensorPins::setUpPins() {
+void SensorPins::setUp() {
   pinMode(DO_,  INPUT);
   pinMode(CLK_, OUTPUT);
   pinMode(CSn_, OUTPUT);
@@ -516,6 +516,11 @@ public:
   scale_(scale), offset_(offset), alpha_(alpha), s_pins_(s_pins) {};
   
   /*!
+   * TODO
+   */
+  void setUp();
+  
+  /*!
    * \brief Read the current position from the sensor connected to the given pins.
    * 
    * Read the current position from the sensor connected to the given pins.
@@ -539,7 +544,7 @@ public:
   int computeEncoder(); 
   
   // TODO check types!!!
-  int raw_ticks_;  //! Raw encoder ticks
+  int raw_ticks_;  //! Raw encoder ticks [0; 4095]
   float p_raw_;    //! Encoder ticks (filtered)
   float p_;        //! Converted value
   float dp_;       //! Time-derivative of the converted value
@@ -550,6 +555,12 @@ public:
   float alpha_;    //! First order filter parameter, 0<=alpha<=1
   SensorPins s_pins_; //! Sensor pins
 };
+
+void Encoder::setUp() {
+  raw_ticks_ = readEncoder(); 
+  offset_    = raw_ticks_;
+  convertSensorReading(raw_ticks_);
+}
 
 int Encoder::readEncoder() {
   unsigned int reading = 0;
@@ -607,7 +618,7 @@ void Encoder::convertSensorReading(int raw_ticks_new) {
   p_raw_ = 2 * M_PI * // TODO what's that?
            ((static_cast<float>(raw_ticks_) - static_cast<float>(offset_)) / (float)res_ + (float)k_) * scale_; // TODO why casting?
   float p_temp = alpha_ * p_ + (1 - alpha_) * p_raw_; //first order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-  float dT=1; // FIXME
+  float dT=1000; // [us] FIXME
   float dp_raw = (p_temp - p_) / ((float)dT*1e-6);
   dp_ = alpha_ * dp_ + (1 - alpha_) * dp_raw;
   p_ = p_temp;
@@ -619,9 +630,9 @@ int Encoder::computeEncoder()
   if ((k_ == std::numeric_limits<int>::max()) ||  (k_ == std::numeric_limits<int>::min())) {
     raw_ticks_ = (-5); // Over/underflow of the rollover count variable TODO enum
   }
-  //if (raw_ticks_ >= 0) { // Everything's OK
+  if (raw_ticks_ >= 0) { // Everything's OK
     convertSensorReading(t_new);  // Update the sensor value (sets v_) 
-  //}
+  }
   return raw_ticks_;
 }
 
@@ -650,7 +661,7 @@ public:
   /*!
    * TODO
    */
-  void setUpPins();
+  void setUp();
   
   int IN1_; //! Motor input 1 pin, controls motor direction
   int IN2_; //! Motor input 2 pin, controls motor direction
@@ -660,7 +671,7 @@ public:
   int D2_;  //! Disable 2 PWM pin to control output voltage, controls speed
 };
 
-void MotorControlPins::setUpPins() {
+void MotorControlPins::setUp() {
   pinMode(IN1_, OUTPUT); // Controls motor direction
   pinMode(IN2_, OUTPUT); // Controls motor direction
   pinMode(SF_,  INPUT);  // Motor Status flag from H-Bridge
@@ -916,13 +927,13 @@ void setup()
   setUpRos(nh);
   
   /* Arduino */
-  m1.m_pins_.setUpPins();
-  m1.e_.s_pins_.setUpPins();
+  m1.m_pins_.setUp();
+  m1.e_.s_pins_.setUp();
+  m1.e_.setUp();
   
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
   
-  /* Set PWM resolution */
   setUpPwm();
   m1.setPwm(2000);
   
@@ -957,7 +968,7 @@ void loop()
   
   m1.e_.computeEncoder();
   
-  enc_vel_msg.data = m1.e_.dp_;
+  enc_vel_msg.data = m1.e_.p_raw_;
   pub_enc_vel.publish( &enc_vel_msg );
   enc_pos_msg.data = m1.e_.p_;
   pub_enc_pos.publish( &enc_pos_msg );

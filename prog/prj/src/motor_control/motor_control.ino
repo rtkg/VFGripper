@@ -10,27 +10,19 @@
  *               add jerk, 
  *               H-Bridge changes - test, 
  *               PID Calibration, 
- *               frequency PWM
- *               class SensorPins,
  *
  * rosserial_python node
- * Publishes:
- * TODO
- * 
- * Subscribes:
- * TODO
- * 
+
  * How to run?
  * 1) roscore 
  * 2) rosrun rosserial_python serial_node.py /dev/ttyACM0
  * 3) rqt (or via console: rostopic pub ... std_msgs/... [--once])
  * 
  * Documentation is done for doxygen.
- * 
+ * \note Set up must NOT be in constructors but in setup()!
+ *
  * TODO
- * - finish current control
  * - publisher/subscriber -> services
- * - private classes
  */
 
 #define USE_USBCON            // Has to be declared if there are problems with serial communication
@@ -94,10 +86,10 @@ const float SCALE_ENCODER = 1; //! TODO
 
 const float T_JERK = 0.0;       //! Time for executing the loop
 
-const float KP = 1000000.0; //! PID value
-const float KI = 10.0;   //! PID value
-const float KD = 0.02;   //! PID value
-const float DEAD_SPACE = 0.0; //(1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
+const float KP_CURR = 1500000.0; //! PID value
+const float KI_CURR = 1400.0;   //! PID value
+const float KD_CURR = 100000.0;   //! PID value
+const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 const float DT = 1e-3;  //! Time step [s]
 
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
@@ -162,19 +154,13 @@ public:
    * \brief Parametrized constructor.
    * 
    * Parametrized constructor.
-   * \param[in] r - setpoint (reference) value at current iteration
    * \param[in] rf - final setpoint value
    * \param[in] ri - initial setpoint value
-   * \param[in] e - error
-   * \param[in] de - error derivative
    * \param[in] ti - time when we initialized motion [s]
    * \param[in] T - time for executing the loop
-   * \param[in] u - computed control
    * \param[in] active - flag indicating whether the corresponding controller is active or not
    */
-  ControlStates(float r, float rf, float ri, float e, float de, 
-                float ti, float T, int u, bool active) : 
-  r_(r), rf_(rf), ri_(ri), e_(e), de_(de), ti_(ti), T_(T), u_(u), active_(active) {};
+  ControlStates(float ri, float rf, float ti, float T, bool active);
   
   /*!
    * \brief Calculates minimum jerk trajectory point.
@@ -188,20 +174,30 @@ public:
    */
   float minimumJerk(float t);
   
-  float r_;  //! Setpoint (reference) value at current iteration
-  float rf_; //! Final setpoint value
   float ri_; //! Initial setpoint value
+  float rf_; //! Final setpoint value
+  float r_;  //! Setpoint (reference) value at current iteration
   float e_;  //! Error
   float de_; //! Error derivative
-  
   float ti_; //! Time when we initialized motion [s]
   float T_;  //! Time for executing the loop
-  
   int u_; //! Computed control
-  
   bool active_; //! Flag indicating whether the corresponding controller is active or not
 };
 
+ControlStates::ControlStates(float ri, float rf, float ti, float T, bool active) : 
+  ri_(ri),
+  rf_(rf), 
+  r_(rf_),
+  e_(0.0),
+  de_(0.0),
+  ti_(ti), 
+  T_(T),  
+  u_(0.0),
+  active_(active)
+  {};
+
+// FIXME
 float ControlStates::minimumJerk(float t) {
   if (t > ti_ + T_) {
     t = T_ + ti_;       // Make sure the ouput stays at qf after T has passed
@@ -228,13 +224,10 @@ public:
    * \param[in] Kd - PID derivative part
    * \param[in] u_min - minimum value of control variable
    * \param[in] u_max - maximum value of control variable
-   * \param[in] I - memory for the integral term
    * \param[in] dead_space - dead area around setpoint 
    */
   PIDController(float Kp, float Ki, float Kd, 
-                float u_min, float u_max, 
-                float I, float dead_space=-1) : 
-    Kp_(Kp), Kd_(Kd), Ki_(Ki), u_min_(u_min), u_max_(u_max), I_(I), dead_space_(dead_space) {};
+                float u_min, float u_max, float dead_space=-1);
   
   /*!
    * \brief Calculates PID control variable.
@@ -256,6 +249,17 @@ public:
   float dead_space_;  //! Calculated output must leave the deadband before the actual output will change; >=0
 };
 
+PIDController::PIDController(float Kp, float Ki, float Kd, 
+              float u_min, float u_max, float dead_space) : 
+              Kp_(Kp), 
+              Kd_(Kd), 
+              Ki_(Ki), 
+              u_min_(u_min), 
+              u_max_(u_max), 
+              I_(0.0), 
+              dead_space_(dead_space) 
+              {};
+              
 float PIDController::pid(const float error, const float d_error) {
   float u;                          // Control variable
   I_ += error;                      // Update integral
@@ -301,13 +305,8 @@ public:
    *
    * Parametrized constructor.
    * \param[in] alpha - first order filter parameter, 0<=alpha<=1
-   * \param[in] sensed_value - value sensed by current sensor [0; PWM_MAX]
-   * \param[in] current - current sensed by current sensor [A]
-   * \param[in] filtered_current - filtered current [A]
    */ 
-  CurrentSensor(float alpha, int sensed_value, float current, float filtered_current) :
-    alpha_(alpha), sensed_value_(sensed_value), 
-    current_(current), filtered_current_(filtered_current) {};
+  CurrentSensor(float alpha);
   
   /*!
    * \brief Measure current.
@@ -334,6 +333,13 @@ public:
   float current_;           //! Sensed current in [A].
   float filtered_current_;  //! Filtered current in [A].
 };
+
+CurrentSensor::CurrentSensor(float alpha) :
+  alpha_(alpha), 
+  sensed_value_(0), 
+  current_(0.0), 
+  filtered_current_(0.0) 
+  {};
 
 float CurrentSensor::senseCurrent(int FB_pin) {
   sensed_value_ = analogRead(FB_pin); // Map input voltages between 0 and 3.3 V into int [0; 4095]
@@ -395,9 +401,6 @@ float CurrentControl::currentControl(const float current) {
   mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct???
   // TODO do we need 1.0*???
   cs_.u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
-  
-  //u_>=0 ? u_+=offset : u_-=offset;              // TODO Add resistance of the motor                      
-  //constrain(u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));      // TODO Clamp after that
   
   constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   return cs_.u_;    // Return CV (can be negative!)
@@ -573,7 +576,8 @@ Encoder::Encoder(int res, float scale, float alpha, SensorPins s_pins) :
   {};
 
 void Encoder::setUp() {
-  offset_ = getRawTicks();
+  raw_ticks_ = getRawTicks();
+  offset_ = raw_ticks_;
   readEncoder();
   convertSensorReading();
 }
@@ -910,13 +914,13 @@ bool Motor::actuate(const float cv) {
 
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
-         CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
+         CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), //TODO Change???
          Control(CURRENT_MODE, 
                  CurrentControl(R_MOTOR,
-                                ControlStates(DESIRED_CURRENT/*0.0*/, DESIRED_CURRENT, 0.0, 0.0, 0.0, 0.0, T_JERK, 0, true), // TODO
-                                PIDController(KP, KI, KD, -PWM_MAX, PWM_MAX, 0.0, 0.0)
+                                ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), // TODO
+                                PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 )
                  )
          );
@@ -1078,7 +1082,8 @@ void setup()
   /* Arduino */
   m1.m_pins_.setUp();
   m1.e_.s_pins_.setUp();
-  m1.e_.setupEncoderSensorR(); // FIXME
+  //m1.e_.setupEncoderSensorR(); // FIXME
+  m1.e_.setUp(); // FIXME
   
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
@@ -1115,7 +1120,8 @@ void loop()
   integral_msg.data = m1.c_.cc_.pid_.I_;
   pub_integral.publish( &integral_msg );
   
-  m1.e_.computeEncoderStatesR();
+  // m1.e_.computeEncoderStatesR();
+  m1.e_.computeEncoder();
   
   enc_dp_msg.data = m1.e_.dp_;
   pub_enc_dp.publish( &enc_dp_msg );

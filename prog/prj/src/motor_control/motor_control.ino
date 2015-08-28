@@ -500,40 +500,43 @@ public:
    * 
    * Parametrized constructor.
    * \param[in] raw_ticks - raw encoder ticks
-   * \param[in] p_raw - encoder ticks (filtered)
-   * \param[in] p - converted value
+   * \param[in] p_raw - converted value
+   * \param[in] p - filtered converted value
    * \param[in] dp - time-derivative of the converted value
    * \param[in] k - rollover counter
+   * \param[in] rev - number of revolutions
    * \param[in] res - resolution (i.e., number of ticks per revolution)
    * \param[in] scale - scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
    * \param[in] offset - used for zeroing
    * \param[in] alpha - first order filter parameter, 0<=alpha<=
    * \param[in] s_pins - sensor pins of the encoder
    */
-  Encoder(int raw_ticks, float p_raw, float p, float dp, int k, int res, 
-          float scale, int offset, float alpha, SensorPins s_pins) : 
-  raw_ticks_(raw_ticks), p_raw_(p_raw), p_(p), dp_(dp), k_(k), res_(res), 
-  scale_(scale), offset_(offset), alpha_(alpha), s_pins_(s_pins) {};
+  Encoder(int raw_ticks, float p_raw, float p, float dp, int k, int rev, 
+          int res, float scale, int offset, float alpha, SensorPins s_pins) : 
+  raw_ticks_(raw_ticks), p_raw_(p_raw), p_(p), dp_(dp), k_(k), rev_(rev), 
+  res_(res), scale_(scale), offset_(offset), alpha_(alpha), s_pins_(s_pins) {};
   
   /*!
-   * TODO
+   * \brief Do the first reading and set offset. 
+   * 
+   * Do the first reading and set offset.
    */
   void setUp();
   
   /*!
-   * \brief Read the current position from the sensor connected to the given pins.
+   * \brief Read the current position from the sensor.
    * 
-   * Read the current position from the sensor connected to the given pins.
-   * \return Reading of the encoder or a failure status flag
+   * Read the current position from the sensor.
+   * \post k_ may have a new value
+   * \post raw_ticks_ has a new value
+   * \return Reading of the encoder (ticks) or a failure status flag
    */
   int readEncoder(); 
   
   /*!
    * \brief TODO 
-   * 
-   * TODO Converts to angles???
    */ 
-  void convertSensorReading(int raw_ticks_new);
+  void convertSensorReading();
   
   /*!
    * \brief Converts the encoder readings and computes derivatives.
@@ -545,10 +548,11 @@ public:
   
   // TODO check types!!!
   int raw_ticks_;  //! Raw encoder ticks [0; 4095]
-  float p_raw_;    //! Encoder ticks (filtered)
-  float p_;        //! Converted value
+  float p_raw_;    //! Converted value (scale_)
+  float p_;        //! Filtered converted value 
   float dp_;       //! Time-derivative of the converted value
-  int k_;          //! Rollover counter
+  int k_;          //! Rollover counter TODO what's that? 0/1?
+  int rev_;        //! Number of revolutions
   int res_;        //! Resolution (i.e., number of ticks per revolution)
   float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
   int offset_;     //! Used for zeroing
@@ -557,9 +561,8 @@ public:
 };
 
 void Encoder::setUp() {
-  raw_ticks_ = readEncoder(); 
-  offset_    = raw_ticks_;
-  convertSensorReading(raw_ticks_);
+  offset_ = readEncoder(); 
+  convertSensorReading();
 }
 
 int Encoder::readEncoder() {
@@ -601,37 +604,50 @@ int Encoder::readEncoder() {
   }
   //add the checksum bit TODO
   
-  return reading;
-}
-
-// TODO understand this part
-// TODO int - int , int / 2 ???
-void Encoder::convertSensorReading(int raw_ticks_new) {
-  if ((raw_ticks_new - raw_ticks_) < -res_ / 2) { 
+  // Update raw_ticks_ and rollover
+  // TODO What is rollover? Only gives 0/1
+  if ((static_cast<int>(reading) - raw_ticks_) < -res_ / 2) { 
     k_++; // Delta is smaller than minus half the resolution -> positive rollover
   }
-  if ((raw_ticks_new - raw_ticks_) > res_ / 2) {
+  if ((static_cast<int>(reading) - raw_ticks_) > res_ / 2) {
     k_--; // Delta is larger than half the resolution -> negative rollover
   }
-  // TODO what's this part?
-  raw_ticks_ = raw_ticks_new; // Update ticks counter
-  p_raw_ = 2 * M_PI * // TODO what's that?
-           ((static_cast<float>(raw_ticks_) - static_cast<float>(offset_)) / (float)res_ + (float)k_) * scale_; // TODO why casting?
-  float p_temp = alpha_ * p_ + (1 - alpha_) * p_raw_; //first order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-  float dT=1000; // [us] FIXME
-  float dp_raw = (p_temp - p_) / ((float)dT*1e-6);
-  dp_ = alpha_ * dp_ + (1 - alpha_) * dp_raw;
-  p_ = p_temp;
-}; // angle=2*pi*[(reading-offset)/res+k]
+  
+  // Here it's number of revolutions FIXME
+  if (reading * raw_ticks_ < 0) { // Different signs 
+    if (reading > 0) { 
+      rev_++; 
+    }
+    else {
+      rev_--; 
+    }
+  }
+  
+  return (raw_ticks_ = reading); // Update ticks counter
+}
 
-int Encoder::computeEncoder()
-{
-  int t_new = readEncoder();
+void Encoder::convertSensorReading() {
+  // angle = 2*pi*[(reading-offset)/res+k]
+  p_raw_ = 2.0*M_PI * ((static_cast<float>(raw_ticks_) - static_cast<float>(offset_)) 
+           / static_cast<float>(res_) 
+           + static_cast<float>(k_)) 
+           * scale_; 
+  float p_tmp = alpha_*p_ + (1-alpha_)*p_raw_; // First order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
+  
+  float dT=1000; // [us] FIXME
+  float dp_raw = (p_tmp - p_) / ((float)dT*1e-6);
+  
+  dp_ = alpha_*dp_ + (1-alpha_)*dp_raw;
+  p_ = p_tmp;
+}; 
+
+int Encoder::computeEncoder() {
+  readEncoder();
   if ((k_ == std::numeric_limits<int>::max()) ||  (k_ == std::numeric_limits<int>::min())) {
     raw_ticks_ = (-5); // Over/underflow of the rollover count variable TODO enum
   }
-  if (raw_ticks_ >= 0) { // Everything's OK
-    convertSensorReading(t_new);  // Update the sensor value (sets v_) 
+  else {                     // Everything's OK
+    convertSensorReading();  // Update the sensor value 
   }
   return raw_ticks_;
 }
@@ -779,7 +795,7 @@ bool Motor::actuate(const float cv) {
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT, 0, 0, 0),
-         Encoder(0, 0.0, 0.0, 0.0, 0, ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, 0, ALPHA_ENCODER,
+         Encoder(0, 0.0, 0.0, 0.0, 0, 0, ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, 0, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), //TODO Change???
          Control(CURRENT_MODE, 
                  CurrentControl(R_MOTOR,
@@ -820,6 +836,10 @@ std_msgs::Float32 enc_vel_msg;
 ros::Publisher pub_enc_vel("enc_vel", &enc_vel_msg);
 std_msgs::Float32 enc_pos_msg;
 ros::Publisher pub_enc_pos("enc_pos", &enc_pos_msg);
+std_msgs::Float32 enc_rev_msg;
+ros::Publisher pub_enc_rev("enc_rev", &enc_rev_msg);
+std_msgs::Float32 enc_raw_msg;
+ros::Publisher pub_enc_raw("enc_raw", &enc_raw_msg);
 
 int counter = 0;
 void confirmCallback() {
@@ -902,6 +922,8 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.advertise(pub_integral);
   node_handler.advertise(pub_enc_vel);
   node_handler.advertise(pub_enc_pos);
+  node_handler.advertise(pub_enc_rev);
+  node_handler.advertise(pub_enc_raw);
   
   node_handler.subscribe(sub_set_vel);
   node_handler.subscribe(sub_set_kp);
@@ -968,10 +990,14 @@ void loop()
   
   m1.e_.computeEncoder();
   
-  enc_vel_msg.data = m1.e_.p_raw_;
+  enc_vel_msg.data = m1.e_.dp_;
   pub_enc_vel.publish( &enc_vel_msg );
   enc_pos_msg.data = m1.e_.p_;
   pub_enc_pos.publish( &enc_pos_msg );
+  enc_raw_msg.data = m1.e_.raw_ticks_;
+  pub_enc_raw.publish( &enc_raw_msg );
+  enc_rev_msg.data = m1.e_.p_raw_; //FIXME
+  pub_enc_rev.publish( &enc_rev_msg );
   
   count_msg.data = counter;
   pub_counter.publish( &count_msg );

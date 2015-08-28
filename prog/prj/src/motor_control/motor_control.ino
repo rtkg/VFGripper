@@ -84,7 +84,7 @@ const float ALPHA_ENCODER = 0.7; //! TODO
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
 const float SCALE_ENCODER = 1; //! TODO
 
-const float T_JERK = 0.0;       //! Time for executing the loop
+const float T_JERK = 100.0;       //! Time for executing the loop [ms]
 
 const float KP_CURR = 1500000.0; //! PID value
 const float KI_CURR = 1400.0;   //! PID value
@@ -105,7 +105,9 @@ int offset = OFFSET; //! Offset for PWM value
 
 /*=============== Functions ===============*/
 /*!
- * TODO  /* Set PWM resolution 
+ * \brief Sets up PWM write and read resolution. 
+ * 
+ * Sets up PWM write and read resolution.
  */
 void setUpPwm() {
   analogWriteResolution(BIT_RESOLUTION);
@@ -139,8 +141,6 @@ float mapFloat(const float x, const float in_min, const float in_max,
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-// TODO Use this class
-// TODO Put it into [Current, ?]Controller??? I think so
 /*============================================================*/
 /*!
  * \brief Class defining Control Variables.
@@ -197,14 +197,14 @@ ControlStates::ControlStates(float ri, float rf, float ti, float T, bool active)
   active_(active)
   {};
 
-// FIXME
 float ControlStates::minimumJerk(float t) {
   if (t > ti_ + T_) {
     t = T_ + ti_;       // Make sure the ouput stays at qf after T has passed
   }
   // Return smoother value
-  // TODO What with dividing by 0?
-  return ri_ + (rf_-ri_)*(10*pow((t-ti_)/T_, 3) - 15*pow((t-ti_)/T_, 4) + 6*pow((t-ti_)/T_, 5));
+  return ( T_ > 0 ? 
+                    ( ri_ + (rf_-ri_)*(10*pow((t-ti_)/T_, 3) - 15*pow((t-ti_)/T_, 4) + 6*pow((t-ti_)/T_, 5)) ) :
+                      rf_);
 }
 
 /*============================================================*/
@@ -385,10 +385,10 @@ public:
 
 // TODO
 float CurrentControl::currentControl(const float current) {
-  // cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] (filtered) TODO nan!!!
-  //TODO ??? ??? And later part with dir on v3?
-  //float dir =  c_s->r_ >= 0 ? 1 : -1;
-  //float current = dir * curr_s->v_;
+   cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] (filtered)
+  //TODO ??? ??? And later part with dir on v3? TODO
+  //float dir =  (cs_->r_ >= 0 ? 1 : -1); // If current reference is <0 (due to jerk) 
+  //float current = dir * curr_s->v_; // TODO
   cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error (already a bit filtered)
   //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-current)); // TODO Or filtereven more?
   cs_.e_ =  cs_.r_ - current;             // Current error
@@ -452,7 +452,9 @@ public:
     DO_(DO), CLK_(CLK), CSn_(CSn) {};
     
   /*!
-   * TODO
+   * \brief Set up directions and default states of the pins.
+   * 
+   * Set up directions and default states of the pins.
    */
   void setUp();  
     
@@ -516,7 +518,12 @@ public:
    */
   void setUp();
   
-  //TODO
+  /*!
+   * \brief Check encoder raw ticks position. 
+   * 
+   * Check encoder raw ticks position.
+   * \return raw_ticks_ [0; 4095]
+   */
   int getRawTicks();
   
   /*!
@@ -530,7 +537,10 @@ public:
   void readEncoder(); 
   
   /*!
-   * \brief TODO 
+   * \brief Converts ticks to angle in radians multiplied by scaling factor. 
+   * 
+   * Converts ticks to angle in radians multiplied by scaling factor.
+   * \post p_raw, p_, dp_ have new values
    */ 
   void convertSensorReading();
   
@@ -542,12 +552,11 @@ public:
    */
   int computeEncoder(); 
   
-  // TODO check types!!!
   int raw_ticks_;  //! Raw encoder ticks [0; 4095]
   float p_raw_;    //! Converted value (scale_)
   float p_;        //! Filtered converted value 
   float dp_;       //! Time-derivative of the converted value
-  int k_;          //! Rollover counter TODO what's that? 0/1?
+  int k_;          //! Rollover counter 
   int rev_;        //! Number of revolutions
   int res_;        //! Resolution (i.e., number of ticks per revolution)
   float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
@@ -626,9 +635,6 @@ int Encoder::getRawTicks() {
 
 void Encoder::readEncoder() {
   int reading = getRawTicks();
-
-  // Update raw_ticks_ and rollover
-  // TODO What is rollover? Only gives 0/1
   if (reading - raw_ticks_ < -res_ / 2) { 
     k_++; // Delta is smaller than minus half the resolution -> positive rollover
   }
@@ -636,7 +642,7 @@ void Encoder::readEncoder() {
     k_--; // Delta is larger than half the resolution -> negative rollover
   }
   
-  // Here it's number of revolutions FIXME
+  // Here it's number of revolutions FIXME == k_
   if (reading * raw_ticks_ < 0) { // Different signs 
     if (reading > 0) { 
       rev_++; 
@@ -675,6 +681,7 @@ int Encoder::computeEncoder() {
   return raw_ticks_;
 }
 
+/* VFG shield3 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 void Encoder::setupEncoderSensorR()
 {
   raw_ticks_ = readEncoderR(); //Read encoder 1
@@ -770,7 +777,7 @@ int Encoder::computeEncoderStatesR()
     
     return 1;
 }
-
+/* VFG shield3 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /*============================================================*/
 /*!
@@ -916,10 +923,10 @@ bool Motor::actuate(const float cv) {
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, ALPHA_ENCODER,
-                 SensorPins(E1_DO, E1_CLK, E1_CSn)), //TODO Change???
+                 SensorPins(E1_DO, E1_CLK, E1_CSn)), 
          Control(CURRENT_MODE, 
                  CurrentControl(R_MOTOR,
-                                ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), // TODO
+                                ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 )
                  )
@@ -1012,8 +1019,9 @@ void setKdCallback( const std_msgs::Float32& Kd_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_kd("set_kd", &setKdCallback);
 
 void setIdCallback( const std_msgs::Float32& i_d_msg ) {
-  //m1.c_.cc_.cs_.rf_ = i_d_msg.data; // TODO
-  m1.c_.cc_.cs_.r_ = i_d_msg.data;
+  m1.c_.cc_.cs_.ri_ = m1.c_.cc_.cs_.r_; 
+  m1.c_.cc_.cs_.rf_ = i_d_msg.data;
+  m1.c_.cc_.cs_.ti_ = static_cast<float>(millis()); 
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_i_d("set_i_d", &setIdCallback);
@@ -1115,8 +1123,10 @@ void loop()
   
   error_msg.data = m1.c_.cc_.cs_.e_;
   pub_error.publish( &error_msg );
+  
   i_d_msg.data = m1.c_.cc_.cs_.r_;
   pub_i_d.publish( &i_d_msg );
+  
   integral_msg.data = m1.c_.cc_.pid_.I_;
   pub_integral.publish( &integral_msg );
   

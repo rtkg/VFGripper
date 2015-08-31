@@ -519,6 +519,18 @@ public:
   void setUp();
   
   /*!
+   * \brief TODO
+   */
+  int evenParity(const byte d1, const byte d2, const byte d3);
+  
+  /*!
+   * \brief // The subsequent 6 bits contain system information, 
+   / / about the validity of data such as OCF, COF, LIN, Parity and Magnetic Field status.
+   * TODO
+   */
+  int checkReading(const byte d1, const byte d2, const byte d3);
+  
+  /*!
    * \brief Check encoder raw ticks position. 
    * 
    * Check encoder raw ticks position.
@@ -551,6 +563,16 @@ public:
    * \return Raw ticks > 0 or a status flag -5
    */
   int computeEncoder(); 
+  
+  enum Flags {
+    OCF = -1, //! Offset Compensation Finished
+    COF = -2, //! Cordic Overflow
+    LIN = -3, //! Linearity Alarm
+    MAG = -4, //! Magnetic field is <45mT or >75mT. It is still possible to operate the AS5045 in this range, but not recommended
+    MagINC = -5, //! Distance decrease; push-function. This state is dynamic and only active while the magnet is moving towards the chip.
+    MagDEC = -6, //! Distance increase; pull-function. This state is dynamic and only active while the magnet is moving away from the chip.
+    PARITY = -7  //! Even checksum of bits 1:15
+  };
   
   int raw_ticks_;  //! Raw encoder ticks [0; 4095]
   float p_raw_;    //! Converted value (scale_)
@@ -591,6 +613,56 @@ void Encoder::setUp() {
   convertSensorReading();
 }
 
+int Encoder::evenParity(const byte d1, const byte d2, const byte d3) {
+  int sum = 0;
+  int i = 0;
+  // Count 1 bits
+  for (i=0; i<8; i++) {
+    if ((1 << i) & d1) sum++;
+  }
+  for (i=0; i<8; i++) {
+    if ((1 << i) & d2) sum++;
+  }
+  for (i=7; i>=/*1*/3; i--) {
+    if ((1 << i) & d3) sum++;
+  }
+  // Check parity bit according to the sum bits 1:15 TODO or 17?
+  if ( (B00000001 & d3) ) {
+    if (sum%2 == 1) return 0; // Odd sum => parity bit = 1
+  }
+  else {
+    if (sum%2 == 0) return 0; // Even sum => parity bit = 0
+  }
+  return 1; // Wrong parity bit
+}
+
+int Encoder::checkReading(const byte d1, const byte d2, const byte d3) {
+  if (!((d2 & B00001000) == B00001000)) { // Check the offset compensation flag: 1 == started up
+    return OCF; 
+  }
+  if (d2 & B00000100) { // Check the cordic overflow flag: 1 = error
+    return COF;
+  }
+  if (d2 & B00000010) { // Check the linearity alarm: 1 = error
+    return LIN;
+  }
+  if ((d2 & B00000001) && (d3 & B10000000)) { // 16bit MagINC, 17bit MagDEC
+    return MAG;                               // Check the magnet range: 11 = error
+  }
+  else { 
+    if (d2 & B00000001) { // 16bit MagINC
+      //return MagINC;                            
+    }
+    else if (d3 & B10000000) { // 17bit MagDEC
+      return MagDEC;                            
+    }
+  }
+  if (!evenParity(d1, d2, d3)) {
+    return PARITY;
+  }
+  return 0;
+}
+
 int Encoder::getRawTicks() {
   unsigned int reading = 0;
   
@@ -615,44 +687,31 @@ int Encoder::getRawTicks() {
   reading = reading >> 4;
   
   // The subsequent 6 bits contain system information, 
-  // about the validity of data such as OCF, COF, LIN, Parity and Magnetic Field status.
-  if (!((d2 & B00001000) == B00001000)) { // Check the offset compensation flag: 1 == started up
-    reading = -1; // TODO enum
-  }
-  if (d2 & B00000100) { // Check the cordic overflow flag: 1 = error
-    reading = -2;
-  }
-  if (d2 & B00000010) { // Check the linearity alarm: 1 = error
-    reading = -3;
-  }
-  if ((d2 & B00000001) & (d3 & B10000000)) { // Check the magnet range: 11 = error
-    reading = -4;
-  }
-  //add the checksum bit TODO
-  
-  return static_cast<int>(reading); 
+  // Return value or flag
+  return ( checkReading(d1, d2, d3) >= 0 ? static_cast<int>(reading) : checkReading(d1, d2, d3) ); 
 }
 
 void Encoder::readEncoder() {
   int reading = getRawTicks();
-  if (reading - raw_ticks_ < -res_ / 2) { 
-    k_++; // Delta is smaller than minus half the resolution -> positive rollover
-  }
-  if (reading - raw_ticks_ > res_ / 2) {
-    k_--; // Delta is larger than half the resolution -> negative rollover
-  }
-  
-  // Here it's number of revolutions FIXME == k_
-  if (reading * raw_ticks_ < 0) { // Different signs 
-    if (reading > 0) { 
-      rev_++; 
+  if (reading >= 0) { // Everything's OK
+    if (reading - raw_ticks_ < -res_ / 2) { 
+      k_++; // Delta is smaller than minus half the resolution -> positive rollover
     }
-    else {
-      rev_--; 
+    if (reading - raw_ticks_ > res_ / 2) {
+      k_--; // Delta is larger than half the resolution -> negative rollover
+    }
+    
+    // Here it's number of revolutions FIXME == k_
+    if (reading * raw_ticks_ < 0) { // Different signs 
+      if (reading > 0) { 
+        rev_++; 
+      }
+      else {
+        rev_--; 
+      }
     }
   }
-  
-  raw_ticks_ = reading; // Update ticks counter
+  raw_ticks_ = reading; // Update ticks counter with value or flag
 }
 
 void Encoder::convertSensorReading() {
@@ -709,7 +768,7 @@ int Encoder::readEncoderR()
   
   //check the offset compensation flag: 1 == started up
   if (!((d2 & B00001000) == B00001000))
-    reading = -1;
+    reading = -1; // FIXME unsigned int!!!
   
   //check the cordic overflow flag: 1 = error
   if (d2 & B00000100)
@@ -720,7 +779,7 @@ int Encoder::readEncoderR()
     reading = -3;
   
   //check the magnet range: 11 = error
-  if ((d2 & B00000001) & (d3 & B10000000))
+  if ((d2 & B00000001) & (d3 & B10000000)) // 16bit MagINC, 17bit MagDEC
     reading = -4;
   
   //add the checksum bit

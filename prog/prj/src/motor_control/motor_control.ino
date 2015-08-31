@@ -69,7 +69,8 @@ const int PWM_MAX = 4095;      //! PWM maximum value
 const int DELAY = 1; // Delay time [ms]
 
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
-const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque)
+const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque) [mA]
+const float DESIRED_POSITION = 3800.0; //! Desired position [ticks]
 
 const float ALPHA_ENCODER = 0.7; //! TODO
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
@@ -80,6 +81,11 @@ const float T_JERK = 100.0;       //! Time for executing the loop [ms]
 const float KP_CURR = 1500000.0; //! PID value
 const float KI_CURR = 1400.0;   //! PID value
 const float KD_CURR = 100000.0;   //! PID value
+
+const float KP_POS = 100.0; //! PID value
+const float KI_POS = 0.0;   //! PID value
+const float KD_POS = 0.0;   //! PID value
+
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 const float DT = 1e-3;  //! Time step [s]
 
@@ -367,7 +373,7 @@ public:
    * Current control feedback.
    * \param[in] current - current current
    */  
-  float currentControl(const float current);
+  float currentControl(float current);
   
   float r_motor_;     //! Terminal resistance of the motor [ohm] (to calculate the feedforward term)
   ControlStates cs_;  //! Control states of the current control
@@ -407,6 +413,50 @@ float CurrentControl::currentControl(float current) {
 
 /*============================================================*/
 /*!
+ * \brief Class defining position control. 
+ * 
+ * Class defining position control.
+ */
+class PositionControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] cs - control states of the position control 
+   * \param[in] pid - PID controller
+   */ 
+  PositionControl(const ControlStates& cs, const PIDController& pid) :  
+  cs_(cs), pid_(pid) {};
+  
+  /*!
+   * \brief Position control feedback.
+   * 
+   * Position control feedback.
+   * \param[in] position - current current
+   */  
+  float positionControl(const float position);
+  
+  ControlStates cs_;  //! Control states of the position control
+  PIDController pid_; //! PID controller for closed loop
+};
+
+float PositionControl::positionControl(const float position) {
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [TODO] (filtered)
+  
+  cs_.de_ = (cs_.e_ - (cs_.r_-position));  // Derivative of the current error (already a bit filtered)
+  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-position)); // TODO Or filter even more?
+  cs_.e_ =  cs_.r_ - position;             // Current error
+  // TODO Maybe add set point weighting?
+  
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
+  constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+ 
+  return cs_.u_;    // Return CV
+}
+
+/*============================================================*/
+/*!
  * \brief Class defining control.
  * 
  * Class defining control.
@@ -431,12 +481,15 @@ public:
    * Parametrized constructor.
    * \param[in] mode - position/current/velocity controller
    * \param[in] cc - current control
+   * \param[in] cc - position control
    */
-  Control(ControlMode mode, const CurrentControl& cc) :
-  mode_(mode), cc_(cc) {};
- 
+  Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc) :
+  mode_(mode), cc_(cc), pc_(pc) {};
+  
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
+  PositionControl pc_;  //! Position control
+  //VelocityControl vc_;  //! Velocity control
 };
 
 /*============================================================*/
@@ -530,14 +583,28 @@ public:
   void setUp();
   
   /*!
-   * \brief TODO
+   * \brief Checks even parity of the bits.
+   * 
+   * Checks even parity of the bits.
+   * \param[in] d1 - first byte of data
+   * \param[in] d2 - second byte of data
+   * \param[in] d3 - third byte of data
+   * \return true - when there is even parity,
+   *         false - otherwise
    */
-  int evenParity(const byte d1, const byte d2, const byte d3);
+  bool evenParity(const byte d1, const byte d2, const byte d3);
   
   /*!
-   * \brief // The subsequent 6 bits contain system information, 
-   / / about the validity of data such as OCF, COF, LIN, Parity and Magnetic Field status.
-   * TODO
+   * \brief Check if readings are correct.
+   * 
+   * Check if readings are correct.
+   * 6 bits contain system information about the validity of data such as 
+   * OCF, COF, LIN, Parity and Magnetic Field status.
+   * \param[in] d1 - first byte of data
+   * \param[in] d2 - second byte of data
+   * \param[in] d3 - third byte of data
+   * \return status flag < 0 when there's something wrong,
+   *         0 otherwise 
    */
   int checkReading(const byte d1, const byte d2, const byte d3);
   
@@ -624,7 +691,7 @@ void Encoder::setUp() {
   convertSensorReading();
 }
 
-int Encoder::evenParity(const byte d1, const byte d2, const byte d3) {
+bool Encoder::evenParity(const byte d1, const byte d2, const byte d3) {
   int sum = 0;
   int i = 0;
   // Count 1 bits
@@ -634,17 +701,17 @@ int Encoder::evenParity(const byte d1, const byte d2, const byte d3) {
   for (i=0; i<8; i++) {
     if ((1 << i) & d2) sum++;
   }
-  for (i=7; i>=/*1*/3; i--) {
+  for (i=7; i>=1; i--) {
     if ((1 << i) & d3) sum++;
   }
-  // Check parity bit according to the sum bits 1:15 TODO or 17?
+  // Check parity bit according to the sum bits 1:17
   if ( (B00000001 & d3) ) {
-    if (sum%2 == 1) return 0; // Odd sum => parity bit = 1
+    if (sum%2 == 1) return true; // Odd sum => parity bit = 1
   }
   else {
-    if (sum%2 == 0) return 0; // Even sum => parity bit = 0
+    if (sum%2 == 0) return true; // Even sum => parity bit = 0
   }
-  return 1; // Wrong parity bit
+  return false; // Wrong parity bit
 }
 
 int Encoder::checkReading(const byte d1, const byte d2, const byte d3) {
@@ -722,7 +789,9 @@ void Encoder::readEncoder() {
       }
     }
   }
-  raw_ticks_ = reading; // Update ticks counter with value or flag
+  //FIXME delete filtering here or p_
+  raw_ticks_ = alpha_*raw_ticks_ + (1-alpha_)*reading; // FIXME delete that
+  //raw_ticks_ = reading; // Update ticks counter with value or flag
 }
 
 void Encoder::convertSensorReading() {
@@ -872,7 +941,9 @@ public:
   IN1_(IN1), IN2_(IN2), SF_(SF), EN_(EN), FB_(FB), D2_(D2) {};
   
   /*!
-   * TODO
+   * \brief Set up directions and default states of the pins.
+   * 
+   * Set up directions and default states of the pins.
    */
   void setUp();
   
@@ -945,6 +1016,14 @@ public:
    */
   int setPwm(const int pwm_val);
   
+  /*!
+   * \brief Check control method and do it.
+   * 
+   * Check control method and do it.
+   * \return control value
+   */ 
+  int control();
+  
   /*! 
    * \brief Adjust direction depending on the control varaible sign and set speed.
    * 
@@ -977,6 +1056,22 @@ int Motor::setPwm(const int pwm_val) {
   return pwm_val;
 }
 
+int Motor::control() {
+  if (c_.mode_ == Control::CURRENT_MODE) {
+    curr_s_.senseCurrent(m_pins_.FB_);
+    curr_s_.filterCurrent();
+    return c_.cc_.currentControl(curr_s_.filtered_current_);
+  }
+  else if (c_.mode_ == Control::POSITION_MODE) {
+    e_.computeEncoder();
+    return c_.pc_.positionControl(e_.raw_ticks_); // FIXME p_
+  }
+  else if (c_.mode_ == Control::VELOCITY_MODE) { 
+    return 0;
+  }
+  return 0;
+}
+
 bool Motor::actuate(const float cv) {
   // Set direction
   if (cv > 0.0) {
@@ -998,6 +1093,9 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                  CurrentControl(R_MOTOR,
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
+                                ),
+                 PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
+                                 PIDController(KP_POS, KI_POS, KD_POS, -PWM_MAX, PWM_MAX, 0.0)
                                 )
                  )
          );
@@ -1008,6 +1106,7 @@ ros::NodeHandle nh; //! Node handler
 
 std_msgs::Int8 count_msg; 
 ros::Publisher pub_counter("counter", &count_msg);
+
 std_msgs::Float32 current_msg;
 ros::Publisher pub_current("current", &current_msg);
 std_msgs::Float32 filtered_current_msg;
@@ -1016,8 +1115,8 @@ std_msgs::Float32 error_msg;
 ros::Publisher pub_error("error", &error_msg);
 std_msgs::Float32 u_msg;
 ros::Publisher pub_u("u", &u_msg);
-std_msgs::Float32 i_d_msg;
-ros::Publisher pub_i_d("i_d", &i_d_msg);
+std_msgs::Float32 ref_msg;
+ros::Publisher pub_ref("ref", &ref_msg);
 std_msgs::Float32 integral_msg;
 ros::Publisher pub_integral("integral", &integral_msg);
 
@@ -1070,31 +1169,59 @@ void setPwmCallback( const std_msgs::Int8& pwm_msg ) {
 }
 ros::Subscriber<std_msgs::Int8> sub_set_vel("set_vel", &setPwmCallback);
 
-void setKpCallback( const std_msgs::Float32& Kp_msg ) {
+void setKpCurrCallback( const std_msgs::Float32& Kp_msg ) {
   m1.c_.cc_.pid_.Kp_ = Kp_msg.data;
   confirmCallback();
 }
-ros::Subscriber<std_msgs::Float32> sub_set_kp("set_kp", &setKpCallback);
+ros::Subscriber<std_msgs::Float32> sub_set_kp_curr("set_kp_curr", &setKpCurrCallback);
 
-void setKiCallback( const std_msgs::Float32& Ki_msg ) {
+void setKiCurrCallback( const std_msgs::Float32& Ki_msg ) {
   m1.c_.cc_.pid_.Ki_ = Ki_msg.data;
   confirmCallback();
 }
-ros::Subscriber<std_msgs::Float32> sub_set_ki("set_ki", &setKiCallback);
+ros::Subscriber<std_msgs::Float32> sub_set_ki_curr("set_ki_curr", &setKiCurrCallback);
 
-void setKdCallback( const std_msgs::Float32& Kd_msg ) {
+void setKdCurrCallback( const std_msgs::Float32& Kd_msg ) {
   m1.c_.cc_.pid_.Kd_ = Kd_msg.data;
   confirmCallback();
 }
-ros::Subscriber<std_msgs::Float32> sub_set_kd("set_kd", &setKdCallback);
+ros::Subscriber<std_msgs::Float32> sub_set_kd_curr("set_kd_curr", &setKdCurrCallback);
 
-void setIdCallback( const std_msgs::Float32& i_d_msg ) {
-  m1.c_.cc_.cs_.ri_ = m1.c_.cc_.cs_.r_; 
-  m1.c_.cc_.cs_.rf_ = i_d_msg.data;
-  m1.c_.cc_.cs_.ti_ = static_cast<float>(millis()); 
+void setKpPosCallback( const std_msgs::Float32& Kp_msg ) {
+  m1.c_.pc_.pid_.Kp_ = Kp_msg.data;
   confirmCallback();
 }
-ros::Subscriber<std_msgs::Float32> sub_set_i_d("set_i_d", &setIdCallback);
+ros::Subscriber<std_msgs::Float32> sub_set_kp_pos("set_kp_pos", &setKpPosCallback);
+
+void setKiPosCallback( const std_msgs::Float32& Ki_msg ) {
+  m1.c_.pc_.pid_.Ki_ = Ki_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_ki_pos("set_ki_pos", &setKiPosCallback);
+
+void setKdPosCallback( const std_msgs::Float32& Kd_msg ) {
+  m1.c_.pc_.pid_.Kd_ = Kd_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_kd_pos("set_kd_pos", &setKdPosCallback);
+
+void setRefCallback( const std_msgs::Float32& ref_msg ) {
+  switch (m1.c_.mode_) {
+    case Control::CURRENT_MODE:
+      m1.c_.cc_.cs_.ri_ = m1.c_.cc_.cs_.r_; 
+      m1.c_.cc_.cs_.rf_ = ref_msg.data;
+      m1.c_.cc_.cs_.ti_ = static_cast<float>(millis());
+      break;
+    case Control::POSITION_MODE:
+      m1.c_.pc_.cs_.ri_ = m1.c_.pc_.cs_.r_; 
+      m1.c_.pc_.cs_.rf_ = ref_msg.data;
+      m1.c_.pc_.cs_.ti_ = static_cast<float>(millis());
+    default:
+      break;
+  }
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_ref("set_ref", &setRefCallback);
 
 void setOffsetCallback( const std_msgs::Float32& offset_msg ) {
   offset = offset_msg.data;
@@ -1114,13 +1241,32 @@ void setAlphaCallback( const std_msgs::Float32& alpha_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_alpha("set_alpha", &setAlphaCallback);
 
+// TODO active = true/false
+void setModeCallback( const std_msgs::Float32& mode_msg ) {
+  switch (static_cast<int>(mode_msg.data)) {
+    case 0 : 
+      m1.c_.mode_ = Control::CURRENT_MODE;
+      break;
+    case 1 : 
+      m1.c_.mode_ = Control::POSITION_MODE;
+      break;
+    case 2 : 
+      m1.c_.mode_ = Control::VELOCITY_MODE;
+      break;
+    default:
+      m1.c_.mode_ = Control::NO_MODE;
+  }
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_mode("set_mode", &setModeCallback);
+
 void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.advertise(pub_counter);
   node_handler.advertise(pub_current);
   node_handler.advertise(pub_filtered_current);
   node_handler.advertise(pub_error);
   node_handler.advertise(pub_u);
-  node_handler.advertise(pub_i_d);
+  node_handler.advertise(pub_ref);
   node_handler.advertise(pub_integral);
   
   node_handler.advertise(pub_enc_alpha);
@@ -1135,14 +1281,20 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.advertise(pub_enc_scale);
   
   node_handler.subscribe(sub_set_vel);
-  node_handler.subscribe(sub_set_kp);
-  node_handler.subscribe(sub_set_ki);
-  node_handler.subscribe(sub_set_kd);
-  node_handler.subscribe(sub_set_i_d);
+  
+  node_handler.subscribe(sub_set_kp_curr);
+  node_handler.subscribe(sub_set_ki_curr);
+  node_handler.subscribe(sub_set_kd_curr);
+  node_handler.subscribe(sub_set_kp_pos);
+  node_handler.subscribe(sub_set_ki_pos);
+  node_handler.subscribe(sub_set_kd_pos);
+  
+  node_handler.subscribe(sub_set_ref);
   node_handler.subscribe(sub_set_offset);
   node_handler.subscribe(sub_set_dead);
   node_handler.subscribe(sub_set_alpha);
   node_handler.subscribe(sub_change_dir);
+  node_handler.subscribe(sub_set_mode);
 }
 
 /*============================================================*/
@@ -1181,27 +1333,34 @@ void setup()
  */
 void loop()
 {
-  current_msg.data = m1.curr_s_.senseCurrent(m1.m_pins_.FB_);
-  pub_current.publish( &current_msg );
-  filtered_current_msg.data = m1.curr_s_.filterCurrent();
-  pub_filtered_current.publish( &filtered_current_msg );
-  u_msg.data =  m1.c_.cc_.currentControl(m1.curr_s_.filtered_current_);
+  u_msg.data = m1.control();
+  
   pub_u.publish( &u_msg );
   
   m1.actuate(u_msg.data);
-  //m1.setPwm(3000);
   
-  error_msg.data = m1.c_.cc_.cs_.e_;
+  current_msg.data = m1.curr_s_.current_;
+  pub_current.publish( &current_msg );
+  filtered_current_msg.data = m1.curr_s_.filtered_current_;
+  pub_filtered_current.publish( &filtered_current_msg );
+  
+  if (m1.c_.mode_ == Control::CURRENT_MODE) {
+    error_msg.data = m1.c_.cc_.cs_.e_;
+    ref_msg.data = m1.c_.cc_.cs_.r_;
+    integral_msg.data = m1.c_.cc_.pid_.I_;
+  }
+  else if (m1.c_.mode_ == Control::POSITION_MODE) {
+    error_msg.data = m1.c_.pc_.cs_.e_;
+    ref_msg.data = m1.c_.pc_.cs_.r_;
+    integral_msg.data = m1.c_.pc_.pid_.I_;
+  }
+  
   pub_error.publish( &error_msg );
-  
-  i_d_msg.data = m1.c_.cc_.cs_.r_;
-  pub_i_d.publish( &i_d_msg );
-  
-  integral_msg.data = m1.c_.cc_.pid_.I_;
+  pub_ref.publish( &ref_msg );
   pub_integral.publish( &integral_msg );
   
-  // m1.e_.computeEncoderStatesR();
-  m1.e_.computeEncoder();
+  // m1.e_.computeEncoderStatesR(); FIXME
+  // m1.e_.computeEncoder();
   
   enc_dp_msg.data = m1.e_.dp_;
   pub_enc_dp.publish( &enc_dp_msg );

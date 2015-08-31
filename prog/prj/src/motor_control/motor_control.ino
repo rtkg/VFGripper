@@ -71,6 +71,7 @@ const int DELAY = 1; // Delay time [ms]
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque) [mA]
 const float DESIRED_POSITION = 3800.0; //! Desired position [ticks]
+const float DESIRED_VELOCITY = 1.0; //! Desired position [TODO]
 
 const float ALPHA_ENCODER = 0.7; //! TODO
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
@@ -82,9 +83,15 @@ const float KP_CURR = 1500000.0; //! PID value
 const float KI_CURR = 1400.0;   //! PID value
 const float KD_CURR = 100000.0;   //! PID value
 
+// TODO
 const float KP_POS = 100.0; //! PID value
 const float KI_POS = 0.0;   //! PID value
 const float KD_POS = 0.0;   //! PID value
+
+// TODO
+const float KP_VEL = 10.0; //! PID value
+const float KI_VEL = 0.0;   //! PID value
+const float KD_VEL = 0.0;   //! PID value
 
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 const float DT = 1e-3;  //! Time step [s]
@@ -433,7 +440,7 @@ public:
    * \brief Position control feedback.
    * 
    * Position control feedback.
-   * \param[in] position - current current
+   * \param[in] position - current position
    */  
   float positionControl(const float position);
   
@@ -457,6 +464,50 @@ float PositionControl::positionControl(const float position) {
 
 /*============================================================*/
 /*!
+ * \brief Class defining velocity control. 
+ * 
+ * Class defining velocity control.
+ */
+class VelocityControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] cs - control states of the velocity control 
+   * \param[in] pid - PID controller
+   */ 
+  VelocityControl(const ControlStates& cs, const PIDController& pid) :  
+  cs_(cs), pid_(pid) {};
+  
+  /*!
+   * \brief Velocity control feedback.
+   * 
+   * Velocity control feedback.
+   * \param[in] velocity - current velocity
+   */  
+  float velocityControl(const float velocity);
+  
+  ControlStates cs_;  //! Control states of the velocity control
+  PIDController pid_; //! PID controller for closed loop
+};
+
+float VelocityControl::velocityControl(const float velocity) {
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired velocity [TODO] (filtered)
+  
+  cs_.de_ = (cs_.e_ - (cs_.r_-velocity));  // Derivative of the current error (already a bit filtered)
+  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-velocity)); // TODO Or filter even more?
+  cs_.e_ =  cs_.r_ - velocity;             // Current error
+  // TODO Maybe add set point weighting?
+  
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
+  constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  
+  return cs_.u_;    // Return CV
+}
+
+/*============================================================*/
+/*!
  * \brief Class defining control.
  * 
  * Class defining control.
@@ -469,10 +520,10 @@ public:
    * Enum defining control modes.
    */
   enum ControlMode {
-    POSITION_MODE, //! Position controller
-    VELOCITY_MODE, //! Velocity controller 
-    CURRENT_MODE,  //! Current controller
-    NO_MODE        //! Without controller
+    POSITION_MODE = 1, //! Position controller
+    VELOCITY_MODE = 2, //! Velocity controller 
+    CURRENT_MODE = 0,  //! Current controller
+    NO_MODE = 3        //! Without controller
   };
   
   /*!
@@ -483,13 +534,13 @@ public:
    * \param[in] cc - current control
    * \param[in] cc - position control
    */
-  Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc) :
-  mode_(mode), cc_(cc), pc_(pc) {};
+  Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, const VelocityControl& vc) :
+  mode_(mode), cc_(cc), pc_(pc), vc_(vc) {};
   
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
   PositionControl pc_;  //! Position control
-  //VelocityControl vc_;  //! Velocity control
+  VelocityControl vc_;  //! Velocity control
 };
 
 /*============================================================*/
@@ -1066,8 +1117,9 @@ int Motor::control() {
     e_.computeEncoder();
     return c_.pc_.positionControl(e_.raw_ticks_); // FIXME p_
   }
-  else if (c_.mode_ == Control::VELOCITY_MODE) { 
-    return 0;
+  else if (c_.mode_ == Control::VELOCITY_MODE) {
+    e_.computeEncoder();
+    return c_.vc_.velocityControl(e_.dp_);
   }
   return 0;
 }
@@ -1094,8 +1146,11 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 ),
-                 PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
+                 PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false), // FIXME true/false
                                  PIDController(KP_POS, KI_POS, KD_POS, -PWM_MAX, PWM_MAX, 0.0)
+                                ),
+                 VelocityControl(ControlStates(0.0, DESIRED_VELOCITY, 0.0, T_JERK, false),
+                                 PIDController(KP_VEL, KI_VEL, KD_VEL, -PWM_MAX, PWM_MAX, 0.0)
                                 )
                  )
          );
@@ -1216,6 +1271,10 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
       m1.c_.pc_.cs_.ri_ = m1.c_.pc_.cs_.r_; 
       m1.c_.pc_.cs_.rf_ = ref_msg.data;
       m1.c_.pc_.cs_.ti_ = static_cast<float>(millis());
+    case Control::VELOCITY_MODE:
+      m1.c_.vc_.cs_.ri_ = m1.c_.vc_.cs_.r_; 
+      m1.c_.vc_.cs_.rf_ = ref_msg.data;
+      m1.c_.vc_.cs_.ti_ = static_cast<float>(millis());
     default:
       break;
   }
@@ -1353,6 +1412,11 @@ void loop()
     error_msg.data = m1.c_.pc_.cs_.e_;
     ref_msg.data = m1.c_.pc_.cs_.r_;
     integral_msg.data = m1.c_.pc_.pid_.I_;
+  }
+  else if (m1.c_.mode_ == Control::VELOCITY_MODE) {
+    error_msg.data = m1.c_.vc_.cs_.e_;
+    ref_msg.data = m1.c_.vc_.cs_.r_;
+    integral_msg.data = m1.c_.vc_.pid_.I_;
   }
   
   pub_error.publish( &error_msg );

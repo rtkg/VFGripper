@@ -55,20 +55,11 @@ const int M1_FB  = A0; //! Analog input A0 for current sensing on Motor 1
 const int EN     = 25; //! Driver board enable pin
 const int M1_D2  = 8;  //! PWM pin to control output voltage
 
-// TODO Check!!!!!!!!!!!
 const int E1_CSn = 26;  //! Chip select pin
 const int E1_DO  = 27;  //! Sensor data output pin
 const int E1_CLK = 28;  //! Clock pin
 
 const int LED_PIN = 13; //! LED pin to visualize  
-
-/*=============== Controller modes ===============*/
-enum ControlMode {
-  POSITION_MODE, //! Position controller
-  VELOCITY_MODE, //! Velocity controller 
-  CURRENT_MODE,  //! Current controller
-  NO_MODE        //! Without controller
-};
 
 /*=============== Constants ===============*/
 const int BIT_RESOLUTION = 12; //! 12 => [0; 4095], analogWrite(pin, PWM value)
@@ -383,27 +374,35 @@ public:
   PIDController pid_; //! PID controller for closed loop
 };
 
-// TODO
-float CurrentControl::currentControl(const float current) {
+float CurrentControl::currentControl(float current) {
    cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] (filtered)
-  //TODO ??? ??? And later part with dir on v3? TODO
-  //float dir =  (cs_->r_ >= 0 ? 1 : -1); // If current reference is <0 (due to jerk) 
-  //float current = dir * curr_s->v_; // TODO
+  
+  float dir =  (cs_.r_ >= 0 ? 1 : -1);  // If current reference is <0 (due to jerk) 
+  current *= dir;                       // We keep or change the sign
+  
   cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error (already a bit filtered)
-  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-current)); // TODO Or filtereven more?
+  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-current)); // TODO Or filter even more?
   cs_.e_ =  cs_.r_ - current;             // Current error
   // TODO Maybe add set point weighting?
-  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
   
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
   float feedforward = r_motor_ * current; // V = L*di/dt + RI + E  
                                           // We hold the motor => w=0 => E=0; di/dt == 0
                                           // => V = RI
-  mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct???
+  mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct?
   // TODO do we need 1.0*???
   cs_.u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
   
   constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  return cs_.u_;    // Return CV (can be negative!)
+  // We don't want it to rotate in the other direction
+  if (cs_.u_ > 0 && dir < 0) {
+    cs_.u_ = 0; // So just don't move
+  }
+  else if (cs_.u_ < 0 && dir > 0) {
+    cs_.u_ = 0;
+  }
+  
+  return cs_.u_;    // Return CV
 }
 
 /*============================================================*/
@@ -414,6 +413,18 @@ float CurrentControl::currentControl(const float current) {
  */
 class Control {
 public:
+  /* 
+   * \brief Enum defining control modes.
+   * 
+   * Enum defining control modes.
+   */
+  enum ControlMode {
+    POSITION_MODE, //! Position controller
+    VELOCITY_MODE, //! Velocity controller 
+    CURRENT_MODE,  //! Current controller
+    NO_MODE        //! Without controller
+  };
+  
   /*!
    * \brief Parametrized constructor.
    * 
@@ -423,7 +434,7 @@ public:
    */
   Control(ControlMode mode, const CurrentControl& cc) :
   mode_(mode), cc_(cc) {};
-  
+ 
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
 };
@@ -983,7 +994,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(CURRENT_MODE, 
+         Control(Control::CURRENT_MODE, 
                  CurrentControl(R_MOTOR,
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)

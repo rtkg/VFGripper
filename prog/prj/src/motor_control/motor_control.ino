@@ -514,7 +514,7 @@ float VelocityControl::velocityControl(const float velocity) {
  */
 class Control {
 public:
-  /* 
+  /*! 
    * \brief Enum defining control modes.
    * 
    * Enum defining control modes.
@@ -532,7 +532,8 @@ public:
    * Parametrized constructor.
    * \param[in] mode - position/current/velocity controller
    * \param[in] cc - current control
-   * \param[in] cc - position control
+   * \param[in] pc - position control
+   * \param[in] vc - velocity control
    */
   Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, const VelocityControl& vc) :
   mode_(mode), cc_(cc), pc_(pc), vc_(vc) {};

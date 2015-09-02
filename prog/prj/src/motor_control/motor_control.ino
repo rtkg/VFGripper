@@ -73,7 +73,7 @@ const int DELAY = 1; // Delay time [ms]
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque) [mA]
 const float DESIRED_POSITION = 200.0; //! Desired position [TODO]
-const float DESIRED_VELOCITY = 0.04; //! Desired position [TODO]
+const float DESIRED_VELOCITY = 0.09; //! Desired position [TODO]
 
 const float ALPHA_ENCODER = 0.7; //! Value for filtering position
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
@@ -89,8 +89,8 @@ const float KP_POS = 320.0; //! PID value
 const float KI_POS = 0.1;   //! PID value
 const float KD_POS = 1e4;  //! PID value
 
-const float KP_VEL = 70000.0; //! PID value
-const float KI_VEL = 5.0;   //! PID value
+const float KP_VEL = 95000.0; //! PID value
+const float KI_VEL = 9.0;   //! PID value
 const float KD_VEL = 1e4;   //! PID value
 
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
@@ -522,9 +522,9 @@ public:
    * Enum defining control modes.
    */
   enum ControlMode {
+    CURRENT_MODE = 0,  //! Current controller
     POSITION_MODE = 1, //! Position controller
     VELOCITY_MODE = 2, //! Velocity controller 
-    CURRENT_MODE = 0,  //! Current controller
     NO_MODE = 3        //! Without controller
   };
   
@@ -952,9 +952,16 @@ public:
   int setPwm(const int pwm_val);
   
   /*!
-   * \brief Check control method and do it.
+   * \brief Reads current sensor and encoder.
    * 
-   * Check control method and do it.
+   * Reads current sensor and encoder.
+   */
+  void sense();
+  
+  /*!
+   * \brief Checks control method and does it.
+   * 
+   * Checks control method and does it.
    * \return control value
    */ 
   int control();
@@ -991,18 +998,20 @@ int Motor::setPwm(const int pwm_val) {
   return pwm_val;
 }
 
+void Motor::sense() {
+  curr_s_.senseCurrent(m_pins_.FB_);
+  curr_s_.filterCurrent();
+  e_.computeEncoder();
+}
+
 int Motor::control() {
   if (c_.mode_ == Control::CURRENT_MODE) {
-    curr_s_.senseCurrent(m_pins_.FB_);
-    curr_s_.filterCurrent();
     return c_.cc_.currentControl(curr_s_.filtered_current_);
   }
   else if (c_.mode_ == Control::POSITION_MODE) {
-    e_.computeEncoder();
     return c_.pc_.positionControl(e_.p_);
   }
   else if (c_.mode_ == Control::VELOCITY_MODE) {
-    e_.computeEncoder();
     return c_.vc_.velocityControl(e_.dp_);
   }
   return 0;
@@ -1010,7 +1019,7 @@ int Motor::control() {
 
 bool Motor::actuate(const float cv) {
   // Set direction
-  if (cv > 0.0) {
+  if (cv >= 0.0) {
     forward();
   }
   else {
@@ -1371,7 +1380,16 @@ void loop()
     t_old_serial = t_new;
   }
   
+  t_new = micros(); //Add the ROS overhead to the time since last loop
+  /* // Currently there is 384 us delay in reading encoder so there is no need to do that here
+  if (abs(t_new - t_old) < dT) {  // If the sampling period didn't pass yet
+    return;                       //Do nothing 
+  }
+  */
+  t_old = t_new;
+  
   // Control motor all the time
+  m1.sense();
   u_msg.data = m1.control();
   m1.actuate(u_msg.data);
 }

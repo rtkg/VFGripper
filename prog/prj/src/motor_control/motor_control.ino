@@ -20,9 +20,12 @@
  * 
  * Documentation is done for doxygen.
  * \note Set up must NOT be in constructors but in setup()!
+ * \note constrain() sometimes doesn't work!
  *
  * TODO
  * - publisher/subscriber -> services
+ * - constantly measure current and encoder!
+ * - velocity control
  */
 
 #define USE_USBCON            // Has to be declared if there are problems with serial communication
@@ -109,7 +112,7 @@ int t_old_serial = 0; //! Timer value for calculating time steps
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
-int offset = OFFSET; //! Offset for PWM value
+int offset_motor = 200;//OFFSET; //! Offset for PWM value to avoid the area where motor does not move at all TODO
 
 /*=============== Functions ===============*/
 /*!
@@ -131,6 +134,24 @@ void setUpPwm() {
  */
 int pwmPercentToVal(const int pwm_percent) {
   return map(constrain(pwm_percent, 0, 100), 0, 100, PWM_MIN, PWM_MAX);
+}
+
+/*!
+ * \brief Constrain value between range.
+ * 
+ * Constrain value between range.
+ * Use this one instead of constrain because constrain() doesn't always work! (why?)
+ * \param[in, out] val - value to clamp into range [min; max]
+ * \param[in] min - lower bound
+ * \param[in] max - upper bound
+ */
+void clamp(int & val, int min, int max) {
+  if (val < min) {
+    val = min;
+  }
+  else if (val > max) {
+    val = max;
+  }
 }
 
 /*!
@@ -461,7 +482,13 @@ float PositionControl::positionControl(const float position) {
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  if (cs_.u_ >= 0) { // Add offset to overcome the motor inner resistance TODO 
+    cs_.u_ += offset_motor;
+  }
+  else {
+    cs_.u_ -= offset_motor;
+  }
+  clamp(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));
  
   return cs_.u_;    // Return CV
 }
@@ -829,8 +856,6 @@ void Encoder::readEncoder() {
       k_--; // Delta is larger than half the resolution -> negative rollover
     }
   }
-  //FIXME delete filtering here or p_
-  //raw_ticks_ = alpha_*raw_ticks_ + (1-alpha_)*reading; // FIXME delete that
   raw_ticks_ = reading; // Update ticks counter with value or flag
 }
 
@@ -841,10 +866,7 @@ void Encoder::convertSensorReading() {
            + static_cast<float>(k_)) 
            * scale_; 
   float p_tmp = alpha_*p_ + (1-alpha_)*p_raw_; // First order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-  
-  //float dT=1000; // [us] FIXME
-  float dp_raw = (p_tmp - p_); // / ((float)dT*1e-6);
-  
+  float dp_raw = (p_tmp - p_); 
   dp_ = alpha_*dp_ + (1-alpha_)*dp_raw;
   p_ = p_tmp;
 }; 
@@ -1006,7 +1028,7 @@ int Motor::control() {
   }
   else if (c_.mode_ == Control::POSITION_MODE) {
     e_.computeEncoder();
-    return c_.pc_.positionControl(e_.p_); // FIXME p_ or raw_ticks_
+    return c_.pc_.positionControl(e_.p_);
   }
   else if (c_.mode_ == Control::VELOCITY_MODE) {
     e_.computeEncoder();
@@ -1189,11 +1211,11 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_ref("set_ref", &setRefCallback);
 
-void setOffsetCallback( const std_msgs::Float32& offset_msg ) {
-  offset = offset_msg.data;
+void setOffsetMotorCallback( const std_msgs::Float32& offset_msg ) {
+  offset_motor = offset_msg.data;
   confirmCallback();
 }
-ros::Subscriber<std_msgs::Float32> sub_set_offset("set_offset", &setOffsetCallback);
+ros::Subscriber<std_msgs::Float32> sub_set_offset("set_offset", &setOffsetMotorCallback);
 
 void setDeadSpaceCallback( const std_msgs::Float32& dead_msg ) {
   m1.c_.cc_.pid_.dead_space_ = dead_msg.data;
@@ -1333,7 +1355,7 @@ void publishEverything() {
  * 
  * Set up code after every reset of the Arduino Board.
  */
-void setup()
+void setup() 
 {
   /* ROS */
   nh.initNode();
@@ -1342,17 +1364,12 @@ void setup()
   /* Arduino */
   m1.m_pins_.setUp();
   m1.e_.s_pins_.setUp();
-  //m1.e_.setupEncoderSensorR(); // FIXME
-  m1.e_.setUp(); // FIXME
+  m1.e_.setUp(); 
   
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
   
   setUpPwm();
-  m1.setPwm(2000);
-  
-  /* Open a serial connection */
-  //Serial.begin(57600);
 }
 
 /*============================================================*/
@@ -1361,7 +1378,7 @@ void setup()
  * 
  * Runs repeatedly code in the loop. 
  */
-void loop()
+void loop() 
 {
   // Publishing takes too much time so spin and check if we should publish
   t_new = micros();

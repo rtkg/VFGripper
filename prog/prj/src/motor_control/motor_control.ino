@@ -155,6 +155,24 @@ void clamp(int & val, int min, int max) {
 }
 
 /*!
+ * \brief Constrain value between range.
+ * 
+ * Constrain value between range.
+ * Use this one instead of constrain because constrain() doesn't always work! (why?)
+ * \param[in, out] val - value to clamp into range [min; max]
+ * \param[in] min - lower bound
+ * \param[in] max - upper bound
+ */
+void clamp(float & val, float min, float max) {
+  if (val < min) {
+    val = min;
+  }
+  else if (val > max) {
+    val = max;
+  }
+}
+
+/*!
  * \brief Maps float value from one range to another.
  * 
  * Maps float value from one range to another.
@@ -315,7 +333,7 @@ float PIDController::pid(const float error, const float d_error) {
   // Clamp the CV and recalculate the Integral term (the latter to avoid windup)
   if ((u > u_max_) || (u < u_min_)) {     // If CV is bigger/smaller than max/min feasible value
     I_ -= error;                      // Back-calculate the I-term to avoid wind up
-    u = constrain(u, u_min_, u_max_); // Clamp the CV
+    clamp(u, u_min_, u_max_);         // Clamp the CV
   }
   
   return u;  // Return control value (in +/- PWM resolution).
@@ -431,7 +449,7 @@ float CurrentControl::currentControl(float current) {
   // TODO do we need 1.0*???
   cs_.u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
   
-  constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  clamp(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   // We don't want it to rotate in the other direction
   if (cs_.u_ > 0 && dir < 0) {
     cs_.u_ = 0; // So just don't move
@@ -532,7 +550,7 @@ float VelocityControl::velocityControl(const float velocity) {
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  clamp(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   
   return cs_.u_;    // Return CV
 }

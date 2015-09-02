@@ -20,11 +20,10 @@
  * 
  * Documentation is done for doxygen.
  * \note Set up must NOT be in constructors but in setup()!
- * \note constrain() sometimes doesn't work!
  *
  * TODO
  * - publisher/subscriber -> services
- * - constantly measure current and encoder!
+ * - impedance control
  */
 
 #define USE_USBCON            // Has to be declared if there are problems with serial communication
@@ -508,6 +507,52 @@ float VelocityControl::velocityControl(const float velocity) {
   return cs_.u_;    // Return CV
 }
 
+// FIXME TODO
+/*============================================================*/
+/*!
+ * \brief Class defining impedance control. 
+ * 
+ * Class defining impedance control.
+ */
+class ImpedanceControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] cs - control states of the impedance control 
+   * \param[in] pid - PID controller
+   */ 
+  ImpedanceControl(const ControlStates& cs, const PIDController& pid) :  
+  cs_(cs), pid_(pid) {};
+  
+  /*!
+   * \brief Impedance control feedback.
+   * 
+   * Impedance control feedback.
+   * \param[in] impedance - current impedance
+   */  
+  float impedanceControl(const float impedance);
+  
+  ControlStates cs_;  //! Control states of the impedance control
+  PIDController pid_; //! PID controller for closed loop
+};
+
+float ImpedanceControl::impedanceControl(const float impedance) {
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired impedance [TODO] (filtered)
+  
+  cs_.de_ = (cs_.e_ - (cs_.r_-impedance));  // Derivative of the current error (already a bit filtered)
+  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-impedance)); // TODO Or filter even more?
+  cs_.e_ =  cs_.r_ - impedance;             // Current error
+  // TODO Maybe add set point weighting?
+  
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
+  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  
+  return cs_.u_;    // Return CV
+}
+
 /*============================================================*/
 /*!
  * \brief Class defining control.
@@ -522,10 +567,11 @@ public:
    * Enum defining control modes.
    */
   enum ControlMode {
-    CURRENT_MODE = 0,  //! Current controller
-    POSITION_MODE = 1, //! Position controller
-    VELOCITY_MODE = 2, //! Velocity controller 
-    NO_MODE = 3        //! Without controller
+    NO_MODE = 0,       //! Without controller
+    CURRENT_MODE  = 1, //! Current controller
+    POSITION_MODE = 2, //! Position controller
+    VELOCITY_MODE = 3, //! Velocity controller
+    IMPEDANCE_MODE = 4 //! Impedance controller 
   };
   
   /*!
@@ -536,14 +582,17 @@ public:
    * \param[in] cc - current control
    * \param[in] pc - position control
    * \param[in] vc - velocity control
+   * \param[in] ic - impedance control
    */
-  Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, const VelocityControl& vc) :
-  mode_(mode), cc_(cc), pc_(pc), vc_(vc) {};
+  Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, 
+          const VelocityControl& vc, const ImpedanceControl& ic) :
+  mode_(mode), cc_(cc), pc_(pc), vc_(vc), ic_(ic) {};
   
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
   PositionControl pc_;  //! Position control
   VelocityControl vc_;  //! Velocity control
+  ImpedanceControl ic_;  //! Impedance control
 };
 
 /*============================================================*/
@@ -1014,6 +1063,9 @@ int Motor::control() {
   else if (c_.mode_ == Control::VELOCITY_MODE) {
     return c_.vc_.velocityControl(e_.dp_);
   }
+  else if (c_.mode_ == Control::IMPEDANCE_MODE) {
+    return c_.vc_.velocityControl(e_.dp_);
+  }
   return 0;
 }
 
@@ -1044,7 +1096,10 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                                 ),
                  VelocityControl(ControlStates(0.0, DESIRED_VELOCITY, 0.0, T_JERK, false),
                                  PIDController(KP_VEL, KI_VEL, KD_VEL, -PWM_MAX, PWM_MAX, 0.0)
-                                )
+                                ),
+                 ImpedanceControl(ControlStates(0.0, 0.0, 0.0, T_JERK, false),
+                                  PIDController(0.0, 0.0, 0.0, -PWM_MAX, PWM_MAX, 0.0)
+                                 )
                  )
          );
 
@@ -1180,10 +1235,17 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
       m1.c_.pc_.cs_.ri_ = m1.c_.pc_.cs_.r_; 
       m1.c_.pc_.cs_.rf_ = ref_msg.data;
       m1.c_.pc_.cs_.ti_ = static_cast<float>(millis());
+      break;
     case Control::VELOCITY_MODE:
       m1.c_.vc_.cs_.ri_ = m1.c_.vc_.cs_.r_; 
       m1.c_.vc_.cs_.rf_ = ref_msg.data;
       m1.c_.vc_.cs_.ti_ = static_cast<float>(millis());
+      break;
+    case Control::IMPEDANCE_MODE:
+      m1.c_.vc_.cs_.ri_ = m1.c_.vc_.cs_.r_; 
+      m1.c_.vc_.cs_.rf_ = ref_msg.data;
+      m1.c_.vc_.cs_.ti_ = static_cast<float>(millis());
+      break;
     default:
       break;
   }
@@ -1217,30 +1279,40 @@ ros::Subscriber<std_msgs::Float32> sub_set_alpha_enc("set_alpha_enc", &setAlphaE
 
 void setModeCallback( const std_msgs::Float32& mode_msg ) {
   switch (static_cast<int>(mode_msg.data)) {
-    case 0 : 
+    case Control::CURRENT_MODE : 
       m1.c_.mode_ = Control::CURRENT_MODE;
       m1.c_.cc_.cs_.active_ = true;
       m1.c_.pc_.cs_.active_ = false;
       m1.c_.vc_.cs_.active_ = false;
+      m1.c_.ic_.cs_.active_ = false;
       break;
-    case 1 : 
+    case Control::POSITION_MODE : 
       m1.c_.mode_ = Control::POSITION_MODE;
       m1.c_.cc_.cs_.active_ = false;
       m1.c_.pc_.cs_.active_ = true;
       m1.c_.vc_.cs_.active_ = false;
+      m1.c_.ic_.cs_.active_ = false;
       break;
-    case 2 : 
+    case Control::VELOCITY_MODE : 
       m1.c_.mode_ = Control::VELOCITY_MODE;
       m1.c_.cc_.cs_.active_ = false;
       m1.c_.pc_.cs_.active_ = false;
       m1.c_.vc_.cs_.active_ = true;
+      m1.c_.ic_.cs_.active_ = false;
+      break;
+    case Control::IMPEDANCE_MODE : 
+      m1.c_.mode_ = Control::IMPEDANCE_MODE;
+      m1.c_.cc_.cs_.active_ = false;
+      m1.c_.pc_.cs_.active_ = false;
+      m1.c_.vc_.cs_.active_ = false;
+      m1.c_.ic_.cs_.active_ = true;
       break;
     default:
       m1.c_.mode_ = Control::NO_MODE;
       m1.c_.cc_.cs_.active_ = false;
       m1.c_.pc_.cs_.active_ = false;
       m1.c_.vc_.cs_.active_ = false;
-      
+      m1.c_.ic_.cs_.active_ = false;
   }
   confirmCallback();
 }

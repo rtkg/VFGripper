@@ -25,7 +25,6 @@
  * TODO
  * - publisher/subscriber -> services
  * - constantly measure current and encoder!
- * - velocity control
  */
 
 #define USE_USBCON            // Has to be declared if there are problems with serial communication
@@ -73,27 +72,26 @@ const int DELAY = 1; // Delay time [ms]
 
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque) [mA]
-const float DESIRED_POSITION = 2000.0; //! Desired position [ticks]
-const float DESIRED_VELOCITY = 100.0; //! Desired position [TODO]
+const float DESIRED_POSITION = 200.0; //! Desired position [TODO]
+const float DESIRED_VELOCITY = 0.04; //! Desired position [TODO]
 
 const float ALPHA_ENCODER = 0.7; //! Value for filtering position
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
-const float SCALE_ENCODER = 14.4; //! TODO
+const float SCALE_ENCODER = 0.167; //! TODO
 
 const float T_JERK = 100.0;       //! Time for executing the loop [ms]
 
-const float KP_CURR = 1500000.0; //! PID value
+const float KP_CURR = 1e5; //! PID value
 const float KI_CURR = 1400.0;   //! PID value
-const float KD_CURR = 100000.0;   //! PID value
+const float KD_CURR = 1e5;   //! PID value
 
-const float KP_POS = 10.0; //! PID value
-const float KI_POS = 0.05;   //! PID value
-const float KD_POS = 100.0;   //! PID value
+const float KP_POS = 320.0; //! PID value
+const float KI_POS = 0.1;   //! PID value
+const float KD_POS = 1e4;  //! PID value
 
-// TODO
-const float KP_VEL = 10.0; //! PID value
-const float KI_VEL = 0.0;   //! PID value
-const float KD_VEL = 0.0;   //! PID value
+const float KP_VEL = 70000.0; //! PID value
+const float KI_VEL = 5.0;   //! PID value
+const float KD_VEL = 1e4;   //! PID value
 
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 
@@ -134,42 +132,6 @@ void setUpPwm() {
  */
 int pwmPercentToVal(const int pwm_percent) {
   return map(constrain(pwm_percent, 0, 100), 0, 100, PWM_MIN, PWM_MAX);
-}
-
-/*!
- * \brief Constrain value between range.
- * 
- * Constrain value between range.
- * Use this one instead of constrain because constrain() doesn't always work! (why?)
- * \param[in, out] val - value to clamp into range [min; max]
- * \param[in] min - lower bound
- * \param[in] max - upper bound
- */
-void clamp(int & val, int min, int max) {
-  if (val < min) {
-    val = min;
-  }
-  else if (val > max) {
-    val = max;
-  }
-}
-
-/*!
- * \brief Constrain value between range.
- * 
- * Constrain value between range.
- * Use this one instead of constrain because constrain() doesn't always work! (why?)
- * \param[in, out] val - value to clamp into range [min; max]
- * \param[in] min - lower bound
- * \param[in] max - upper bound
- */
-void clamp(float & val, float min, float max) {
-  if (val < min) {
-    val = min;
-  }
-  else if (val > max) {
-    val = max;
-  }
 }
 
 /*!
@@ -310,12 +272,10 @@ PIDController::PIDController(float Kp, float Ki, float Kd,
 float PIDController::pid(const float error, const float d_error) {
   float u;                          // Control variable
   I_ += error;                      // Update integral
-  /* TODO Add this part??? Set boundaries */
-  /*
+  /* TODO Add this part??? Set boundaries
   if (I_ > I_max_ || I < I_min_) {  
-    constrain(I_, I_min_, I_max_);  // Keep the integral within some boundaries
-  }
- */ 
+    I_ = constrain(I_, I_min_, I_max_);  // Keep the integral within some boundaries
+  }*/ 
   if ( !(dead_space_> 0) ) {              // If there is no deadband
     u = Kp_*error + Ki_*I_ + Kd_*d_error; // Calculate control
   }
@@ -333,7 +293,7 @@ float PIDController::pid(const float error, const float d_error) {
   // Clamp the CV and recalculate the Integral term (the latter to avoid windup)
   if ((u > u_max_) || (u < u_min_)) {     // If CV is bigger/smaller than max/min feasible value
     I_ -= error;                      // Back-calculate the I-term to avoid wind up
-    clamp(u, u_min_, u_max_);         // Clamp the CV
+    u = constrain(u, u_min_, u_max_);         // Clamp the CV
   }
   
   return u;  // Return control value (in +/- PWM resolution).
@@ -437,7 +397,6 @@ float CurrentControl::currentControl(float current) {
   current *= dir;                       // We keep or change the sign
   
   cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error (already a bit filtered)
-  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-current)); // TODO Or filter even more?
   cs_.e_ =  cs_.r_ - current;             // Current error
   // TODO Maybe add set point weighting?
   
@@ -445,11 +404,10 @@ float CurrentControl::currentControl(float current) {
   float feedforward = r_motor_ * current; // V = L*di/dt + RI + E  
                                           // We hold the motor => w=0 => E=0; di/dt == 0
                                           // => V = RI
-  mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range TODO correct?
-  // TODO do we need 1.0*???
-  cs_.u_ += feedforward;  // Compute control with feedforward term // TODO shouldn't be +/-???
+  mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  cs_.u_ += feedforward;  // Compute control with feedforward term (only positive values)
   
-  clamp(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   // We don't want it to rotate in the other direction
   if (cs_.u_ > 0 && dir < 0) {
     cs_.u_ = 0; // So just don't move
@@ -495,18 +453,12 @@ float PositionControl::positionControl(const float position) {
   cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [TODO] (filtered)
   
   cs_.de_ = (cs_.e_ - (cs_.r_-position));  // Derivative of the current error (already a bit filtered)
-  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-position)); // TODO Or filter even more?
   cs_.e_ =  cs_.r_ - position;             // Current error
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  if (cs_.u_ >= 0) { // Add offset to overcome the motor inner resistance TODO 
-    cs_.u_ += offset_motor;
-  }
-  else {
-    cs_.u_ -= offset_motor;
-  }
-  clamp(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));
+  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));
  
   return cs_.u_;    // Return CV
 }
@@ -550,7 +502,8 @@ float VelocityControl::velocityControl(const float velocity) {
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  clamp(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   
   return cs_.u_;    // Return CV
 }
@@ -843,7 +796,7 @@ int Encoder::getRawTicks() {
   digitalWrite(s_pins_.CSn_, LOW);
   //Propagation delay 384μs (slow mode) 96μs (fast mode) 
   // System propagation delay absolute output : delay of ADC, DSP and absolute interface 
-  delayMicroseconds(384); // FIXME
+  delayMicroseconds(384);
   // Shift in our data (read: 18bits ( 12bits data + 6 bits status)
   byte d1 = s_pins_.shiftIn(8);
   byte d2 = s_pins_.shiftIn(8);
@@ -1072,12 +1025,12 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::POSITION_MODE, 
+         Control(Control::NO_MODE, 
                  CurrentControl(R_MOTOR,
-                                ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), 
+                                ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 ),
-                 PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false), // FIXME true/false
+                 PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
                                  PIDController(KP_POS, KI_POS, KD_POS, -PWM_MAX, PWM_MAX, 0.0)
                                 ),
                  VelocityControl(ControlStates(0.0, DESIRED_VELOCITY, 0.0, T_JERK, false),
@@ -1253,20 +1206,32 @@ void setAlphaEncCallback( const std_msgs::Float32& alpha_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_alpha_enc("set_alpha_enc", &setAlphaEncCallback);
 
-// TODO active = true/false
 void setModeCallback( const std_msgs::Float32& mode_msg ) {
   switch (static_cast<int>(mode_msg.data)) {
     case 0 : 
       m1.c_.mode_ = Control::CURRENT_MODE;
+      m1.c_.cc_.cs_.active_ = true;
+      m1.c_.pc_.cs_.active_ = false;
+      m1.c_.vc_.cs_.active_ = false;
       break;
     case 1 : 
       m1.c_.mode_ = Control::POSITION_MODE;
+      m1.c_.cc_.cs_.active_ = false;
+      m1.c_.pc_.cs_.active_ = true;
+      m1.c_.vc_.cs_.active_ = false;
       break;
     case 2 : 
       m1.c_.mode_ = Control::VELOCITY_MODE;
+      m1.c_.cc_.cs_.active_ = false;
+      m1.c_.pc_.cs_.active_ = false;
+      m1.c_.vc_.cs_.active_ = true;
       break;
     default:
       m1.c_.mode_ = Control::NO_MODE;
+      m1.c_.cc_.cs_.active_ = false;
+      m1.c_.pc_.cs_.active_ = false;
+      m1.c_.vc_.cs_.active_ = false;
+      
   }
   confirmCallback();
 }

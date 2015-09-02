@@ -70,12 +70,12 @@ const int DELAY = 1; // Delay time [ms]
 
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque) [mA]
-const float DESIRED_POSITION = 3800.0; //! Desired position [ticks]
-const float DESIRED_VELOCITY = 1.0; //! Desired position [TODO]
+const float DESIRED_POSITION = 2000.0; //! Desired position [ticks]
+const float DESIRED_VELOCITY = 100.0; //! Desired position [TODO]
 
-const float ALPHA_ENCODER = 0.7; //! TODO
+const float ALPHA_ENCODER = 0.7; //! Value for filtering position
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
-const float SCALE_ENCODER = 1; //! TODO
+const float SCALE_ENCODER = 14.4; //! TODO
 
 const float T_JERK = 100.0;       //! Time for executing the loop [ms]
 
@@ -83,10 +83,9 @@ const float KP_CURR = 1500000.0; //! PID value
 const float KI_CURR = 1400.0;   //! PID value
 const float KD_CURR = 100000.0;   //! PID value
 
-// TODO
-const float KP_POS = 100.0; //! PID value
-const float KI_POS = 0.0;   //! PID value
-const float KD_POS = 0.0;   //! PID value
+const float KP_POS = 10.0; //! PID value
+const float KI_POS = 0.05;   //! PID value
+const float KD_POS = 100.0;   //! PID value
 
 // TODO
 const float KP_VEL = 10.0; //! PID value
@@ -94,17 +93,22 @@ const float KI_VEL = 0.0;   //! PID value
 const float KD_VEL = 0.0;   //! PID value
 
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
-const float DT = 1e-3;  //! Time step [s]
 
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
 const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
 const float R_MOTOR = 7.25; //! Terminal resistance of the motor
 
+/*=============== Time variables ===============*/
+const float DT = 1e-3;       //! Time step [s]
+const int dT = 1000;         //! Sample time [us] 
+const int dT_serial = 75000; //! Sample time for the serial connection [us]
+int t_old = 0;        //! Timer value for calculating time steps
+int t_new = 0;        //! Timer value for calculating time steps
+int t_old_serial = 0; //! Timer value for calculating time steps
+
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
-int t_old = 0; //! Timer value for calculating time steps
-int t_new = 0; //! Timer value for calculating time steps
 int offset = OFFSET; //! Offset for PWM value
 
 /*=============== Functions ===============*/
@@ -708,18 +712,12 @@ public:
   float p_raw_;    //! Converted value (scale_)
   float p_;        //! Filtered converted value 
   float dp_;       //! Time-derivative of the converted value
-  int k_;          //! Rollover counter 
-  int rev_;        //! Number of revolutions
+  int k_;          //! Rollover counter (number of revolutions)
   int res_;        //! Resolution (i.e., number of ticks per revolution)
   float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
   int offset_;     //! Used for zeroing
   float alpha_;    //! First order filter parameter, 0<=alpha<=1
   SensorPins s_pins_; //! Sensor pins
-  
-  void convertSensorReadingR(int raw_ticks_new);
-  void setupEncoderSensorR();
-  int computeEncoderStatesR();
-  int readEncoderR();
 };
 
 Encoder::Encoder(int res, float scale, float alpha, SensorPins s_pins) :   
@@ -728,7 +726,6 @@ Encoder::Encoder(int res, float scale, float alpha, SensorPins s_pins) :
   p_(0.0),
   dp_(0.0),
   k_(0),
-  rev_(0),
   res_(res), 
   scale_(scale),
   offset_(0.0),
@@ -781,7 +778,7 @@ int Encoder::checkReading(const byte d1, const byte d2, const byte d3) {
   }
   else { 
     if (d2 & B00000001) { // 16bit MagINC
-      //return MagINC;                            
+      return MagINC;                            
     }
     else if (d3 & B10000000) { // 17bit MagDEC
       return MagDEC;                            
@@ -801,7 +798,7 @@ int Encoder::getRawTicks() {
   digitalWrite(s_pins_.CSn_, LOW);
   //Propagation delay 384μs (slow mode) 96μs (fast mode) 
   // System propagation delay absolute output : delay of ADC, DSP and absolute interface 
-  delayMicroseconds(1);
+  delayMicroseconds(384); // FIXME
   // Shift in our data (read: 18bits ( 12bits data + 6 bits status)
   byte d1 = s_pins_.shiftIn(8);
   byte d2 = s_pins_.shiftIn(8);
@@ -818,7 +815,8 @@ int Encoder::getRawTicks() {
   
   // The subsequent 6 bits contain system information, 
   // Return value or flag
-  return ( checkReading(d1, d2, d3) >= 0 ? static_cast<int>(reading) : checkReading(d1, d2, d3) ); 
+  int a = -1;
+  return ( a = checkReading(d1, d2, d3) >= 0 ? static_cast<int>(reading) : a ); 
 }
 
 void Encoder::readEncoder() {
@@ -830,20 +828,10 @@ void Encoder::readEncoder() {
     if (reading - raw_ticks_ > res_ / 2) {
       k_--; // Delta is larger than half the resolution -> negative rollover
     }
-    
-    // Here it's number of revolutions FIXME == k_
-    if (reading * raw_ticks_ < 0) { // Different signs 
-      if (reading > 0) { 
-        rev_++; 
-      }
-      else {
-        rev_--; 
-      }
-    }
   }
   //FIXME delete filtering here or p_
-  raw_ticks_ = alpha_*raw_ticks_ + (1-alpha_)*reading; // FIXME delete that
-  //raw_ticks_ = reading; // Update ticks counter with value or flag
+  //raw_ticks_ = alpha_*raw_ticks_ + (1-alpha_)*reading; // FIXME delete that
+  raw_ticks_ = reading; // Update ticks counter with value or flag
 }
 
 void Encoder::convertSensorReading() {
@@ -854,8 +842,8 @@ void Encoder::convertSensorReading() {
            * scale_; 
   float p_tmp = alpha_*p_ + (1-alpha_)*p_raw_; // First order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
   
-  float dT=1000; // [us] FIXME
-  float dp_raw = (p_tmp - p_) / ((float)dT*1e-6);
+  //float dT=1000; // [us] FIXME
+  float dp_raw = (p_tmp - p_); // / ((float)dT*1e-6);
   
   dp_ = alpha_*dp_ + (1-alpha_)*dp_raw;
   p_ = p_tmp;
@@ -871,104 +859,6 @@ int Encoder::computeEncoder() {
   }
   return raw_ticks_;
 }
-
-/* VFG shield3 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-void Encoder::setupEncoderSensorR()
-{
-  raw_ticks_ = readEncoderR(); //Read encoder 1
-  offset_    = raw_ticks_;
-  convertSensorReadingR(raw_ticks_);
-}
-int Encoder::readEncoderR()
-{
-  unsigned int reading = 0;
-  
-  //shift in our data
-  digitalWrite(s_pins_.CSn_, LOW);
-  delayMicroseconds(1);
-  byte d1 = s_pins_.shiftIn(8);
-  byte d2 = s_pins_.shiftIn(8);
-  byte d3 = s_pins_.shiftIn(2);
-  digitalWrite(s_pins_.CSn_, HIGH);
-  
-  //get our reading variable
-  reading = d1;
-  reading = reading << 8;
-  reading = reading | d2;
-  
-  reading = reading >> 4;
-  
-  //check the offset compensation flag: 1 == started up
-  if (!((d2 & B00001000) == B00001000))
-    reading = -1; // FIXME unsigned int!!!
-  
-  //check the cordic overflow flag: 1 = error
-  if (d2 & B00000100)
-    reading = -2;
-  
-  //check the linearity alarm: 1 = error
-  if (d2 & B00000010)
-    reading = -3;
-  
-  //check the magnet range: 11 = error
-  if ((d2 & B00000001) & (d3 & B10000000)) // 16bit MagINC, 17bit MagDEC
-    reading = -4;
-  
-  //add the checksum bit
-  
-  return reading;
-}
-void Encoder::convertSensorReadingR(int raw_ticks_new) {
-  if ((raw_ticks_new - raw_ticks_) < -res_ / 2) // delta is smaller than minus half the resolution -> positive rollover
-    k_++;
-  if ((raw_ticks_new - raw_ticks_) > res_ / 2) // delta is larger than half the resolution -> negative rollover
-    k_--;
-  
-  // TODO what's this part?
-  raw_ticks_ = raw_ticks_new;
-  p_raw_ = 2 * M_PI * ((raw_ticks_ - (float)offset_) / (float)res_ + (float)k_) * scale_;
-  float p_temp = alpha_ * p_ + (1 - alpha_) * p_raw_; //first order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-  float dT=1000;
-  float dp_raw = (p_temp - p_) / ((float)dT*1e-6);
-  dp_ = alpha_ * dp_ + (1 - alpha_) * dp_raw;
-  p_ = p_temp;
-}; // angle=2*pi*[(reading-offset)/res+k]
-int Encoder::computeEncoderStatesR()
-{
-  int t_new = readEncoderR();
-  
-  if ((k_ == INT_MAX) ||  (k_ == INT_MIN))
-    raw_ticks_ = (-5); //Over/underflow of the rollover count variable
-    
-    if (raw_ticks_ >= 0)
-    {
-      convertSensorReadingR(t_new);  //update the sensor value (sets e_s->v_)   //Serial.print("Reading: ");
-      //Serial.print(e_s->t_, DEC);
-      //Serial.print(" Offset: ");
-      //Serial.print(e_s->offset_, DEC);
-      //Serial.print(" Position: ");
-      //Serial.print(e_s->v_, 4);//, DEC);
-      //Serial.print(" k: ");
-      //Serial.print(e_s->k_, DEC);//, DEC);
-      //Serial.print(" Velocity: ");
-      //Serial.println(e_s->dv_, 4); //DEC);
-    }
-    else
-    {
-      /*
-       *    Serial1.print("Error in computeEncoderStates(...): ");
-       *    Serial1.println(e_s->raw_ticks_, DEC);
-       *    Serial1.print("pins ");
-       *    Serial1.println(s_pins->D_, DEC);
-       *    Serial1.println("read from sensor: ");
-       *    Serial1.println(t_new, DEC);
-       */
-      return raw_ticks_;
-    }
-    
-    return 1;
-}
-/* VFG shield3 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 
 /*============================================================*/
 /*!
@@ -1116,7 +1006,7 @@ int Motor::control() {
   }
   else if (c_.mode_ == Control::POSITION_MODE) {
     e_.computeEncoder();
-    return c_.pc_.positionControl(e_.raw_ticks_); // FIXME p_
+    return c_.pc_.positionControl(e_.p_); // FIXME p_ or raw_ticks_
   }
   else if (c_.mode_ == Control::VELOCITY_MODE) {
     e_.computeEncoder();
@@ -1140,9 +1030,9 @@ bool Motor::actuate(const float cv) {
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
-         Encoder(ENCODER_RESOLUTION, /*TODO*/SCALE_ENCODER, ALPHA_ENCODER,
+         Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::CURRENT_MODE, 
+         Control(Control::POSITION_MODE, 
                  CurrentControl(R_MOTOR,
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, true), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
@@ -1180,8 +1070,6 @@ std_msgs::Float32 enc_dp_msg;
 ros::Publisher pub_enc_dp("enc_dp", &enc_dp_msg);
 std_msgs::Float32 enc_p_msg;
 ros::Publisher pub_enc_p("enc_p", &enc_p_msg);
-std_msgs::Float32 enc_rev_msg;
-ros::Publisher pub_enc_rev("enc_rev", &enc_rev_msg);
 std_msgs::Float32 enc_raw_ticks_msg;
 ros::Publisher pub_enc_raw_ticks("enc_raw_ticks", &enc_raw_ticks_msg);
 std_msgs::Float32 enc_p_raw_msg;
@@ -1261,6 +1149,24 @@ void setKdPosCallback( const std_msgs::Float32& Kd_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_kd_pos("set_kd_pos", &setKdPosCallback);
 
+void setKpVelCallback( const std_msgs::Float32& Kp_msg ) {
+  m1.c_.vc_.pid_.Kp_ = Kp_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_kp_vel("set_kp_vel", &setKpVelCallback);
+
+void setKiVelCallback( const std_msgs::Float32& Ki_msg ) {
+  m1.c_.vc_.pid_.Ki_ = Ki_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_ki_vel("set_ki_vel", &setKiVelCallback);
+
+void setKdVelCallback( const std_msgs::Float32& Kd_msg ) {
+  m1.c_.vc_.pid_.Kd_ = Kd_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_kd_vel("set_kd_vel", &setKdVelCallback);
+
 void setRefCallback( const std_msgs::Float32& ref_msg ) {
   switch (m1.c_.mode_) {
     case Control::CURRENT_MODE:
@@ -1295,11 +1201,17 @@ void setDeadSpaceCallback( const std_msgs::Float32& dead_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_dead("set_dead", &setDeadSpaceCallback);
 
-void setAlphaCallback( const std_msgs::Float32& alpha_msg ) {
+void setAlphaCurrCallback( const std_msgs::Float32& alpha_msg ) {
   m1.curr_s_.alpha_ = alpha_msg.data;
   confirmCallback();
 }
-ros::Subscriber<std_msgs::Float32> sub_set_alpha("set_alpha", &setAlphaCallback);
+ros::Subscriber<std_msgs::Float32> sub_set_alpha_curr("set_alpha_curr", &setAlphaCurrCallback);
+
+void setAlphaEncCallback( const std_msgs::Float32& alpha_msg ) {
+  m1.e_.alpha_ = alpha_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_alpha_enc("set_alpha_enc", &setAlphaEncCallback);
 
 // TODO active = true/false
 void setModeCallback( const std_msgs::Float32& mode_msg ) {
@@ -1337,7 +1249,6 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.advertise(pub_enc_p_raw);
   node_handler.advertise(pub_enc_raw_ticks);
   node_handler.advertise(pub_enc_res);
-  node_handler.advertise(pub_enc_rev);
   node_handler.advertise(pub_enc_scale);
   
   node_handler.subscribe(sub_set_vel);
@@ -1348,13 +1259,72 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.subscribe(sub_set_kp_pos);
   node_handler.subscribe(sub_set_ki_pos);
   node_handler.subscribe(sub_set_kd_pos);
+  node_handler.subscribe(sub_set_kp_vel);
+  node_handler.subscribe(sub_set_ki_vel);
+  node_handler.subscribe(sub_set_kd_vel);
   
   node_handler.subscribe(sub_set_ref);
   node_handler.subscribe(sub_set_offset);
   node_handler.subscribe(sub_set_dead);
-  node_handler.subscribe(sub_set_alpha);
+  node_handler.subscribe(sub_set_alpha_curr);
+  node_handler.subscribe(sub_set_alpha_enc);
   node_handler.subscribe(sub_change_dir);
   node_handler.subscribe(sub_set_mode);
+}
+
+/*!
+ * \brief Publishes interestind data from motor.
+ * 
+ * Publishes interestind data from motor.
+ */
+void publishEverything() {
+  pub_u.publish( &u_msg );
+  current_msg.data = m1.curr_s_.current_;
+  pub_current.publish( &current_msg );
+  filtered_current_msg.data = m1.curr_s_.filtered_current_;
+  pub_filtered_current.publish( &filtered_current_msg );
+  
+  if (m1.c_.mode_ == Control::CURRENT_MODE) {
+    error_msg.data = m1.c_.cc_.cs_.e_;
+    ref_msg.data = m1.c_.cc_.cs_.r_;
+    integral_msg.data = m1.c_.cc_.pid_.I_;
+  }
+  else if (m1.c_.mode_ == Control::POSITION_MODE) {
+    error_msg.data = m1.c_.pc_.cs_.e_;
+    ref_msg.data = m1.c_.pc_.cs_.r_;
+    integral_msg.data = m1.c_.pc_.pid_.I_;
+  }
+  else if (m1.c_.mode_ == Control::VELOCITY_MODE) {
+    error_msg.data = m1.c_.vc_.cs_.e_;
+    ref_msg.data = m1.c_.vc_.cs_.r_;
+    integral_msg.data = m1.c_.vc_.pid_.I_;
+  }
+  
+  pub_error.publish( &error_msg );
+  pub_ref.publish( &ref_msg );
+  pub_integral.publish( &integral_msg );
+  
+  enc_dp_msg.data = m1.e_.dp_;
+  pub_enc_dp.publish( &enc_dp_msg );
+  enc_p_msg.data = m1.e_.p_;
+  pub_enc_p.publish( &enc_p_msg );
+  enc_raw_ticks_msg.data = m1.e_.raw_ticks_;
+  pub_enc_raw_ticks.publish( &enc_raw_ticks_msg );
+  enc_k_msg.data = m1.e_.k_;
+  pub_enc_k.publish( &enc_k_msg );
+  enc_scale_msg.data = m1.e_.scale_;
+  pub_enc_scale.publish( &enc_scale_msg );
+  enc_alpha_msg.data = m1.e_.alpha_;
+  pub_enc_alpha.publish( &enc_alpha_msg );
+  enc_offset_msg.data = m1.e_.offset_;
+  pub_enc_offset.publish( &enc_offset_msg );
+  enc_p_raw_msg.data = m1.e_.p_raw_;
+  pub_enc_p_raw.publish( &enc_p_raw_msg );
+  enc_res_msg.data = m1.e_.res_;
+  pub_enc_res.publish( &enc_res_msg );
+  
+  count_msg.data = counter;
+  pub_counter.publish( &count_msg );
 }
 
 /*============================================================*/
@@ -1393,64 +1363,15 @@ void setup()
  */
 void loop()
 {
-  u_msg.data = m1.control();
-  
-  pub_u.publish( &u_msg );
-  
-  m1.actuate(u_msg.data);
-  
-  current_msg.data = m1.curr_s_.current_;
-  pub_current.publish( &current_msg );
-  filtered_current_msg.data = m1.curr_s_.filtered_current_;
-  pub_filtered_current.publish( &filtered_current_msg );
-  
-  if (m1.c_.mode_ == Control::CURRENT_MODE) {
-    error_msg.data = m1.c_.cc_.cs_.e_;
-    ref_msg.data = m1.c_.cc_.cs_.r_;
-    integral_msg.data = m1.c_.cc_.pid_.I_;
-  }
-  else if (m1.c_.mode_ == Control::POSITION_MODE) {
-    error_msg.data = m1.c_.pc_.cs_.e_;
-    ref_msg.data = m1.c_.pc_.cs_.r_;
-    integral_msg.data = m1.c_.pc_.pid_.I_;
-  }
-  else if (m1.c_.mode_ == Control::VELOCITY_MODE) {
-    error_msg.data = m1.c_.vc_.cs_.e_;
-    ref_msg.data = m1.c_.vc_.cs_.r_;
-    integral_msg.data = m1.c_.vc_.pid_.I_;
-  }
-  
-  pub_error.publish( &error_msg );
-  pub_ref.publish( &ref_msg );
-  pub_integral.publish( &integral_msg );
-  
-  // m1.e_.computeEncoderStatesR(); FIXME
-  // m1.e_.computeEncoder();
-  
-  enc_dp_msg.data = m1.e_.dp_;
-  pub_enc_dp.publish( &enc_dp_msg );
-  enc_p_msg.data = m1.e_.p_;
-  pub_enc_p.publish( &enc_p_msg );
-  enc_raw_ticks_msg.data = m1.e_.raw_ticks_;
-  pub_enc_raw_ticks.publish( &enc_raw_ticks_msg );
-  enc_rev_msg.data = m1.e_.rev_; 
-  pub_enc_rev.publish( &enc_rev_msg );
-  enc_k_msg.data = m1.e_.k_;
-  pub_enc_k.publish( &enc_k_msg );
-  enc_scale_msg.data = m1.e_.scale_;
-  pub_enc_scale.publish( &enc_scale_msg );
-  enc_alpha_msg.data = m1.e_.alpha_;
-  pub_enc_alpha.publish( &enc_alpha_msg );
-  enc_offset_msg.data = m1.e_.offset_;
-  pub_enc_offset.publish( &enc_offset_msg );
-  enc_p_raw_msg.data = m1.e_.p_raw_;
-  pub_enc_p_raw.publish( &enc_p_raw_msg );
-  enc_res_msg.data = m1.e_.res_;
-  pub_enc_res.publish( &enc_res_msg );
-  
-  count_msg.data = counter;
-  pub_counter.publish( &count_msg );
-  
+  // Publishing takes too much time so spin and check if we should publish
+  t_new = micros();
   nh.spinOnce();
-  delay(DELAY);
+  if (abs(t_new - t_old_serial) > dT_serial) {
+    publishEverything();
+    t_old_serial = t_new;
+  }
+  
+  // Control motor all the time
+  u_msg.data = m1.control();
+  m1.actuate(u_msg.data);
 }

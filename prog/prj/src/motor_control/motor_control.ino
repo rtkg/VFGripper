@@ -6,10 +6,7 @@
  * \date    August 2015
  * \pre     roscore
  * \bug     
- * \warning TODO Feedforward term - verify (V_MAX?)
- *               add jerk, 
- *               H-Bridge changes - test, 
- *               PID Calibration, 
+ * \warning
  *
  * rosserial_python node
 
@@ -22,6 +19,7 @@
  * \note Set up must NOT be in constructors but in setup()!
  *
  * TODO
+ * - Feedforward term current control -> add w, dw/dt
  * - publisher/subscriber -> services
  * - impedance control
  */
@@ -98,6 +96,7 @@ const int   V_MAX = 24;   //! Maximum value for our maxon motor [V]
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
 const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
 const float R_MOTOR = 7.25; //! Terminal resistance of the motor
+const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor [A]
 
 /*=============== Time variables ===============*/
 const float DT = 1e-3;       //! Time step [s]
@@ -395,8 +394,9 @@ float CurrentControl::currentControl(float current) {
   float dir =  (cs_.r_ >= 0 ? 1 : -1);  // If current reference is <0 (due to jerk) 
   current *= dir;                       // We keep or change the sign
   
-  cs_.de_ = (cs_.e_ - (cs_.r_-current));  // Derivative of the current error (already a bit filtered)
-  cs_.e_ =  cs_.r_ - current;             // Current error
+  float error = current - cs_.r_; // Current error
+  cs_.de_ = error - cs_.e_;       // Derivative of the current error (already a bit filtered)
+  cs_.e_ =  error;                // Current error
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
@@ -451,8 +451,9 @@ public:
 float PositionControl::positionControl(const float position) {
   cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [TODO] (filtered)
   
-  cs_.de_ = (cs_.e_ - (cs_.r_-position));  // Derivative of the current error (already a bit filtered)
-  cs_.e_ =  cs_.r_ - position;             // Current error
+  float error =  cs_.r_ - position; // Current error
+  cs_.de_ = error - cs_.e_;         // Derivative of the current error (already a bit filtered)
+  cs_.e_ =  error;                  // Current error
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
@@ -495,9 +496,10 @@ public:
 float VelocityControl::velocityControl(const float velocity) {
   cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired velocity [TODO] (filtered)
   
-  cs_.de_ = (cs_.e_ - (cs_.r_-velocity));  // Derivative of the current error (already a bit filtered)
+  float error = cs_.r_ - velocity; // Current error
+  cs_.de_ = error - cs_.e_;        // Derivative of the current error (already a bit filtered)
   //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-velocity)); // TODO Or filter even more?
-  cs_.e_ =  cs_.r_ - velocity;             // Current error
+  cs_.e_ =  error;             // Current error
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
@@ -513,6 +515,31 @@ float VelocityControl::velocityControl(const float velocity) {
  * \brief Class defining impedance control. 
  * 
  * Class defining impedance control.
+ * f = Z*v
+ * In impedance control the input is flow (velocity) and the output is effort (force).
+ * The term “impedance” is loosely applied to describe either velocity or displacement input.
+ * 
+ * On-line processing of angular velocity and moment (== current)
+ * and setting PWM according to them.
+ * 
+ * Simple impedance controller does not rely on force feedback and does not require 
+ * a force sensor. Since a control loop based on force error is missing, forces are only
+ * indirectly assigned by controlling position.
+ * 
+ * In directions where the robot has to be environment-sensitive, impedance is low,
+ * otherwise impedance is high (~position control).
+ * During the movement impedance of the object (M, B, K) can change.
+ * (However that's not our case).
+ * 
+ * The most direct approach is to design low-impedance hardware and use a
+ * simple impedance cont*rol algorithm; in fact, this is the recommended approach. However, intrinsically
+ * low-impedance hardware can be difficult to create, particularly with complex geometries and large force
+ * or power outputs. Most robotic devices have intrinsically high friction and/or inertia, and the simple
+ * impedance control technique described above does nothing to compensate for intrinsic robot impedance.
+ * Considerable effort has been devoted to designing controllers to reduce the apparent endpoint impedance
+ * of interactive robots.
+ * 19.5.1 Force Feedback
+ * 
  */
 class ImpedanceControl {
 public:
@@ -521,10 +548,11 @@ public:
    *
    * Parametrized constructor.
    * \param[in] cs - control states of the impedance control 
-   * \param[in] pid - PID controller
+   * \param[in] TODO
    */ 
-  ImpedanceControl(const ControlStates& cs, const PIDController& pid) :  
-  cs_(cs), pid_(pid) {};
+  // FIXME
+  //ImpedanceControl(const ControlStates& cs, const PIDController& pid) :  
+  //cs_(cs), TODO {};
   
   /*!
    * \brief Impedance control feedback.
@@ -534,13 +562,42 @@ public:
    */  
   float impedanceControl(const float impedance);
   
+  //! 1/( Ms^2 + Bs + K)
+  float M_; //! Mass (inertia)
+  float B_; //! Damper (damping)
+  float K_; //! Spring (stiffness)
   ControlStates cs_;  //! Control states of the impedance control
-  PIDController pid_; //! PID controller for closed loop
+  PositionControl pc_; //! Position control
+  VelocityControl vc_; //! Velocity control
+  CurrentControl cc_; //! Current (== Torque) control
 };
 
-float ImpedanceControl::impedanceControl(const float impedance) {
-  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired impedance [TODO] (filtered)
+/* Position outer loop plus inner torque
+ */
+float ImpedanceControl::impedanceControl(const float position, const float current) {
+  float error;
+  float time = static_cast<float>(millis());
+  // Set reference values
+  pc_.cs_.r_ = pc_.cs_.minimumJerk(time);
+  cc_.cs_.r_ = cc_.cs_.minimumJerk(time);
   
+  // Do the outer loop
+  error = pc_.cs_.r_ - position;    // Current error 
+  pc_.cs_.de_ = error - pc_.cs_.e_; // Derivative of the current error (already a bit filtered)
+  pc_.cs_.e_ = error;               // Current error
+  pc_.cs_.u_ = pc_.pid_.pid(pc_.cs_.e_, pc_.cs_.de_); // Set a new control value
+  
+  // Do the inner loop
+  error = cc_.cs_.r_ + pc_.cs_.u_ - current; // Current error
+  cc_.cs_.de_ = error - cc_.cs_.e_;          // Derivative of the current error (already a bit filtered)
+  cc_.cs_.e_ = error;     
+  cc_.cs_.u_ = cc_.pid_.pid(cc_.cs_.e_, cc_.cs_.de_); // Set a new control value
+  
+  cs_.u_ = cc_.cs_.u_;
+  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  //cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  
+  /*
   cs_.de_ = (cs_.e_ - (cs_.r_-impedance));  // Derivative of the current error (already a bit filtered)
   //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-impedance)); // TODO Or filter even more?
   cs_.e_ =  cs_.r_ - impedance;             // Current error
@@ -549,7 +606,7 @@ float ImpedanceControl::impedanceControl(const float impedance) {
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
   //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  
+  */
   return cs_.u_;    // Return CV
 }
 
@@ -955,6 +1012,28 @@ void MotorControlPins::setUp() {
 
 /*============================================================*/
 /*!
+ * \brief Class defining limits of the DC motor. 
+ * 
+ * Class defining limits of the DC Motor.
+ */
+class MotorLimits {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] curr_max - maximum current
+   */ 
+  MotorLimits(const float curr_max) :
+  curr_max_(curr_max) {};
+        
+  const float curr_max_; //! Maximum current
+  //w_max;    //! Maximum angular velocity
+  // Add more if necessary
+};
+
+/*============================================================*/
+/*!
  * \brief Class defining DC Motor. 
  * 
  * Class defining DC Motor.
@@ -966,13 +1045,14 @@ public:
    *
    * Parametrized constructor.
    * \param[in] m_pins - motor control pins
+   * \param[in] limits - motor limits
    * \param[in] curr_s - current sensor
    * \param[in] e - encoder
    * \param[in] c - control of the motor
    */ 
-  Motor(const MotorControlPins& m_pins, const CurrentSensor& curr_s, 
-        const Encoder& e, const Control& c) :
-    m_pins_(m_pins), curr_s_(curr_s), e_(e), c_(c) {};
+  Motor(const MotorControlPins& m_pins, const MotorLimits& limits, 
+        const CurrentSensor& curr_s, const Encoder& e, const Control& c) :
+    m_pins_(m_pins), limits_(limits), curr_s_(curr_s), e_(e), c_(c) {};
   
   /*!
    * \brief Drives motor in forward direction. 
@@ -1001,6 +1081,14 @@ public:
   int setPwm(const int pwm_val);
   
   /*!
+   * \brief Checks if everything's good (now only current).
+   * 
+   * Checks if everything's good (now only current).
+   * \return true - OK, false - otherwise
+   */
+  bool watchdogOk();
+  
+  /*!
    * \brief Reads current sensor and encoder.
    * 
    * Reads current sensor and encoder.
@@ -1025,8 +1113,9 @@ public:
    *         false - status flag LOW -> bad
    */
   bool actuate(const float cv); 
-  
+   
   MotorControlPins m_pins_; //! Motor control pins
+  MotorLimits limits_;      //! Limits for the motor
   CurrentSensor curr_s_;    //! Current sensor
   Encoder e_;               //! Encoder
   Control c_;               //! Control of the motor
@@ -1045,6 +1134,14 @@ void Motor::reverse() {
 int Motor::setPwm(const int pwm_val) {
   analogWrite(m_pins_.D2_, pwm_val); 
   return pwm_val;
+}
+
+bool Motor::watchdogOk() {
+  if (curr_s_.filtered_current_ > limits_.curr_max_) {  // Check if the current is not too high
+    digitalWrite(m_pins_.EN_, LOW);            // Disable the driver board
+    return false;  
+  }
+  return true;
 }
 
 void Motor::sense() {
@@ -1081,8 +1178,17 @@ bool Motor::actuate(const float cv) {
   return digitalRead(m_pins_.SF_); // Return status flag 
 }
 
+/* TODO
+void Motor::go() {
+  sense();
+  watchdogOk();
+  actuate(control());
+}
+*/
+
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
+         MotorLimits(CURR_MAX),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
@@ -1462,6 +1568,7 @@ void loop()
   
   // Control motor all the time
   m1.sense();
+  m1.watchdogOk();
   u_msg.data = m1.control();
   m1.actuate(u_msg.data);
 }

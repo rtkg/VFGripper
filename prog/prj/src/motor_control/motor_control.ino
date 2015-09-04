@@ -108,6 +108,7 @@ const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MA
 const float R_MOTOR = 7.25; //! Terminal resistance of the motor
 const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor [A]
 const float K_TAU = 0.0452; //! Torque constant [Nm/A]
+const float K_EMF = K_TAU;  //! TODO
 
 /*=============== Time variables ===============*/
 const float DT = 1e-3;       //! Time step [s]
@@ -380,6 +381,45 @@ float CurrentSensor::filterCurrent() {
 
 /*============================================================*/
 /*!
+ * \brief Class defining feedforward control. 
+ * 
+ * Class defining feedforward control.
+ */
+class FeedforwardControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] r_motor - terminal resistance of the motor [ohm]
+   * \param[in] k_emf - back-emf coefficient [TODO]
+   */ 
+  FeedforwardControl(float r_motor, float k_emf) :  
+  r_motor_(r_motor), k_emf_(k_emf) {};
+  
+  /*!
+   * \brief Calculates feedforward term.
+   * 
+   * Calculates feedforward term.
+   * V = L*di/dt + RI + E  
+   * Let di/dt == 0.
+   * E = k_emf*w 
+   * => V = RI + k_emf*w
+   * \param[in] current - current current [A]
+   * \param[in] w - angular velocity [rad/s]
+   */  
+  float feedforward(float current, float w);  
+    
+  const float r_motor_; //! Terminal resistance of the motor [ohm]
+  const float k_emf_;   //! Back-emf coefficient [TODO]
+};
+
+float FeedforwardControl::feedforward(float current, float w) {
+  return r_motor_*current + k_emf_*w; 
+}
+
+/*============================================================*/
+/*!
  * \brief Class defining current control. 
  * 
  * Class defining current control.
@@ -388,46 +428,46 @@ class CurrentControl {
 public:
   /*!
    * \brief Parametrized constructor. 
-   *
+   *TODO
    * Parametrized constructor.
    * \param[in] r_motor - terminal resistance of the motor [ohm]
    * \param[in] cs - control states of the current control 
    * \param[in] pid - PID controller
    */ 
-  CurrentControl(float r_motor, const ControlStates& cs, const PIDController& pid) :  
-  r_motor_(r_motor), cs_(cs), pid_(pid) {};
+  CurrentControl(const FeedforwardControl& fc, const ControlStates& cs, const PIDController& pid) :  
+  feedforward_term_(0.0), feedforward_(fc), cs_(cs), pid_(pid) {};
   
   /*!
    * \brief Current control feedback.
    * 
    * Current control feedback.
    * \param[in] current - current current
+   * TODO
    */  
-  float currentControl(float current);
+  float currentControl(float current, float vel);
   
-  float r_motor_;     //! Terminal resistance of the motor [ohm] (to calculate the feedforward term)
+  float feedforward_term_; // TODO
+  FeedforwardControl feedforward_; //! Feedforward term 
   ControlStates cs_;  //! Control states of the current control
   PIDController pid_; //! PID controller for closed loop
 };
 
-float CurrentControl::currentControl(float current) {
+float CurrentControl::currentControl(float current, float vel) {
    cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] (filtered)
   
   float dir =  (cs_.r_ >= 0 ? 1 : -1);  // If current reference is <0 (due to jerk) 
   current *= dir;                       // We keep or change the sign
   
   float error = current - cs_.r_; // Current error
+  error *= -1; //TODO FIXME
   cs_.de_ = error - cs_.e_;       // Derivative of the current error (already a bit filtered)
   cs_.e_ =  error;                // Current error
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  float feedforward = r_motor_ * current; // V = L*di/dt + RI + E  
-                                          // We hold the motor => w=0 => E=0; di/dt == 0
-                                          // => V = RI
-  mapFloat(feedforward, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
-  cs_.u_ += feedforward;  // Compute control with feedforward term (only positive values)
-  
+  feedforward_term_ = feedforward_.feedforward(current, vel);
+  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  cs_.u_ += feedforward_term_;  // Compute control with feedforward term
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   // We don't want it to rotate in the other direction
   if (cs_.u_ > 0 && dir < 0) {
@@ -703,8 +743,9 @@ public:
    */
   Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, 
           const VelocityControl& vc, const ImpedanceControl& ic) :
-  mode_(mode), cc_(cc), pc_(pc), vc_(vc), ic_(ic) {};
+  /*data_(data),*/ mode_(mode), cc_(cc), pc_(pc), vc_(vc), ic_(ic) {};
   
+  //MotorData data_;      //! TODO
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
   PositionControl pc_;  //! Position control
@@ -999,7 +1040,7 @@ void Encoder::readEncoder() {
 }
 
 void Encoder::convertSensorReading() {
-  step_new = micros(); 
+  step_new = micros();  // TODO FIXME TODO FIXME ADD GLONBALLY AND TO CURRENT!!!!
   int step = step_new - step_old; // [us]
   step_old = step_new;
   
@@ -1095,12 +1136,15 @@ public:
    * \param[in] curr_max - maximum current
    * \param[in] k_tau - torque constant; force = k_tau*current
    */ 
-  MotorData(const float curr_max, const float k_tau) :
-  curr_max_(curr_max), k_tau_(k_tau) {};
+  MotorData(const float curr_max, const float k_tau, const float k_emf, const float r_motor) :
+  curr_max_(curr_max), k_tau_(k_tau), k_emf_(k_emf), r_motor_(r_motor) {};
         
   const float curr_max_; //! Maximum current
-  const float k_tau_;    //! Torque constant; force = k_tau*current
-  //w_max;    //! Maximum angular velocity
+  const float k_tau_;    //! Torque constant == k_emf; force = k_tau*current
+  const float k_emf_;    //! Back-emf constant == k_tau
+  const float r_motor_;  //! TODO 
+  
+  //w_max;    //! Maximum angular velocity TODO
   // Add more if necessary
 };
 
@@ -1224,7 +1268,7 @@ void Motor::sense() {
 
 int Motor::control() {
   if (c_.mode_ == Control::CURRENT_MODE) {
-    return c_.cc_.currentControl(curr_s_.filtered_current_);
+    return c_.cc_.currentControl(curr_s_.filtered_current_, e_.dp_);
   }
   else if (c_.mode_ == Control::POSITION_MODE) {
     return c_.pc_.positionControl(e_.p_);
@@ -1260,12 +1304,12 @@ void Motor::go() {
 
 /*=============== Variable motor definition ===============*/
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
-         MotorData(CURR_MAX, K_TAU),
+         MotorData(CURR_MAX, K_TAU, K_EMF, R_MOTOR),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
          Control(Control::NO_MODE, 
-                 CurrentControl(R_MOTOR,
+                 CurrentControl(FeedforwardControl(m1.data_.r_motor_, m1.data_.k_emf_),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 ),

@@ -98,7 +98,7 @@ const float KD_IMP = 0.0;   //! PID value
 const float M_IMP = 0.0; //! PID value
 const float B_IMP = 1.0;   //! PID value
 const float K_IMP = 100.0;   //! PID value
-const float F_IMP = 1e7;   //! PID value
+const float F_IMP = 3.0e7;   //! PID value
 
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 

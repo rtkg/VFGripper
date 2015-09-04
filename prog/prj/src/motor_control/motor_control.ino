@@ -20,6 +20,7 @@
  *
  * TODO
  * - Feedforward term current control -> add w, dw/dt
+ * - Add acceleration! de = /dT==384+1+1+1+1+1
  * - publisher/subscriber -> services
  * - impedance control
  */
@@ -105,12 +106,23 @@ const int dT_serial = 75000; //! Sample time for the serial connection [us]
 int t_old = 0;        //! Timer value for calculating time steps
 int t_new = 0;        //! Timer value for calculating time steps
 int t_old_serial = 0; //! Timer value for calculating time steps
+int step_new = 0;         //! Timer value for calculating velocity and acceleration
+int step_old = 0;         //! Timer value for calculating velocity and acceleration
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
 int offset_motor = 200;//OFFSET; //! Offset for PWM value to avoid the area where motor does not move at all TODO
 
 /*=============== Functions ===============*/
+/*!
+ * \brief Sets up time variables. 
+ * 
+ * Sets up time variables.
+ */
+void setUpTime() {
+  t_old = t_new = t_old_serial = step_new = step_old = micros();
+}
+
 /*!
  * \brief Sets up PWM write and read resolution. 
  * 
@@ -498,7 +510,6 @@ float VelocityControl::velocityControl(const float velocity) {
   
   float error = cs_.r_ - velocity; // Current error
   cs_.de_ = error - cs_.e_;        // Derivative of the current error (already a bit filtered)
-  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-velocity)); // TODO Or filter even more?
   cs_.e_ =  error;             // Current error
   // TODO Maybe add set point weighting?
   
@@ -518,6 +529,13 @@ float VelocityControl::velocityControl(const float velocity) {
  * f = Z*v
  * In impedance control the input is flow (velocity) and the output is effort (force).
  * The term “impedance” is loosely applied to describe either velocity or displacement input.
+ * 
+ * K*p + B*dp + [M*ddp] = F
+ * yi = K*p + B*dp - F
+ * Control which keeps yi = 0 will accomplish the desired impedance behavior, 
+ * i.e. a trade-off between trajectory error and force error. If the motion
+ * is unconstrained F will be zero and the robot will move to the reference
+ * position.
  * 
  * On-line processing of angular velocity and moment (== current)
  * and setting PWM according to them.
@@ -567,9 +585,10 @@ public:
   float B_; //! Damper (damping)
   float K_; //! Spring (stiffness)
   ControlStates cs_;  //! Control states of the impedance control
-  PositionControl pc_; //! Position control
-  VelocityControl vc_; //! Velocity control
-  CurrentControl cc_; //! Current (== Torque) control
+  //PositionControl pc_; //! Position control
+  //VelocityControl vc_; //! Velocity control
+  //CurrentControl cc_; //! Current (== Torque) control
+  PIDController pid_; //! PID controller for closed loop
 };
 
 /* Position outer loop plus inner torque
@@ -588,7 +607,8 @@ float ImpedanceControl::impedanceControl(const float position, const float curre
   pc_.cs_.u_ = pc_.pid_.pid(pc_.cs_.e_, pc_.cs_.de_); // Set a new control value
   
   // Do the inner loop
-  error = cc_.cs_.r_ + pc_.cs_.u_ - current; // Current error
+  float pc_u_to_current = mapFloat(pc_.cs_.u_,  
+  error = cc_.cs_.r_ + pc_u_to_current - current; // Current error
   cc_.cs_.de_ = error - cc_.cs_.e_;          // Derivative of the current error (already a bit filtered)
   cc_.cs_.e_ = error;     
   cc_.cs_.u_ = cc_.pid_.pid(cc_.cs_.e_, cc_.cs_.de_); // Set a new control value
@@ -814,8 +834,9 @@ public:
   
   int raw_ticks_;  //! Raw encoder ticks [0; 4095]
   float p_raw_;    //! Converted value (scale_)
-  float p_;        //! Filtered converted value 
-  float dp_;       //! Time-derivative of the converted value
+  float p_;        //! Filtered converted value (position)
+  float dp_;       //! Time-derivative of the converted value (velocity)
+  float ddp_;      //! Second time-derivative of the converted value (acceleration)
   int k_;          //! Rollover counter (number of revolutions)
   int res_;        //! Resolution (i.e., number of ticks per revolution)
   float scale_;    //! Scale factor used for conversion from ticks to value - can be used to lump transmission ratio, radius ...
@@ -829,6 +850,7 @@ Encoder::Encoder(int res, float scale, float alpha, SensorPins s_pins) :
   p_raw_(0.0),
   p_(0.0),
   dp_(0.0),
+  ddp_(0.0),
   k_(0),
   res_(res), 
   scale_(scale),
@@ -904,9 +926,9 @@ int Encoder::getRawTicks() {
   // System propagation delay absolute output : delay of ADC, DSP and absolute interface 
   delayMicroseconds(384);
   // Shift in our data (read: 18bits ( 12bits data + 6 bits status)
-  byte d1 = s_pins_.shiftIn(8);
-  byte d2 = s_pins_.shiftIn(8);
-  byte d3 = s_pins_.shiftIn(2);
+  byte d1 = s_pins_.shiftIn(8); // 2 us
+  byte d2 = s_pins_.shiftIn(8); // 2 us
+  byte d3 = s_pins_.shiftIn(2); // 2 us
   // A subsequent measurement is initiated by a “high” pulse at CSn with a minimum duration of tCSn
   digitalWrite(s_pins_.CSn_, HIGH);
   
@@ -937,15 +959,23 @@ void Encoder::readEncoder() {
 }
 
 void Encoder::convertSensorReading() {
+  step_new = micros(); 
+  int step = step_new - step_old; // [us]
+  step_old = step_new;
+  
   // angle = 2*pi*[(reading-offset)/res+k]
   p_raw_ = 2.0*M_PI * ((static_cast<float>(raw_ticks_) - static_cast<float>(offset_)) 
            / static_cast<float>(res_) 
            + static_cast<float>(k_)) 
            * scale_; 
   float p_tmp = alpha_*p_ + (1-alpha_)*p_raw_; // First order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-  float dp_raw = (p_tmp - p_); 
-  dp_ = alpha_*dp_ + (1-alpha_)*dp_raw;
+  float dp_raw = (p_tmp - p_) / step * 1e6;    // [us -> s]        
+  float dp_tmp = alpha_*dp_ + (1-alpha_)*dp_raw; // TODO FIXME filter???
+  float ddp_raw = (dp_tmp - dp_) / step * 1e6; // [us -> s]
+  float ddp_tmp = alpha_*ddp_ + (1-alpha_)*ddp_raw; // TODO FIXME filter???
   p_ = p_tmp;
+  dp_ = dp_tmp;
+  ddp_ = ddp_tmp;
 }; 
 
 int Encoder::computeEncoder() {
@@ -1540,6 +1570,8 @@ void setup()
   digitalWrite(LED_PIN, HIGH);
   
   setUpPwm();
+  
+  setUpTime();
 }
 
 /*============================================================*/

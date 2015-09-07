@@ -70,7 +70,7 @@ const int DELAY = 1; // Delay time [ms]
 
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
-const float DESIRED_POSITION = 200.0; //! Desired position [rad]
+const float DESIRED_POSITION = 20.0; //! Desired position [rad]
 const float DESIRED_VELOCITY = 0.09; //! Desired velocity [rad/s]
 
 const float ALPHA_ENCODER = 0.7; //! Value for filtering position
@@ -90,6 +90,9 @@ const float KD_POS = 1e4;  //! PID value
 const float KP_VEL = 95000.0; //! PID value
 const float KI_VEL = 9.0;   //! PID value
 const float KD_VEL = 1e4;   //! PID value
+
+const float KP_STIFF = 5000.0; //! PID value
+const float KD_STIFF = 400.0;   //! PID value
 
 // TODO
 const float KP_IMP = 1.0; //! PID value
@@ -568,10 +571,68 @@ float VelocityControl::velocityControl(const float velocity) {
   return cs_.u_;    // Return CV
 }
 
+/*! \brief Class defining Stiffness Control.
+ *
+ * Class defining Stiffness Control.
+ * Stiffness control derives from a position control scheme of PD type.
+ * Driving torques:
+ * u = J*kp*(pos_d - pos) - kv*vel
+ */ 
+class StiffnessControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] cs - position control states of the control 
+   * \param[in] pd - PD controller
+   */ 
+  StiffnessControl(const ControlStates& cs, const PIDController& pd) :  
+  cs_(cs), pd_(pd) {};
+  
+  /*!
+   * \brief Stiffness control feedback.
+   * 
+   * Stiffness control feedback.
+   * \param[in] position - current position
+   * \param[in] velocity - current velocity
+   */  
+  float stiffnessControl(const float pos, const float vel);
+  
+  //const float offset_motor_; // TODO
+  ControlStates cs_;  //! Position control states of the control
+  PIDController pd_; //! PD controller for closed loop
+};
+
+float StiffnessControl::stiffnessControl(const float pos, const float vel) {
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [rad] (filtered)
+  
+  cs_.e_ = cs_.r_ - pos;
+  cs_.u_ = pd_.Kp_*cs_.e_ - pd_.Kd_*vel;     // Set a new control value
+  //cs_.u_ >= 0 ? cs_.u_ += offset_motor_ : cs_.u_ -= offset_motor_; // Add offset to overcome the motor inner resistance TODO FIXME
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pd_.u_min_), static_cast<int>(pd_.u_max_)); // Clamp
+  return cs_.u_;    // Return CV
+}
+
+/*! \brief Class defining Force/Position Control.
+ * 
+ * Class defining Force/Position Control.
+ * In order to combine the features of stiffness control and force control,
+ * a parallel force/position regulator can be designed, 
+ * where a PI force control action plus desired force feedforward is used 
+ * in parallel to a PD position control action.
+ * Driving torques:
+ * u = J*( kp*(pos_d - p) + force_d + kf*(force_d - force) + ki*integral(force_d - force) ) - kv*vel
+ */ 
+class ForcePositionControl {
+public:
+  
+};
+
 // FIXME TODO
 /*============================================================*/
 /*!
- * \brief Class defining impedance control. 
+ * \brief Class defining Impedance Control. 
  * 
  * Class defining impedance control.
  * f = Z*v
@@ -638,6 +699,10 @@ public:
   float K_; //! Spring (stiffness)
   float F_; //! Force coefficient
   ControlStates cs_;  //! Control states of the impedance control
+  //ControlStates force_cs_;
+  //ControlStates pos_cs_;
+  //ControlStates vel_cs_;
+  //ControlStates acc_cs_;
   //PositionControl pc_; //! Position control
   //VelocityControl vc_; //! Velocity control
   //CurrentControl cc_; //! Current (== Torque) control
@@ -688,7 +753,8 @@ public:
     CURRENT_MODE  = 1, //! Current controller
     POSITION_MODE = 2, //! Position controller
     VELOCITY_MODE = 3, //! Velocity controller
-    IMPEDANCE_MODE = 4 //! Impedance controller 
+    STIFFNESS_MODE = 4, //! Stiffness controller
+    IMPEDANCE_MODE = 5 //! Impedance controller 
   };
   
   /*!
@@ -699,16 +765,18 @@ public:
    * \param[in] cc - current control
    * \param[in] pc - position control
    * \param[in] vc - velocity control
+   * \param[in] vc - stiffness control
    * \param[in] ic - impedance control
    */
   Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, 
-          const VelocityControl& vc, const ImpedanceControl& ic) :
-  mode_(mode), cc_(cc), pc_(pc), vc_(vc), ic_(ic) {};
+          const VelocityControl& vc, const StiffnessControl& sc, const ImpedanceControl& ic) :
+  mode_(mode), cc_(cc), pc_(pc), vc_(vc), sc_(sc), ic_(ic) {};
   
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
   PositionControl pc_;  //! Position control
   VelocityControl vc_;  //! Velocity control
+  StiffnessControl sc_;  //! Stiffness control
   ImpedanceControl ic_;  //! Impedance control
 };
 
@@ -1240,6 +1308,9 @@ int Motor::control() {
   else if (c_.mode_ == Control::VELOCITY_MODE) {
     return c_.vc_.velocityControl(e_.dp_);
   }
+  else if (c_.mode_ == Control::STIFFNESS_MODE) {
+    return c_.sc_.stiffnessControl(e_.p_, e_.dp_);
+  }
   else if (c_.mode_ == Control::IMPEDANCE_MODE) {
     return c_.ic_.impedanceControl(e_.p_, e_.dp_, e_.ddp_, data_.k_tau_*curr_s_.filtered_current_);
   }
@@ -1272,7 +1343,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::CURRENT_MODE, 
+         Control(Control::STIFFNESS_MODE, 
                  CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
@@ -1283,6 +1354,9 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                  VelocityControl(ControlStates(0.0, DESIRED_VELOCITY, 0.0, T_JERK, false),
                                  PIDController(KP_VEL, KI_VEL, KD_VEL, -PWM_MAX, PWM_MAX, 0.0)
                                 ),
+                 StiffnessControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
+                                 PIDController(KP_STIFF, 0.0, KD_STIFF, -PWM_MAX, PWM_MAX, 0.0)
+                 ),
                  ImpedanceControl(M_IMP, B_IMP, K_IMP, F_IMP,
                                   ControlStates(0.0, 0.0, 0.0, T_JERK, false),
                                   PIDController(KP_IMP, KI_IMP, KD_IMP, -PWM_MAX, PWM_MAX, 0.0)
@@ -1438,6 +1512,18 @@ void setKdImpCallback( const std_msgs::Float32& Kd_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_kd_imp("set_kd_imp", &setKdImpCallback);
 
+void setKpStiffCallback( const std_msgs::Float32& Kp_msg ) {
+  m1.c_.sc_.pd_.Kp_ = Kp_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_kp_stiff("set_kp_stiff", &setKpStiffCallback);
+
+void setKdStiffCallback( const std_msgs::Float32& Kd_msg ) {
+  m1.c_.sc_.pd_.Kd_ = Kd_msg.data;
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_kd_stiff("set_kd_stiff", &setKdStiffCallback);
+
 void setMImpCallback( const std_msgs::Float32& M_msg ) {
   m1.c_.ic_.M_ = M_msg.data;
   confirmCallback();
@@ -1478,6 +1564,11 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
       m1.c_.vc_.cs_.ri_ = m1.c_.vc_.cs_.r_; 
       m1.c_.vc_.cs_.rf_ = ref_msg.data;
       m1.c_.vc_.cs_.ti_ = static_cast<float>(millis());
+      break;
+    case Control::STIFFNESS_MODE:
+      m1.c_.sc_.cs_.ri_ = m1.c_.ic_.cs_.r_; 
+      m1.c_.sc_.cs_.rf_ = ref_msg.data;
+      m1.c_.sc_.cs_.ti_ = static_cast<float>(millis());
       break;
     case Control::IMPEDANCE_MODE:
       m1.c_.ic_.cs_.ri_ = m1.c_.ic_.cs_.r_; 
@@ -1538,6 +1629,13 @@ void setModeCallback( const std_msgs::Float32& mode_msg ) {
       m1.c_.vc_.cs_.active_ = true;
       m1.c_.ic_.cs_.active_ = false;
       break;
+    case Control::STIFFNESS_MODE : 
+      m1.c_.mode_ = Control::IMPEDANCE_MODE;
+      m1.c_.cc_.cs_.active_ = false;
+      m1.c_.pc_.cs_.active_ = false;
+      m1.c_.vc_.cs_.active_ = false;
+      m1.c_.ic_.cs_.active_ = true;
+      break;
     case Control::IMPEDANCE_MODE : 
       m1.c_.mode_ = Control::IMPEDANCE_MODE;
       m1.c_.cc_.cs_.active_ = false;
@@ -1591,6 +1689,8 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.subscribe(sub_set_kp_vel);
   node_handler.subscribe(sub_set_ki_vel);
   node_handler.subscribe(sub_set_kd_vel);
+  node_handler.subscribe(sub_set_kp_stiff);
+  node_handler.subscribe(sub_set_kd_stiff);
   node_handler.subscribe(sub_set_kp_imp);
   node_handler.subscribe(sub_set_ki_imp);
   node_handler.subscribe(sub_set_kd_imp);
@@ -1635,6 +1735,11 @@ void publishEverything() {
     error_msg.data = m1.c_.vc_.cs_.e_;
     ref_msg.data = m1.c_.vc_.cs_.r_;
     integral_msg.data = m1.c_.vc_.pid_.I_;
+  }
+  else if (m1.c_.mode_ == Control::STIFFNESS_MODE) {
+    error_msg.data = m1.c_.sc_.cs_.e_;
+    ref_msg.data = m1.c_.sc_.cs_.r_;
+    integral_msg.data = m1.c_.sc_.pd_.I_;
   }
   else if (m1.c_.mode_ == Control::IMPEDANCE_MODE) {
     error_msg.data = m1.c_.ic_.cs_.e_;

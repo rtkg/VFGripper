@@ -69,19 +69,19 @@ const int PWM_MAX = 4095;      //! PWM maximum value
 const int DELAY = 1; // Delay time [ms]
 
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
-const float DESIRED_CURRENT = 0.015; //! Desired current (=> torque) [mA]
-const float DESIRED_POSITION = 200.0; //! Desired position [TODO]
-const float DESIRED_VELOCITY = 0.09; //! Desired position [TODO]
+const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
+const float DESIRED_POSITION = 200.0; //! Desired position [rad]
+const float DESIRED_VELOCITY = 0.09; //! Desired velocity [rad/s]
 
 const float ALPHA_ENCODER = 0.7; //! Value for filtering position
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
-const float SCALE_ENCODER = 0.167; //! TODO
+const float SCALE_ENCODER = 1.0/(2*44.0); //! One full revolution is 2pi radians
 
 const float T_JERK = 100.0;       //! Time for executing the loop [ms]
 
-const float KP_CURR = 1e5; //! PID value
-const float KI_CURR = 1400.0;   //! PID value
-const float KD_CURR = 1e5;   //! PID value
+const float KP_CURR = 4.0e5; //! PID value
+const float KI_CURR = 25.0;   //! PID value
+const float KD_CURR = 5.0e5;   //! PID value
 
 const float KP_POS = 320.0; //! PID value
 const float KI_POS = 0.1;   //! PID value
@@ -105,10 +105,11 @@ const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband ar
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
 const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
+
 const float R_MOTOR = 7.25; //! Terminal resistance of the motor
 const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor [A]
 const float K_TAU = 0.0452; //! Torque constant [Nm/A]
-const float K_EMF = K_TAU;  //! TODO
+const float K_EMF = K_TAU;  //! Speed constant [rpm/V -> rad/Vs]
 
 /*=============== Time variables ===============*/
 const float DT = 1e-3;       //! Time step [s]
@@ -122,7 +123,7 @@ int step_old = 0;         //! Timer value for calculating velocity and accelerat
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
-int offset_motor = 200;//OFFSET; //! Offset for PWM value to avoid the area where motor does not move at all TODO
+int offset_motor = 200;//OFFSET; //! Offset for PWM value to avoid the area where motor does not move at all TODO FIXME
 
 /*=============== Functions ===============*/
 /*!
@@ -392,7 +393,7 @@ public:
    *
    * Parametrized constructor.
    * \param[in] r_motor - terminal resistance of the motor [ohm]
-   * \param[in] k_emf - back-emf coefficient [TODO]
+   * \param[in] k_emf - back-emf coefficient (torque constant) [Nm/A]
    */ 
   FeedforwardControl(float r_motor, float k_emf) :  
   r_motor_(r_motor), k_emf_(k_emf) {};
@@ -407,14 +408,15 @@ public:
    * => V = RI + k_emf*w
    * \param[in] current - current current [A]
    * \param[in] w - angular velocity [rad/s]
+   * \return feedforward value in [V]
    */  
-  float feedforward(float current, float w);  
+  float feedforward(const float current, const float w);  
     
   const float r_motor_; //! Terminal resistance of the motor [ohm]
-  const float k_emf_;   //! Back-emf coefficient [TODO]
+  const float k_emf_;   //! Back-emf coefficient (torque constant) [Nm/A]
 };
 
-float FeedforwardControl::feedforward(float current, float w) {
+float FeedforwardControl::feedforward(const float current, const float w) {
   return r_motor_*current + k_emf_*w; 
 }
 
@@ -428,9 +430,8 @@ class CurrentControl {
 public:
   /*!
    * \brief Parametrized constructor. 
-   *TODO
    * Parametrized constructor.
-   * \param[in] r_motor - terminal resistance of the motor [ohm]
+   * \param[in] fc - feedforward control
    * \param[in] cs - control states of the current control 
    * \param[in] pid - PID controller
    */ 
@@ -442,12 +443,12 @@ public:
    * 
    * Current control feedback.
    * \param[in] current - current current
-   * TODO
+   * \param[in] vel - current velocity
    */  
   float currentControl(float current, float vel);
   
-  float feedforward_term_; // TODO
-  FeedforwardControl feedforward_; //! Feedforward term 
+  float feedforward_term_; //! Feedforward value
+  FeedforwardControl feedforward_; //! Feedforward control 
   ControlStates cs_;  //! Control states of the current control
   PIDController pid_; //! PID controller for closed loop
 };
@@ -455,19 +456,18 @@ public:
 float CurrentControl::currentControl(float current, float vel) {
    cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired current [A] (filtered)
   
-  float dir =  (cs_.r_ >= 0 ? 1 : -1);  // If current reference is <0 (due to jerk) 
+  float dir =  (cs_.r_ >= 0 ? 1 : -1);  // If current reference is <0 (we measure current only as a positive value) 
   current *= dir;                       // We keep or change the sign
   
-  float error = current - cs_.r_; // Current error
-  error *= -1; //TODO FIXME
+  float error = cs_.r_ - current; // Current error
   cs_.de_ = error - cs_.e_;       // Derivative of the current error (already a bit filtered)
   cs_.e_ =  error;                // Current error
   // TODO Maybe add set point weighting?
   
-  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  feedforward_term_ = feedforward_.feedforward(current, vel);
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);  // Set a new control value
+  feedforward_term_ = feedforward_.feedforward(current, vel); // Calculate feedforward term
   feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
-  cs_.u_ += feedforward_term_;  // Compute control with feedforward term
+  cs_.u_ += feedforward_term_;  // Compute control with feedforward term to make control faster
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   // We don't want it to rotate in the other direction
   if (cs_.u_ > 0 && dir < 0) {
@@ -476,7 +476,6 @@ float CurrentControl::currentControl(float current, float vel) {
   else if (cs_.u_ < 0 && dir > 0) {
     cs_.u_ = 0;
   }
-  
   return cs_.u_;    // Return CV
 }
 
@@ -511,7 +510,7 @@ public:
 };
 
 float PositionControl::positionControl(const float position) {
-  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [TODO] (filtered)
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [rad] (filtered)
   
   float error =  cs_.r_ - position; // Current error
   cs_.de_ = error - cs_.e_;         // Derivative of the current error (already a bit filtered)
@@ -519,7 +518,7 @@ float PositionControl::positionControl(const float position) {
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO FIXME
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));
  
   return cs_.u_;    // Return CV
@@ -556,17 +555,16 @@ public:
 };
 
 float VelocityControl::velocityControl(const float velocity) {
-  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired velocity [TODO] (filtered)
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired velocity [rad/s] (filtered)
   
   float error = cs_.r_ - velocity; // Current error
   cs_.de_ = error - cs_.e_;        // Derivative of the current error (already a bit filtered)
-  cs_.e_ =  error;             // Current error
+  cs_.e_ =  error;                 // Current error
   // TODO Maybe add set point weighting?
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO FIXME
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  
   return cs_.u_;    // Return CV
 }
 
@@ -670,44 +668,6 @@ float ImpedanceControl::impedanceControl(const float pos, const float vel, const
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   
   return cs_.u_;    // Return CV
-  
-  
-  
-  /*
-  float error;
-  float time = static_cast<float>(millis());
-  // Set reference values
-  pc_.cs_.r_ = pc_.cs_.minimumJerk(time);
-  cc_.cs_.r_ = cc_.cs_.minimumJerk(time);
-  
-  // Do the outer loop
-  error = pc_.cs_.r_ - position;    // Current error 
-  pc_.cs_.de_ = error - pc_.cs_.e_; // Derivative of the current error (already a bit filtered)
-  pc_.cs_.e_ = error;               // Current error
-  pc_.cs_.u_ = pc_.pid_.pid(pc_.cs_.e_, pc_.cs_.de_); // Set a new control value
-  
-  // Do the inner loop
-  float pc_u_to_current = mapFloat(pc_.cs_.u_,  
-  error = cc_.cs_.r_ + pc_u_to_current - current; // Current error
-  cc_.cs_.de_ = error - cc_.cs_.e_;          // Derivative of the current error (already a bit filtered)
-  cc_.cs_.e_ = error;     
-  cc_.cs_.u_ = cc_.pid_.pid(cc_.cs_.e_, cc_.cs_.de_); // Set a new control value
-  
-  cs_.u_ = cc_.cs_.u_;
-  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
-  //cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  
-  /*
-  cs_.de_ = (cs_.e_ - (cs_.r_-impedance));  // Derivative of the current error (already a bit filtered)
-  //cs_.de_ = ALPHA_ERROR*cs_.de_ + (1-ALPHA_ERROR)*(cs_.e_ - (cs_.r_-impedance)); // TODO Or filter even more?
-  cs_.e_ =  cs_.r_ - impedance;             // Current error
-  // TODO Maybe add set point weighting?
-  
-  cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
-  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  */
-  //return cs_.u_;    // Return CV
 }
 
 /*============================================================*/
@@ -743,9 +703,8 @@ public:
    */
   Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, 
           const VelocityControl& vc, const ImpedanceControl& ic) :
-  /*data_(data),*/ mode_(mode), cc_(cc), pc_(pc), vc_(vc), ic_(ic) {};
+  mode_(mode), cc_(cc), pc_(pc), vc_(vc), ic_(ic) {};
   
-  //MotorData data_;      //! TODO
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
   PositionControl pc_;  //! Position control
@@ -903,6 +862,10 @@ public:
    */
   int computeEncoder(); 
   
+  /*! \brief Encoder error codes.
+   * 
+   * Encoder error codes.
+   */
   enum Flags {
     OCF = -1, //! Offset Compensation Finished
     COF = -2, //! Cordic Overflow
@@ -910,13 +873,14 @@ public:
     MAG = -4, //! Magnetic field is <45mT or >75mT. It is still possible to operate the AS5045 in this range, but not recommended
     MagINC = -5, //! Distance decrease; push-function. This state is dynamic and only active while the magnet is moving towards the chip.
     MagDEC = -6, //! Distance increase; pull-function. This state is dynamic and only active while the magnet is moving away from the chip.
-    PARITY = -7  //! Even checksum of bits 1:15
+    PARITY = -7,  //! Even checksum of bits 1:17
+    OUT_OF_BOUNDS = -8 //! Numeric limits error
   };
   
   int raw_ticks_;  //! Raw encoder ticks [0; 4095]
   float p_raw_;    //! Converted value (scale_)
-  float p_;        //! Filtered converted value (position)
-  float dp_;       //! Time-derivative of the converted value (velocity)
+  float p_;        //! Filtered converted value (position) [rad]
+  float dp_;       //! Time-derivative of the converted value (velocity) [rad/s]
   float ddp_;      //! Second time-derivative of the converted value (acceleration)
   int k_;          //! Rollover counter (number of revolutions)
   int res_;        //! Resolution (i.e., number of ticks per revolution)
@@ -1040,7 +1004,7 @@ void Encoder::readEncoder() {
 }
 
 void Encoder::convertSensorReading() {
-  step_new = micros();  // TODO FIXME TODO FIXME ADD GLONBALLY AND TO CURRENT!!!!
+  step_new = micros();  // Necessary to calculate velocity and acceleration
   int step = step_new - step_old; // [us]
   step_old = step_new;
   
@@ -1062,7 +1026,7 @@ void Encoder::convertSensorReading() {
 int Encoder::computeEncoder() {
   readEncoder();
   if ((k_ == std::numeric_limits<int>::max()) ||  (k_ == std::numeric_limits<int>::min())) {
-    raw_ticks_ = (-5); // Over/underflow of the rollover count variable TODO enum
+    raw_ticks_ = OUT_OF_BOUNDS; // Over/underflow of the rollover count variable
   }
   else {                     // Everything's OK
     convertSensorReading();  // Update the sensor value 
@@ -1140,9 +1104,9 @@ public:
   curr_max_(curr_max), k_tau_(k_tau), k_emf_(k_emf), r_motor_(r_motor) {};
         
   const float curr_max_; //! Maximum current
-  const float k_tau_;    //! Torque constant == k_emf; force = k_tau*current
-  const float k_emf_;    //! Back-emf constant == k_tau
-  const float r_motor_;  //! TODO 
+  const float k_tau_;    //! Torque constant == k_emf; force = k_tau*current [Nm/A]
+  const float k_emf_;    //! Back-emf constant (speed constant) == k_tau [rpm/V -> rad/Vs]
+  const float r_motor_;  //! Motor terminal resistance [ohm]
   
   //w_max;    //! Maximum angular velocity TODO
   // Add more if necessary
@@ -1268,7 +1232,7 @@ void Motor::sense() {
 
 int Motor::control() {
   if (c_.mode_ == Control::CURRENT_MODE) {
-    return c_.cc_.currentControl(curr_s_.filtered_current_, e_.dp_);
+    return c_.cc_.currentControl(curr_s_.filtered_current_, e_.dp_ / e_.scale_); // We need inner motor velocity without gearbox
   }
   else if (c_.mode_ == Control::POSITION_MODE) {
     return c_.pc_.positionControl(e_.p_);
@@ -1308,8 +1272,8 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::NO_MODE, 
-                 CurrentControl(FeedforwardControl(m1.data_.r_motor_, m1.data_.k_emf_),
+         Control(Control::CURRENT_MODE, 
+                 CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 ),
@@ -1371,6 +1335,8 @@ std_msgs::Float32 imp_msg;
 ros::Publisher pub_imp("imp", &imp_msg);
 std_msgs::Float32 force_msg;
 ros::Publisher pub_force("force", &force_msg);
+std_msgs::Float32 feedforward_msg;
+ros::Publisher pub_feedforward("feedforward", &feedforward_msg);
 
 int counter = 0;
 void confirmCallback() {
@@ -1612,6 +1578,7 @@ void setUpRos(ros::NodeHandle & node_handler) {
   
   node_handler.advertise(pub_imp);
   node_handler.advertise(pub_force);
+  node_handler.advertise(pub_feedforward);
   
   node_handler.subscribe(sub_set_vel);
   
@@ -1643,9 +1610,9 @@ void setUpRos(ros::NodeHandle & node_handler) {
 }
 
 /*!
- * \brief Publishes interestind data from motor.
+ * \brief Publishes interesting data from motor.
  * 
- * Publishes interestind data from motor.
+ * Publishes interesting data from motor.
  */
 void publishEverything() {
   pub_u.publish( &u_msg );
@@ -1683,6 +1650,8 @@ void publishEverything() {
   pub_imp.publish( &imp_msg );
   force_msg.data = m1.c_.ic_.force_;
   pub_force.publish( &force_msg );
+  feedforward_msg.data = m1.c_.cc_.feedforward_term_;
+  pub_feedforward.publish( &feedforward_msg );
   
   enc_ddp_msg.data = m1.e_.ddp_;
   pub_enc_ddp.publish( &enc_ddp_msg );
@@ -1732,6 +1701,8 @@ void setup()
   setUpPwm();
   
   setUpTime();
+  
+  //Serial.begin(9600); // For debugging -> Serial.println();
 }
 
 /*============================================================*/

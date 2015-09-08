@@ -101,9 +101,9 @@ const float KP_STIFF = 5000.0; //! PID value
 const float KD_STIFF = 400.0;   //! PID value
 
 const float KP_FPR = 1.0e4; //! PID value
-const float KF_FPR = 1.0e8; //! PID value
-const float KI_FPR = 1.0e2; //! PID value
-const float KV_FPR = 1.0e3; //! PID value
+const float KF_FPR = 5.0e5; //! PID value
+const float KI_FPR = 2.0e3; //! PID value
+const float KV_FPR = 3.0e3; //! PID value
 
 // TODO 
 const float KP_IMP = 1.0; //! PID value
@@ -658,7 +658,7 @@ public:
    * \param[in] force - current force
    * \param[in] velocity - current velocity
    */  
-  float forcePositionRegulator(const float pos, const float force, const float vel);
+  float forcePositionRegulator(const float pos, float force, const float vel);
   
   //const float offset_motor_; // TODO
   ControlStates pos_cs_;   //! Position control states of the control
@@ -679,7 +679,7 @@ ForcePositionRegulator::ForcePositionRegulator(const ControlStates& pos_cs, cons
   fp_pid_(PIDController(0.0, 0.0, 0.0, -PWM_MAX, PWM_MAX, 0.0))
   {};
 
-float ForcePositionRegulator::forcePositionRegulator(const float pos, const float force, const float vel) {
+float ForcePositionRegulator::forcePositionRegulator(const float pos, float force, const float vel) {
   float time = millis();
   
   pos_cs_.r_ = pos_cs_.minimumJerk(time);     // Set a new desired position [rad] (filtered)
@@ -687,11 +687,29 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, const floa
   
   force_cs_.r_ = force_cs_.minimumJerk(time); // Set a new desired force [N] (filtered)
   force_cs_.e_ = force_cs_.r_ - force;
-  force_pi_.I_ += force_cs_.e_;                      // Update integral
+  float dir =  (pos_cs_.e_ >= 0 ? 1 : -1);    // If current error is <0  
+  force_cs_.e_ *= dir;                        // We keep or change the sign
+  force_pi_.I_ += force_cs_.e_;               // Update integral
+  
   /* TODO FIXME Add this part??? Set boundaries
    if (I_ > I_max_ || I < I_min_) {  
      I_ -= force_cs_.e_; // Recalculate the Integral term (the latter to avoid windup)
    }*/ 
+  
+  /*
+  feedforward_term_ = feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
+  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  cs_.u_ += feedforward_term_;  // Compute control with feedforward term to make control faster
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  // We don't want it to rotate in the other direction
+  if (cs_.u_ > 0 && dir < 0) {
+    cs_.u_ = 0; // So just don't move
+  }
+  else if (cs_.u_ < 0 && dir > 0) {
+    cs_.u_ = 0;
+  }
+  return cs_.u_;    // Return CV
+  */
   
   fp_cs_.u_ = pos_pd_.Kp_*pos_cs_.e_ 
               + force_cs_.r_ + force_pi_.Kp_*force_cs_.e_ + force_pi_.Ki_*force_pi_.I_

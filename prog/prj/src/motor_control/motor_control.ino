@@ -85,26 +85,26 @@ const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor 
 const float K_TAU = 0.0452; //! Torque constant [Nm/A]
 const float K_EMF = K_TAU;  //! Speed constant [rpm/V -> rad/Vs]
 
+// Tuned
 const float KP_CURR = 4.0e5; //! PID value
 const float KI_CURR = 25.0;   //! PID value
 const float KD_CURR = 5.0e5;   //! PID value
-
+// TODO
 const float KP_POS = 320.0; //! PID value
 const float KI_POS = 0.1;   //! PID value
 const float KD_POS = 1e4;  //! PID value
-
+// TODO
 const float KP_VEL = 95000.0; //! PID value
 const float KI_VEL = 9.0;   //! PID value
 const float KD_VEL = 1e4;   //! PID value
-
+// Tuned
 const float KP_STIFF = 5000.0; //! PID value
 const float KD_STIFF = 400.0;   //! PID value
-
+// Tuned
 const float KP_FPR = 1.0e4; //! PID value
 const float KF_FPR = 5.0e5; //! PID value
 const float KI_FPR = 2.0e3; //! PID value
 const float KV_FPR = 3.0e3; //! PID value
-
 // TODO 
 const float KP_IMP = 1.0; //! PID value
 const float KI_IMP = 0.0;   //! PID value
@@ -122,7 +122,6 @@ const float DESIRED_FORCE = DESIRED_CURRENT * K_TAU; //! Desired force [N]
 const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
 
 /*=============== Time variables ===============*/
-const float DT = 1e-3;       //! Time step [s]
 const int dT = 1000;         //! Sample time [us] 
 const int dT_serial = 75000; //! Sample time for the serial connection [us]
 int t_old = 0;        //! Timer value for calculating time steps

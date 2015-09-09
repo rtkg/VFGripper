@@ -647,7 +647,7 @@ public:
    * \param[in] pd - PD controller
    */ 
   ForcePositionRegulator(const ControlStates& pos_cs, const PIDController& pos_pd,
-                         const ControlStates& force_cs, const PIDController& force_pi);
+                         const CurrentControl& fc);
   
   /*!
    * \brief TODO Stiffness control feedback.
@@ -660,20 +660,21 @@ public:
   float forcePositionRegulator(const float pos, float force, const float vel);
   
   //const float offset_motor_; // TODO
+  // TODO change to PositionControl and CurrentControl instead of 4 types
   ControlStates pos_cs_;   //! Position control states of the control
   PIDController pos_pd_;   //! PD position controller for closed loop
-  ControlStates force_cs_; //! Force control states of the control
-  PIDController force_pi_; //! PI force controller for closed loop
+  //ControlStates force_cs_; //! Force control states of the control
+  //PIDController force_pi_; //! PI force controller for closed loop
+  CurrentControl fc_;       //! Force control
   ControlStates fp_cs_;    //! Parallel Force/Position Regulator states  
   PIDController fp_pid_;   //! PID force/position controller for closed loop
 };
 
 ForcePositionRegulator::ForcePositionRegulator(const ControlStates& pos_cs, const PIDController& pos_pd,
-                                               const ControlStates& force_cs, const PIDController& force_pi) : 
+                                               const CurrentControl& fc) : 
   pos_cs_(pos_cs), 
   pos_pd_(pos_pd), 
-  force_cs_(force_cs),
-  force_pi_(force_pi),
+  fc_(fc),
   fp_cs_(ControlStates(0.0, 0.0, 0.0, T_JERK, false)),
   fp_pid_(PIDController(0.0, 0.0, 0.0, -PWM_MAX, PWM_MAX, 0.0))
   {};
@@ -684,37 +685,30 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, float forc
   pos_cs_.r_ = pos_cs_.minimumJerk(time);     // Set a new desired position [rad] (filtered)
   pos_cs_.e_ = pos_cs_.r_ - pos;
   
-  force_cs_.r_ = force_cs_.minimumJerk(time); // Set a new desired force [N] (filtered)
-  force_cs_.e_ = force_cs_.r_ - force;
-  float dir =  (pos_cs_.e_ >= 0 ? 1 : -1);    // If current error is <0  
-  force_cs_.e_ *= dir;                        // We keep or change the sign
-  force_pi_.I_ += force_cs_.e_;               // Update integral
-  
-  /* TODO FIXME Add this part??? Set boundaries
-   if (I_ > I_max_ || I < I_min_) {  
-     I_ -= force_cs_.e_; // Recalculate the Integral term (the latter to avoid windup)
-   }*/ 
-  
-  /*
-  feedforward_term_ = feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
-  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
-  cs_.u_ += feedforward_term_;  // Compute control with feedforward term to make control faster
-  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  // We don't want it to rotate in the other direction
-  if (cs_.u_ > 0 && dir < 0) {
-    cs_.u_ = 0; // So just don't move
-  }
-  else if (cs_.u_ < 0 && dir > 0) {
-    cs_.u_ = 0;
-  }
-  return cs_.u_;    // Return CV
-  */
-  
+  fc_.cs_.r_ = fc_.cs_.minimumJerk(time); // Set a new desired force [N] (filtered)
+  force = (fc_.cs_.r_ >= 0 ? force : -force);   // If current reference is <0 (we measure current only as a positive value), change the sign 
+  fc_.cs_.e_ = fc_.cs_.r_ - force;              // Calculate error
+  fc_.pid_.I_ += fc_.cs_.e_;                    // Update integral
+ 
+  // TODO FIXME Add this part? Setting boundaries
+  //if (I_ > I_max_ || I < I_min_) {  
+  //  I_ -= force_cs_.e_; // Recalculate the Integral term (the latter to avoid windup)
+  //} 
+ 
+  // u = J*( kp*(pos_d - p) + force_d + kf*(force_d - force) + ki*integral(force_d - force) ) - kv*vel
   fp_cs_.u_ = pos_pd_.Kp_*pos_cs_.e_ 
-              + force_cs_.r_ + force_pi_.Kp_*force_cs_.e_ + force_pi_.Ki_*force_pi_.I_
+              + fc_.cs_.r_ + fc_.pid_.Kp_*fc_.cs_.e_ + fc_.pid_.Ki_*fc_.pid_.I_
               - pos_pd_.Kd_*vel;                                 // Set a new control value
   
+  //const float move_dir =  (pos_cs_.e_ >= 0 ? 1 : -1); // Set movement direction to direction of desired position
+  //fp_cs_.u_ *= move_dir;
   //fp_cs_.u_ >= 0 ? fp_cs_.u_ += offset_motor_ : fp_cs_.u_ -= offset_motor_; // Add offset to overcome the motor inner resistance TODO FIXME
+  
+  //fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
+  //fc_.feedforward_term_ = mapFloat(fc_.feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  
+  //fp_cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
+  
   fp_cs_.u_ = constrain(fp_cs_.u_, static_cast<int>(fp_pid_.u_min_), static_cast<int>(fp_pid_.u_max_)); // Clamp
   return fp_cs_.u_;    // Return CV
 }
@@ -767,9 +761,8 @@ public:
    * \param[in] cs - control states of the impedance control 
    * \param[in] TODO
    */ 
-  ImpedanceControl(const float M, const float B, const float K, const float F,
-                   const ControlStates& cs, const PIDController& pid) :  
-  M_(M), B_(B), K_(K), F_(F), cs_(cs), pid_(pid) {};
+  ImpedanceControl(const float pos_d, const float M, const float B, const float K, const float F,
+                   const ControlStates& cs, const PIDController& pid);
   
   /*!
    * \brief Impedance control feedback.
@@ -781,41 +774,40 @@ public:
    */  
   float impedanceControl(const float pos, const float vel, const float acc, const float force);
   
-  //! 1/( Ms^2 + Bs + K)
-  float impedance_; // TODO
-  float force_; // TODO
-  float M_; //! Mass (inertia)
-  float B_; //! Damper (damping)
-  float K_; //! Spring (stiffness)
-  float F_; //! Force coefficient
+  float acc_d_; //! Desired acceleration [rad/s^2]
+  float vel_d_; //! Desired velocity [rad/s]
+  float pos_d_; //! Desired position [rad]
+  float impedance_; //! 1/( Ms^2 + Bs + K)
+  float force_; // Force [N] (scaled)
+  float M_; //! Mass (inertia) [kg]
+  float B_; //! Damper (damping) [Ns/m]
+  float K_; //! Spring (stiffness) [N/m]
+  float F_; //! Force coefficient (scale)
   ControlStates cs_;  //! Control states of the impedance control
-  //ControlStates force_cs_;
-  //ControlStates pos_cs_;
-  //ControlStates vel_cs_;
-  //ControlStates acc_cs_;
-  //PositionControl pc_; //! Position control
-  //VelocityControl vc_; //! Velocity control
-  //CurrentControl cc_; //! Current (== Torque) control
   PIDController pid_; //! PID controller for closed loop
 };
 
-/* Position outer loop plus inner torque
- */
+ImpedanceControl::ImpedanceControl(const float pos_d, const float M, const float B, const float K, const float F,
+                 const ControlStates& cs, const PIDController& pid) :  
+                 acc_d_(0.0), // Desired acceleration and velocity are usually not present
+                 vel_d_(0.0), // to guarantee passivity when in contact with environment.
+                 pos_d_(pos_d),
+                 M_(M), 
+                 B_(B), 
+                 K_(K), 
+                 F_(F), 
+                 cs_(cs), 
+                 pid_(pid) 
+                 {};
+                 
 float ImpedanceControl::impedanceControl(const float pos, const float vel, const float acc, float force) {
-  float time = static_cast<float>(millis());
-  // Set reference value
-  //cs_.rf_ = force; // TODO check and change from current to torque
-  cs_.r_ = 0.0; //cs_.minimumJerk(time);
-  //cs_.ri_ = cs_.r_;
-  
-  force_ = force = force*F_;
-  
-  // Do the loop
-  float acc_d_ = 0, vel_d_ = 0, pos_d_ = 200; // TODO FIXME
+  cs_.r_ = 0.0; // Control which keeps ui = 0 will accomplish the desired impedance behavior 
+  force_ = force = force*F_; // Scale force
+  // Do the control
   const float imp = M_*(acc_d_-acc) + B_*(vel_d_-vel) + K_*(pos_d_-pos) - force; // Calculate current impedance
   impedance_ =  imp;
-  float error = cs_.r_ - imp;           // Current error 
-  error *= -1;
+  
+  const float error = -(cs_.r_ - imp);         // Current error (change the sign necessary) 
   cs_.de_ = error - cs_.e_;           // Derivative of the current error (already a bit filtered)
   cs_.e_ = error;                     // Current error
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_); // Set a new control value
@@ -1439,7 +1431,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::FORCE_POSITION_MODE, 
+         Control(Control::IMPEDANCE_MODE, 
                  CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
@@ -1455,10 +1447,12 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                  ),
                  ForcePositionRegulator(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
                                         PIDController(KP_FPR, 0.0, KV_FPR, -PWM_MAX, PWM_MAX, 0.0),
-                                        ControlStates(0.0, DESIRED_FORCE, 0.0, T_JERK, false),
-                                        PIDController(KF_FPR, KI_FPR, 0.0, -PWM_MAX, PWM_MAX, 0.0)
+                                        CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
+                                                       ControlStates(0.0, DESIRED_FORCE, 0.0, T_JERK, false),
+                                                       PIDController(KF_FPR, KI_FPR, 0.0, -PWM_MAX, PWM_MAX, 0.0)
+                                                      )                                        
                  ),
-                 ImpedanceControl(M_IMP, B_IMP, K_IMP, F_IMP,
+                 ImpedanceControl(DESIRED_POSITION, M_IMP, B_IMP, K_IMP, F_IMP,
                                   ControlStates(0.0, 0.0, 0.0, T_JERK, false),
                                   PIDController(KP_IMP, KI_IMP, KD_IMP, -PWM_MAX, PWM_MAX, 0.0)
                                  )
@@ -1633,13 +1627,13 @@ void setKpFprCallback( const std_msgs::Float32& Kp_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_kp_fpr("set_kp_fpr", &setKpFprCallback);
 
 void setKfFprCallback( const std_msgs::Float32& Kf_msg ) {
-  m1.c_.fpr_.force_pi_.Kp_ = Kf_msg.data;
+  m1.c_.fpr_.fc_.pid_.Kp_ = Kf_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_kf_fpr("set_kf_fpr", &setKfFprCallback);
 
 void setKiFprCallback( const std_msgs::Float32& Ki_msg ) {
-  m1.c_.fpr_.force_pi_.Ki_ = Ki_msg.data;
+  m1.c_.fpr_.fc_.pid_.Ki_ = Ki_msg.data;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_ki_fpr("set_ki_fpr", &setKiFprCallback);
@@ -1651,7 +1645,7 @@ void setKvFprCallback( const std_msgs::Float32& Kv_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_kv_fpr("set_kv_fpr", &setKvFprCallback);
 
 void setFdFprCallback( const std_msgs::Float32& Fd_msg ) {
-  m1.c_.fpr_.force_cs_.rf_ = Fd_msg.data; // TODO FIXME
+  m1.c_.fpr_.fc_.cs_.rf_ = Fd_msg.data; // TODO FIXME
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_fd_fpr("set_fd_fpr", &setFdFprCallback);
@@ -1712,9 +1706,9 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
     case Control::FORCE_POSITION_MODE:
       // TODO FIXME
       // Force
-      m1.c_.fpr_.force_cs_.ri_ = m1.c_.fpr_.force_cs_.r_; 
-      m1.c_.fpr_.force_cs_.rf_ = m1.c_.fpr_.force_cs_.r_ * 2.0;//ref_msg.data;
-      m1.c_.fpr_.force_cs_.ti_ = static_cast<float>(millis());
+      m1.c_.fpr_.fc_.cs_.ri_ = m1.c_.fpr_.fc_.cs_.r_; 
+      m1.c_.fpr_.fc_.cs_.rf_ = m1.c_.fpr_.fc_.cs_.r_ * 2.0;//ref_msg.data;
+      m1.c_.fpr_.fc_.cs_.ti_ = static_cast<float>(millis());
       // Position
       m1.c_.fpr_.pos_cs_.ri_ = m1.c_.fpr_.pos_cs_.r_; 
       m1.c_.fpr_.pos_cs_.rf_ = ref_msg.data;
@@ -1912,7 +1906,7 @@ void publishEverything() {
     // TODO FIXME
     error_msg.data = m1.c_.fpr_.fp_cs_.e_; // TODO FIXME
     ref_msg.data = m1.c_.sc_.cs_.r_;
-    integral_msg.data = m1.c_.fpr_.force_pi_.I_;
+    integral_msg.data = m1.c_.fpr_.fc_.pid_.I_;
   }
   else if (m1.c_.mode_ == Control::IMPEDANCE_MODE) {
     error_msg.data = m1.c_.ic_.cs_.e_;

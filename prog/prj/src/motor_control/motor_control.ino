@@ -219,6 +219,7 @@ public:
   float r_;  //! Setpoint (reference) value at current iteration
   float e_;  //! Error
   float de_; //! Error derivative
+  float dde_; //! Error second derivative
   float ti_; //! Time when we initialized motion [s]
   float T_;  //! Time for executing the loop
   int u_; //! Computed control
@@ -231,6 +232,7 @@ ControlStates::ControlStates(float ri, float rf, float ti, float T, bool active)
   r_(rf_),
   e_(0.0),
   de_(0.0),
+  dde_(0.0),
   ti_(ti), 
   T_(T),  
   u_(0.0),
@@ -711,6 +713,110 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, float forc
   
   fp_cs_.u_ = constrain(fp_cs_.u_, static_cast<int>(fp_pid_.u_min_), static_cast<int>(fp_pid_.u_max_)); // Clamp
   return fp_cs_.u_;    // Return CV
+}
+
+/*! \brief Class defining Parallel Force/Position Control.
+ * 
+ * Class defining Parallel Force/Position Control.
+ * In order to combine the features of stiffness control and force control,
+ * a parallel force/position regulator can be designed, 
+ * where a PI force control action plus desired force feedforward is used 
+ * in parallel to a PD position control action.
+ * The position controller is an impedance while the force controller 
+ * results in a filtering action on the force variables.
+ * Driving torques:
+ * 
+ * 
+ * u = J*( kp*(pos_d - p) + force_d + kf*(force_d - force) + ki*integral(force_d - force) ) - kv*vel
+ */ 
+class ForcePositionControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * \param[in] cs - position control states of the control 
+   * \param[in] pd - PD controller
+   */ 
+  ForcePositionControl(const float M, const CurrentControl& fc,
+                       const PositionControl& pc);
+  
+  /*!
+   * \brief TODO Stiffness control feedback.
+   * 
+   * Stiffness control feedback.
+   * \param[in] position - current position
+   * \param[in] force - current force
+   * \param[in] velocity - current velocity
+   */  
+  float forcePositionControl(const float pos, float force, const float vel);
+  
+  //const float offset_motor_; // TODO
+  float time_;          //! TODO
+  float force_;
+  float M_;
+  float cv_;
+  CurrentControl fc_;   //! Force control
+  PositionControl pc_;  //! Position control 
+  ControlStates cs_;    //! Parallel Force/Position Regulator states  
+  PIDController pid_;   //! PID force/position controller for closed loop
+};
+
+ForcePositionControl::ForcePositionControl(const float M, const CurrentControl& fc,
+                                           const PositionControl& pc) : 
+  time_(millis()),
+  force_(0.0),
+  M_(M),
+  cv_(0.0),
+  fc_(fc),
+  pc_(pc), 
+  cs_(ControlStates(0.0, 0.0, 0.0, T_JERK, false)),
+  pid_(PIDController(0.0, 0.0, 0.0, -PWM_MAX, PWM_MAX, 0.0))
+  {};
+
+float ForcePositionControl::forcePositionControl(const float pos, float force, const float vel) {
+  float time = millis();
+  float dt = time - time_;
+  time_ = time;
+  
+  cs_.r_ = 0.0; // Control which keeps ui = 0 will accomplish the desired impedance behavior 
+  
+  pc_.cs_.r_ = pc_.cs_.minimumJerk(time);     // Set a new desired position [rad] (filtered)
+  float error    =  pc_.cs_.r_ - pos;
+  float d_error  = (error - pc_.cs_.e_) / dt; 
+  float dd_error = (d_error - pc_.cs_.de_) / dt;
+  pc_.cs_.e_ = error;
+  pc_.cs_.de_ = d_error;
+  pc_.cs_.dde_ = dd_error;
+  
+  fc_.cs_.r_ = fc_.cs_.minimumJerk(time); // Set a new desired force [N] (filtered)
+  force_ = (fc_.cs_.r_ >= 0 ? force : -force);   // If current reference is <0 (we measure current only as a positive value), change the sign 
+  error     =  fc_.cs_.r_ - force_;              // Calculate error
+  d_error   = (error - fc_.cs_.e_) / dt; 
+  dd_error  = (d_error - fc_.cs_.de_) / dt;
+  fc_.cs_.e_ = error;
+  fc_.cs_.de_ = d_error;
+  fc_.cs_.dde_ = dd_error;
+  fc_.pid_.I_ += fc_.cs_.e_;                    // Update integral
+
+  // Do the control
+  const float cv = M_*pc_.cs_.dde_ + pc_.pid_.Kd_*pc_.cs_.de_ + pc_.pid_.Kp_*pc_.cs_.e_ 
+                   + fc_.pid_.Kp_*fc_.cs_.e_ + fc_.pid_.Ki_*fc_.pid_.I_;
+  cv_ = cv;
+  error = -(cs_.r_ - cv);             // Current error (change the sign necessary because ...=0) 
+  cs_.de_ = error - cs_.e_;           // Derivative of the current error (already a bit filtered)
+  cs_.e_ = error;                     // Current error
+  cs_.u_ = pid_.pid(cs_.e_, cs_.de_); // Set a new control value
+ 
+  cs_.u_ = (pc_.cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
+  //cs_.u_ += (cs_.u_ >= 0 ? offset_motor_ : -offset_motor_); // Add offset to overcome the motor inner resistance TODO FIXME
+  
+  //fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
+  //fc_.feedforward_term_ = mapFloat(fc_.feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  //fp_cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
+  
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  return cs_.u_;    // Return CV
 }
 
 // FIXME TODO
@@ -1687,16 +1793,19 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
       m1.c_.cc_.cs_.ri_ = m1.c_.cc_.cs_.r_; 
       m1.c_.cc_.cs_.rf_ = ref_msg.data;
       m1.c_.cc_.cs_.ti_ = static_cast<float>(millis());
+      m1.c_.cc_.pid_.I_ = 0.0; // New integral
       break;
     case Control::POSITION_MODE:
       m1.c_.pc_.cs_.ri_ = m1.c_.pc_.cs_.r_; 
       m1.c_.pc_.cs_.rf_ = ref_msg.data;
       m1.c_.pc_.cs_.ti_ = static_cast<float>(millis());
+      m1.c_.pc_.pid_.I_ = 0.0; // New integral
       break;
     case Control::VELOCITY_MODE:
       m1.c_.vc_.cs_.ri_ = m1.c_.vc_.cs_.r_; 
       m1.c_.vc_.cs_.rf_ = ref_msg.data;
       m1.c_.vc_.cs_.ti_ = static_cast<float>(millis());
+      m1.c_.vc_.pid_.I_ = 0.0; // New integral
       break;
     case Control::STIFFNESS_MODE:
       m1.c_.sc_.cs_.ri_ = m1.c_.ic_.cs_.r_; 
@@ -1718,6 +1827,7 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
       m1.c_.ic_.cs_.ri_ = m1.c_.ic_.cs_.r_; 
       m1.c_.ic_.cs_.rf_ = ref_msg.data;
       m1.c_.ic_.cs_.ti_ = static_cast<float>(millis());
+      m1.c_.ic_.pid_.I_ = 0.0; // New integral
       break;
     default:
       break;

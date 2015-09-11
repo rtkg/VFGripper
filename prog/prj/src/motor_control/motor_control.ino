@@ -133,8 +133,6 @@ const int dT_serial = 75000; //! Sample time for the serial connection [us]
 unsigned long t_old = 0;        //! Timer value for calculating time steps
 unsigned long t_new = 0;        //! Timer value for calculating time steps
 unsigned long t_old_serial = 0; //! Timer value for calculating time steps
-unsigned long step_new = 0;         //! Timer value for calculating velocity and acceleration
-unsigned long step_old = 0;         //! Timer value for calculating velocity and acceleration
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
@@ -145,9 +143,11 @@ int offset_motor = 200;//OFFSET; //! Offset for PWM value to avoid the area wher
  * \brief Sets up time variables. 
  * 
  * Sets up time variables.
+ * Micros counts time from the start of the program.
+ * So it initializes values with a value close to 0.
  */
 void setUpTime() {
-  t_old = t_new = t_old_serial = step_new = step_old = micros();
+  t_old = t_new = t_old_serial = micros();
 }
 
 /*!
@@ -860,7 +860,7 @@ public:
    * \param[in] force - current force
    * \param[in] velocity - current velocity
    */  
-  float forcePositionControl(const float pos, float force);
+  float forcePositionControl(const float pos, float force, const float vel);
   
   //const float offset_motor_; // TODO
   unsigned long time_;          //! TODO
@@ -885,7 +885,7 @@ ForcePositionControl::ForcePositionControl(const float M, const CurrentControl& 
   pid_(pid) 
   {};
 
-float ForcePositionControl::forcePositionControl(const float pos, float force) {
+float ForcePositionControl::forcePositionControl(const float pos, float force, const float vel) {
   unsigned long time = micros();
   unsigned long dt = time - time_;
   time_ = time;
@@ -920,11 +920,9 @@ float ForcePositionControl::forcePositionControl(const float pos, float force) {
   
   cs_.u_ = (pc_.cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
 
-  //cs_.u_ += (cs_.u_ >= 0 ? offset_motor_ : -offset_motor_); // Add offset to overcome the motor inner resistance TODO FIXME
-  
-  //fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
-  //fc_.feedforward_term_ = mapFloat(fc_.feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
-  //fp_cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
+  fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
+  fc_.feedforward_term_ = mapFloat(fc_.feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
   
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   return cs_.u_;    // Return CV
@@ -1160,6 +1158,7 @@ public:
     OUT_OF_BOUNDS = -8 //! Numeric limits error
   };
   
+  unsigned long time_;         //! Timer value for calculating velocity and acceleration
   int raw_ticks_;  //! Raw encoder ticks [0; 4095]
   float p_raw_;    //! Converted value (scale_)
   float p_;        //! Filtered converted value (position) [rad]
@@ -1174,6 +1173,7 @@ public:
 };
 
 Encoder::Encoder(int res, float scale, float alpha, SensorPins s_pins) :   
+  time_(0),
   raw_ticks_(0.0),
   p_raw_(0.0),
   p_(0.0),
@@ -1287,9 +1287,9 @@ void Encoder::readEncoder() {
 }
 
 void Encoder::convertSensorReading() {
-  step_new = micros();  // Necessary to calculate velocity and acceleration
-  int step = step_new - step_old; // [us]
-  step_old = step_new;
+  unsigned long time = micros();  // Necessary to calculate velocity and acceleration
+  unsigned long dt = time - time_; // [us]
+  time_ = time;
   
   // angle = 2*pi*[(reading-offset)/res+k]
   p_raw_ = 2.0*M_PI * ((static_cast<float>(raw_ticks_) - static_cast<float>(offset_)) 
@@ -1297,13 +1297,13 @@ void Encoder::convertSensorReading() {
            + static_cast<float>(k_)) 
            * scale_; 
   float p_tmp = alpha_*p_ + (1-alpha_)*p_raw_; // First order low-pass filter (alpha = 1/(1+2*pi*w*Td), w=cutoff frequency, Td=sampling time)
-  float dp_raw = (p_tmp - p_) / step * 1e6;    // [us -> s]        
-  float dp_tmp = alpha_*dp_ + (1-alpha_)*dp_raw; // TODO FIXME filter???
-  float ddp_raw = (dp_tmp - dp_) / step * 1e6; // [us -> s]
-  float ddp_tmp = alpha_*ddp_ + (1-alpha_)*ddp_raw; // TODO FIXME filter???
+  float dp_raw = (p_tmp - p_) / dt * 1e6;    // [us -> s]        
+  float dp_tmp = alpha_*dp_ + (1-alpha_)*dp_raw; // TODO Do we need to filter?
+  float ddp_raw = (dp_tmp - dp_) / dt * 1e6; // [us -> s]
+  float ddp_tmp = alpha_*ddp_ + (1-alpha_)*ddp_raw; // TODO Do we need to filter?
   p_ = p_tmp;
-  dp_ = dp_tmp;
-  ddp_ = ddp_tmp;
+  dp_ = dp_raw;//dp_tmp; FIXME
+  ddp_ = ddp_raw;//ddp_tmp; FIXME
 }; 
 
 int Encoder::computeEncoder() {
@@ -1533,7 +1533,7 @@ int Motor::control() {
     return c_.ic_.impedanceControl(e_.p_, e_.dp_, e_.ddp_, data_.k_tau_*curr_s_.filtered_current_);
   }
   else if (c_.mode_ == Control::FORCE_POSITION_MODE) {
-    return c_.fpc_.forcePositionControl(e_.p_, curr_s_.force_);
+    return c_.fpc_.forcePositionControl(e_.p_, curr_s_.force_, e_.dp_);
   }
   return 0;
 }
@@ -1770,13 +1770,18 @@ void setKvFprCallback( const std_msgs::Float32& Kv_msg ) {
 ros::Subscriber<std_msgs::Float32> sub_set_kv_fpr("set_kv_fpr", &setKvFprCallback);
 
 void setFdFprCallback( const std_msgs::Float32& Fd_msg ) {
-  m1.c_.fpr_.fc_.cs_.rf_ = Fd_msg.data; // TODO FIXME
+  m1.c_.fpr_.fc_.cs_.ri_ = m1.c_.fpr_.fc_.cs_.r_; 
+  m1.c_.fpr_.fc_.cs_.rf_ = Fd_msg.data; 
+  m1.c_.fpr_.fc_.cs_.ti_ = static_cast<float>(millis());
+  m1.c_.fpr_.fc_.pid_.I_ = 0.0;
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_fd_fpr("set_fd_fpr", &setFdFprCallback);
 
 void setPdFprCallback( const std_msgs::Float32& Pd_msg ) {
-  m1.c_.fpr_.pos_cs_.rf_ = Pd_msg.data; // TODO FIXME
+  m1.c_.fpr_.pos_cs_.ri_ = m1.c_.fpr_.pos_cs_.r_; 
+  m1.c_.fpr_.pos_cs_.rf_ = Pd_msg.data; 
+  m1.c_.fpr_.pos_cs_.ti_ = static_cast<float>(millis());
   confirmCallback();
 }
 ros::Subscriber<std_msgs::Float32> sub_set_pd_fpr("set_pd_fpr", &setPdFprCallback);
@@ -1893,38 +1898,15 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
       m1.c_.vc_.pid_.I_ = 0.0; // New integral
       break;
     case Control::STIFFNESS_MODE:
-      m1.c_.sc_.cs_.ri_ = m1.c_.ic_.cs_.r_; 
+      m1.c_.sc_.cs_.ri_ = m1.c_.ic_.cs_.r_;  // Position
       m1.c_.sc_.cs_.rf_ = ref_msg.data;
       m1.c_.sc_.cs_.ti_ = static_cast<float>(millis());
       break;
-    case Control::FORCE_POSITION_REGULATOR_MODE:
-      // TODO FIXME
-      // Force
-      m1.c_.fpr_.fc_.cs_.ri_ = m1.c_.fpr_.fc_.cs_.r_; 
-      m1.c_.fpr_.fc_.cs_.rf_ = m1.c_.fpr_.fc_.cs_.r_ * 2.0;//ref_msg.data;
-      m1.c_.fpr_.fc_.cs_.ti_ = static_cast<float>(millis());
-      // Position
-      m1.c_.fpr_.pos_cs_.ri_ = m1.c_.fpr_.pos_cs_.r_; 
-      m1.c_.fpr_.pos_cs_.rf_ = ref_msg.data;
-      m1.c_.fpr_.pos_cs_.ti_ = static_cast<float>(millis());
-      break;
     case Control::IMPEDANCE_MODE:
-      m1.c_.ic_.cs_.ri_ = m1.c_.ic_.cs_.r_; 
+      m1.c_.ic_.cs_.ri_ = m1.c_.ic_.cs_.r_;  // Position
       m1.c_.ic_.cs_.rf_ = ref_msg.data;
       m1.c_.ic_.cs_.ti_ = static_cast<float>(millis());
       m1.c_.ic_.pid_.I_ = 0.0; // New integral
-      break;
-    case Control::FORCE_POSITION_MODE:
-      // TODO FIXME
-      // Force
-      m1.c_.fpc_.fc_.cs_.ri_ = m1.c_.fpc_.fc_.cs_.r_; 
-      m1.c_.fpc_.fc_.cs_.rf_ = m1.c_.fpc_.fc_.cs_.r_; //ref_msg.data; TODO
-      m1.c_.fpc_.fc_.cs_.ti_ = static_cast<float>(millis());
-      m1.c_.fpc_.fc_.pid_.I_ = 0.0;
-      // Position
-      m1.c_.fpc_.pc_.cs_.ri_ = m1.c_.fpc_.pc_.cs_.r_; 
-      m1.c_.fpc_.pc_.cs_.rf_ = ref_msg.data;
-      m1.c_.fpc_.pc_.cs_.ti_ = static_cast<float>(millis());
       break;
     default:
       break;
@@ -2139,7 +2121,7 @@ void publishEverything() {
   }
   else if (m1.c_.mode_ == Control::FORCE_POSITION_MODE) {
     error_msg.data = m1.c_.fpc_.fc_.cs_.e_; // TODO 
-    ref_msg.data = m1.c_.fpc_.cs_.r_; // TODO
+    ref_msg.data = m1.c_.fpc_.cs_.r_;       // TODO
     integral_msg.data = m1.c_.fpc_.fc_.pid_.I_; // TODO
   }
   

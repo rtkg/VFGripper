@@ -114,11 +114,11 @@ const float B_IMP = 1.0;   //! PID value
 const float K_IMP = 100.0;   //! PID value
 const float F_IMP = 3.0e7;   //! PID value
 // TODO
-const float M_FPC = 100.0; //! PID value
-const float KF_FPC = 100.0; //! PID value
-const float KI_FPC = 100.0; //! PID value
-const float KP_FPC = 100.0; //! PID value
-const float KV_FPC = 100.0; //! PID value
+const float M_FPC = 1.0; //! PID value
+const float KF_FPC = 9.0e6; //! PID value
+const float KI_FPC = 150.0; //! PID value
+const float KP_FPC = 1.0; //! PID value
+const float KV_FPC = 1.0; //! PID value
 
 const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
 const float DESIRED_POSITION = 20.0; //! Desired position [rad]
@@ -130,11 +130,11 @@ const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband ar
 /*=============== Time variables ===============*/
 const int dT = 1000;         //! Sample time [us] 
 const int dT_serial = 75000; //! Sample time for the serial connection [us]
-int t_old = 0;        //! Timer value for calculating time steps
-int t_new = 0;        //! Timer value for calculating time steps
-int t_old_serial = 0; //! Timer value for calculating time steps
-int step_new = 0;         //! Timer value for calculating velocity and acceleration
-int step_old = 0;         //! Timer value for calculating velocity and acceleration
+unsigned long t_old = 0;        //! Timer value for calculating time steps
+unsigned long t_new = 0;        //! Timer value for calculating time steps
+unsigned long t_old_serial = 0; //! Timer value for calculating time steps
+unsigned long step_new = 0;         //! Timer value for calculating velocity and acceleration
+unsigned long step_old = 0;         //! Timer value for calculating velocity and acceleration
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0; //! PWM duty cycle [%]
@@ -216,6 +216,7 @@ public:
    * The smaller T, the more rapid response. 
    * Similar to step response achieved by higher order systems.
    * 
+   * \param[in] t - time in [ms]
    * \return minimum jerk trajectory point
    */
   float minimumJerk(float t);
@@ -862,7 +863,7 @@ public:
   float forcePositionControl(const float pos, float force);
   
   //const float offset_motor_; // TODO
-  float time_;          //! TODO
+  unsigned long time_;          //! TODO
   float force_;
   float M_;
   float cv_;
@@ -874,7 +875,7 @@ public:
 
 ForcePositionControl::ForcePositionControl(const float M, const CurrentControl& fc,
                                            const PositionControl& pc, const PIDController& pid) : 
-  time_(millis()),
+  time_(0),
   force_(0.0),
   M_(M),
   cv_(0.0),
@@ -885,45 +886,40 @@ ForcePositionControl::ForcePositionControl(const float M, const CurrentControl& 
   {};
 
 float ForcePositionControl::forcePositionControl(const float pos, float force) {
-  float time = millis();
-  float dt = time - time_;
+  unsigned long time = micros();
+  unsigned long dt = time - time_;
   time_ = time;
   
   cs_.r_ = 0.0; // Control which keeps ui = 0 will accomplish the desired behavior 
   
-  pc_.cs_.r_ = pc_.cs_.minimumJerk(time);     // Set a new desired position [rad] (filtered)
+  pc_.cs_.r_ = pc_.cs_.minimumJerk(time/1.0e3);     // Set a new desired position [rad] (filtered)
   float error    =  pc_.cs_.r_ - pos;
-  float d_error  = (error - pc_.cs_.e_) / dt; 
-  float dd_error = (d_error - pc_.cs_.de_) / dt;
+  float d_error  = (error - pc_.cs_.e_) / dt * 1e6 ;  // [us -> s]  
+  float dd_error = (d_error - pc_.cs_.de_) / dt* 1e6; // [us -> s] 
   pc_.cs_.e_ = error;
   pc_.cs_.de_ = d_error;
   pc_.cs_.dde_ = dd_error;
   
-  fc_.cs_.r_ = fc_.cs_.minimumJerk(time); // Set a new desired force [N] (filtered)
+  fc_.cs_.r_ = fc_.cs_.minimumJerk(time/1.0e3); // Set a new desired force [N] (filtered)
   force_ = (fc_.cs_.r_ >= 0 ? force : -force);   // If current reference is <0 (we measure current only as a positive value), change the sign 
   error     =  fc_.cs_.r_ - force_;              // Calculate error
-  d_error   = (error - fc_.cs_.e_) / dt; 
-  dd_error  = (d_error - fc_.cs_.de_) / dt;
+  d_error   = (error - fc_.cs_.e_) / dt * 1e6;    // [us -> s]  
+  dd_error  = (d_error - fc_.cs_.de_) / dt * 1e6; // [us -> s]  
   fc_.cs_.e_ = error;
   fc_.cs_.de_ = d_error;
   fc_.cs_.dde_ = dd_error;
   fc_.pid_.I_ += fc_.cs_.e_;                    // Update integral
 
   // Do the control
-  const float cv = M_*pc_.cs_.dde_ + pc_.pid_.Kd_*pc_.cs_.de_ + pc_.pid_.Kp_*pc_.cs_.e_ 
+  cv_ = M_*pc_.cs_.dde_ + pc_.pid_.Kd_*pc_.cs_.de_ + pc_.pid_.Kp_*pc_.cs_.e_ 
                    + fc_.pid_.Kp_*fc_.cs_.e_ + fc_.pid_.Ki_*fc_.pid_.I_;
-  cv_ = cv;
-  Serial.println("***");
-  Serial.println(cv);
-  error = -(cs_.r_ - cv);             // Current error (change the sign necessary because ...=0) 
+  error = -(cs_.r_ - cv_);             // Current error (change the sign necessary because ...=0) 
   cs_.de_ = error - cs_.e_;           // Derivative of the current error (already a bit filtered)
   cs_.e_ = error;                     // Current error
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_); // Set a new control value
- 
-  Serial.println(cs_.u_);
   
   cs_.u_ = (pc_.cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
-  Serial.println(cs_.u_);
+
   //cs_.u_ += (cs_.u_ >= 0 ? offset_motor_ : -offset_motor_); // Add offset to overcome the motor inner resistance TODO FIXME
   
   //fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
@@ -931,7 +927,6 @@ float ForcePositionControl::forcePositionControl(const float pos, float force) {
   //fp_cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
   
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
-  Serial.println(cs_.u_);
   return cs_.u_;    // Return CV
 }
 
@@ -2053,7 +2048,7 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.advertise(pub_feedforward);
   
   node_handler.subscribe(sub_set_vel);
-/*  
+
   node_handler.subscribe(sub_set_kp_curr);
   node_handler.subscribe(sub_set_ki_curr);
   node_handler.subscribe(sub_set_kd_curr);
@@ -2081,7 +2076,7 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.subscribe(sub_set_b_imp);
   node_handler.subscribe(sub_set_k_imp);
   node_handler.subscribe(sub_set_f_imp);
-  */
+  
   node_handler.subscribe(sub_set_m_fpc);
   node_handler.subscribe(sub_set_kp_fpc);
   node_handler.subscribe(sub_set_kf_fpc);
@@ -2090,13 +2085,13 @@ void setUpRos(ros::NodeHandle & node_handler) {
   node_handler.subscribe(sub_set_fd_fpc);
   node_handler.subscribe(sub_set_pd_fpc);
   
- /* node_handler.subscribe(sub_set_ref);
+  node_handler.subscribe(sub_set_ref);
   node_handler.subscribe(sub_set_offset);
   node_handler.subscribe(sub_set_dead);
   node_handler.subscribe(sub_set_alpha_curr);
   node_handler.subscribe(sub_set_alpha_enc);
   node_handler.subscribe(sub_change_dir);
-  node_handler.subscribe(sub_set_mode); */
+  node_handler.subscribe(sub_set_mode); 
 }
 
 /*!
@@ -2208,7 +2203,7 @@ void setup()
   
   setUpTime();
   
-  Serial.begin(9600); // For debugging -> Serial.println();
+  //Serial.begin(9600); // For debugging -> Serial.println();
 }
 
 /*============================================================*/

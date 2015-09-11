@@ -1307,8 +1307,8 @@ void Encoder::convertSensorReading() {
   float ddp_raw = (dp_tmp - dp_) / dt * 1e6; // [us -> s]
   float ddp_tmp = alpha_*ddp_ + (1-alpha_)*ddp_raw; // TODO Do we need to filter?
   p_ = p_tmp;
-  dp_ = dp_raw;//dp_tmp; FIXME
-  ddp_ = ddp_raw;//ddp_tmp; FIXME
+  dp_ = dp_raw;//dp_tmp; FIXME TODO
+  ddp_ = ddp_raw;//ddp_tmp; FIXME TODO
 }; 
 
 int Encoder::computeEncoder() {
@@ -1609,25 +1609,24 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          );
 
 /*=============== ROS ===============*/
-// TODO documentation for this part
 ros::NodeHandle nh; //! Node handler
 
+/*** Publishers ***/
 std_msgs::Int8 count_msg; 
 ros::Publisher pub_counter("counter", &count_msg);
 
+// Current sensor
 std_msgs::Float32 current_msg;
 ros::Publisher pub_current("current", &current_msg);
 std_msgs::Float32 filtered_current_msg;
 ros::Publisher pub_filtered_current("filtered_current", &filtered_current_msg);
-std_msgs::Float32 error_msg;
-ros::Publisher pub_error("error", &error_msg);
-std_msgs::Float32 u_msg;
-ros::Publisher pub_u("u", &u_msg);
-std_msgs::Float32 ref_msg;
-ros::Publisher pub_ref("ref", &ref_msg);
-std_msgs::Float32 integral_msg;
-ros::Publisher pub_integral("integral", &integral_msg);
+std_msgs::Float32 force_msg;
+ros::Publisher pub_force("force", &force_msg);
+std_msgs::Float32 feedforward_msg;
+ros::Publisher pub_feedforward("feedforward", &feedforward_msg);
 
+
+// Encoder
 std_msgs::Float32 enc_ddp_msg;
 ros::Publisher pub_enc_ddp("enc_ddp", &enc_ddp_msg);
 std_msgs::Float32 enc_dp_msg;
@@ -1649,13 +1648,20 @@ ros::Publisher pub_enc_offset("enc_offset", &enc_offset_msg);
 std_msgs::Float32 enc_alpha_msg;
 ros::Publisher pub_enc_alpha("enc_alpha", &enc_alpha_msg);
 
+// Control
+std_msgs::Float32 error_msg;
+ros::Publisher pub_error("error", &error_msg);
+std_msgs::Float32 u_msg;
+ros::Publisher pub_u("u", &u_msg);
+std_msgs::Float32 ref_msg;
+ros::Publisher pub_ref("ref", &ref_msg);
+std_msgs::Float32 integral_msg;
+ros::Publisher pub_integral("integral", &integral_msg);
+
 std_msgs::Float32 imp_msg;
 ros::Publisher pub_imp("imp", &imp_msg);
-std_msgs::Float32 force_msg;
-ros::Publisher pub_force("force", &force_msg);
-std_msgs::Float32 feedforward_msg;
-ros::Publisher pub_feedforward("feedforward", &feedforward_msg);
 
+/*** Subscribtions ***/
 int counter = 0;
 void confirmCallback() {
   digitalWrite(LED_PIN, counter % 2 ? HIGH : LOW); // blink the led

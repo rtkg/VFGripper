@@ -68,7 +68,7 @@ const int DELAY = 1; // Delay time [ms]
 
 const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
 
-const float ALPHA_ENCODER = 0.7; //! Value for filtering position TODO FIXME
+const float ALPHA_ENCODER = 0.1; //! Value for filtering position TODO FIXME
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
 const float SCALE_ENCODER_VFG_M3= 1.0/(2*44.0); //! One full revolution is 2pi radians
 
@@ -94,26 +94,26 @@ const float KD_POS = 1.0e4;  //! PID value
 // Tuned :|
 const float KP_VEL = 2000.0; //! PID value
 const float KI_VEL = 0.09;   //! PID value
-const float KD_VEL = 0.0;   //! PID value
+const float KD_VEL = 0.0;    //! PID value
 // Tuned
-const float KP_STIFF = 5000.0; //! PID value
-const float KD_STIFF = 400.0;   //! PID value
+const float KP_STIFF = 5000.0; //! Position
+const float KD_STIFF = 400.0;  //! Velocity
 // Tuned
-const float KP_FPR = 1.0e4; //! PID value
-const float KF_FPR = 5.0e5; //! PID value
-const float KI_FPR = 2.0e3; //! PID value
-const float KV_FPR = 3.0e3; //! PID value
+const float KP_FPR = 1.0e4; //! Position
+const float KF_FPR = 5.0e5; //! P Force
+const float KI_FPR = 2.0e3; //! I Force
+const float KV_FPR = 3.0e3; //! Velocity
 // Tuned 
 const float M_IMP = 0.1;     //! Inertia
 const float B_IMP = 400.0;   //! Damping
 const float K_IMP = 5000.0;  //! Stiffness 
-const float F_IMP = 5.0e6;   //! Force
+const float F_IMP = 9.0e6;   //! Force
 // Tuned ;/
-const float M_FPC = 0.05; //! Inertia
-const float KF_FPC = 8.0e6; //! P Force
-const float KI_FPC = 45.0; //! I Force
+const float M_FPC = 0.05;    //! Inertia
+const float KF_FPC = 8.0e6;  //! P Force
+const float KI_FPC = 45.0;   //! I Force
 const float KP_FPC = 60.0e0; //! P Position
-const float KV_FPC = 1.0e4; //! D Position
+const float KV_FPC = 1.0e4;  //! D Position
 
 const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
 const float DESIRED_POSITION = 20.0; //! Desired position [rad]

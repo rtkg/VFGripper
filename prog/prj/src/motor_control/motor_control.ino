@@ -2,14 +2,13 @@
  * \file
  * \brief   Arduino + ROS code to control DC motor.
  * \author  Krzysztof Kwiecinski supervised by Robert Krug
- * \version 0.1
- * \date    August 2015
+ * \version 0.8
+ * \date    September 2015
  * \pre     roscore
  * \bug     
  * \warning
  *
  * rosserial_python node
-
  * How to run?
  * 1) roscore 
  * 2) rosrun rosserial_python serial_node.py /dev/ttyACM0
@@ -83,9 +82,9 @@ const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor 
 const float K_TAU = 0.0452; //! Torque constant [Nm/A]
 const float K_EMF = K_TAU;  //! Speed constant [rpm/V -> rad/Vs]
 
-// Tuned :)
-const float KP_CURR = 4.0e5; //! PID value
-const float KI_CURR = 25.0;  //! PID value
+// Tuned :D
+const float KP_CURR = 9.0e5; //! PID value - can be bigger -> faster but oscilates
+const float KI_CURR = 120.0;  //! PID value 
 const float KD_CURR = 5.0e5; //! PID value
 // Tuned :D
 const float KP_POS = 1.2e4; //! PID value
@@ -99,7 +98,7 @@ const float KD_VEL = 0.0;    //! PID value
 const float KP_STIFF = 5000.0; //! Position
 const float KD_STIFF = 400.0;  //! Velocity
 // Tuned
-const float KP_FPR = 1.0e4; //! Position
+const float KP_FPR = 3.0e2; //! Position
 const float KF_FPR = 5.0e5; //! P Force
 const float KI_FPR = 2.0e3; //! I Force
 const float KV_FPR = 3.0e3; //! Velocity
@@ -246,8 +245,8 @@ float ControlStates::minimumJerk(float t) {
   }
   // Return smoother value
   return ( T_ > 0 ? 
-                    ( ri_ + (rf_-ri_)*(10*pow((t-ti_)/T_, 3) - 15*pow((t-ti_)/T_, 4) + 6*pow((t-ti_)/T_, 5)) ) :
-                      rf_);
+         ( ri_ + (rf_-ri_)*(10*pow((t-ti_)/T_, 3) - 15*pow((t-ti_)/T_, 4) + 6*pow((t-ti_)/T_, 5)) ) :
+           rf_ );
 }
 
 /*============================================================*/
@@ -691,7 +690,7 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, float forc
   fc_.cs_.e_ = fc_.cs_.r_ - force;              // Calculate error
   fc_.pid_.I_ += fc_.cs_.e_;                    // Update integral
  
-  // TODO FIXME Add this part? Setting boundaries
+  // TODO Add this part? Setting boundaries
   //if (I_ > I_max_ || I < I_min_) {  
   //  I_ -= force_cs_.e_; // Recalculate the Integral term (the latter to avoid windup)
   //} 
@@ -700,15 +699,10 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, float forc
   cs_.u_ = pc_.pid_.Kp_*pc_.cs_.e_ 
               + fc_.cs_.r_ + fc_.pid_.Kp_*fc_.cs_.e_ + fc_.pid_.Ki_*fc_.pid_.I_
               - pc_.pid_.Kd_*vel;                                 // Set a new control value
-  
-  //const float move_dir =  (pos_cs_.e_ >= 0 ? 1 : -1); // Set movement direction to direction of desired position
-  //fp_cs_.u_ *= move_dir;
-  //fp_cs_.u_ >= 0 ? fp_cs_.u_ += offset_motor_ : fp_cs_.u_ -= offset_motor_; // Add offset to overcome the motor inner resistance TODO FIXME
-  
-  //fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
-  //fc_.feedforward_term_ = mapFloat(fc_.feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
-  
-  //cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
+
+  fc_.feedforward_term_ = fc_.feedforward_.feedforward(force/K_TAU, vel); // Calculate feedforward term
+  fc_.feedforward_term_ = mapFloat(fc_.feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
   
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   return cs_.u_;    // Return CV
@@ -911,7 +905,7 @@ float ForcePositionControl::forcePositionControl(const float pos, float force, c
   cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   
-  // TODO FIXME cs_.u_ = (pc_.cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
+  // TODO cs_.u_ = (pc_.cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
   return cs_.u_;
 }
 
@@ -1567,7 +1561,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER_VFG_M3, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::IMPEDANCE_MODE, 
+         Control(Control::CURRENT_MODE, 
                  CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
@@ -1923,6 +1917,30 @@ void setRefCallback( const std_msgs::Float32& ref_msg ) {
 }
 ros::Subscriber<std_msgs::Float32> sub_set_ref("set_ref", &setRefCallback);
 
+void setIntegralToValCallback( const std_msgs::Float32& msg ) {
+  switch (m1.c_.mode_) {
+    case Control::CURRENT_MODE:
+      m1.c_.cc_.pid_.I_ = msg.data; 
+      break;
+    case Control::POSITION_MODE:
+      m1.c_.pc_.pid_.I_ = msg.data;
+      break;
+    case Control::VELOCITY_MODE:
+      m1.c_.vc_.pid_.I_ = msg.data;
+      break;
+    case Control::FORCE_POSITION_REGULATOR_MODE:
+      m1.c_.fpr_.fc_.pid_.I_ = msg.data;
+      break;
+    case Control::FORCE_POSITION_MODE:
+      m1.c_.fpc_.fc_.pid_.I_ = msg.data;
+      break;
+    default:
+      break;
+  }
+  confirmCallback();
+}
+ros::Subscriber<std_msgs::Float32> sub_set_integral_to_val("set_integral_to_val", &setIntegralToValCallback);
+
 void setOffsetMotorCallback( const std_msgs::Float32& offset_msg ) {
   offset_motor = offset_msg.data;
   confirmCallback();
@@ -2109,6 +2127,7 @@ void setUpRos(ros::NodeHandle & node_handler) {
   }
   node_handler.subscribe(sub_set_vel);
   node_handler.subscribe(sub_set_ref);
+  node_handler.subscribe(sub_set_integral_to_val);
   node_handler.subscribe(sub_set_offset);
   node_handler.subscribe(sub_set_dead);
   node_handler.subscribe(sub_set_alpha_curr);
@@ -2150,10 +2169,9 @@ void publishEverything() {
     integral_msg.data = m1.c_.sc_.pd_.I_;
   }
   else if (m1.c_.mode_ == Control::FORCE_POSITION_REGULATOR_MODE) {
-    // TODO FIXME
-    error_msg.data = m1.c_.fpr_.cs_.e_; // TODO FIXME
-    ref_msg.data = m1.c_.fpr_.cs_.r_;
-    integral_msg.data = m1.c_.fpr_.fc_.pid_.I_;
+    error_msg.data = m1.c_.fpr_.fc_.cs_.e_;     // Force error, TODO Position error
+    ref_msg.data = m1.c_.fpr_.fc_.cs_.r_;       // Desired force, TODO desired position
+    integral_msg.data = m1.c_.fpr_.fc_.pid_.I_; // Force integral
   }
   else if (m1.c_.mode_ == Control::IMPEDANCE_MODE) {
     error_msg.data = m1.c_.ic_.cs_.e_;
@@ -2161,9 +2179,9 @@ void publishEverything() {
     integral_msg.data = m1.c_.ic_.pid_.I_;
   }
   else if (m1.c_.mode_ == Control::FORCE_POSITION_MODE) {
-    error_msg.data = m1.c_.fpc_.fc_.cs_.e_; // TODO 
-    ref_msg.data = m1.c_.fpc_.cs_.r_;       // TODO
-    integral_msg.data = m1.c_.fpc_.fc_.pid_.I_; // TODO
+    error_msg.data = m1.c_.fpc_.fc_.cs_.e_;     // Force error, TODO Position error
+    ref_msg.data = m1.c_.fpc_.fc_.cs_.r_;       // Desired force, TODO desired position
+    integral_msg.data = m1.c_.fpc_.fc_.pid_.I_; // Force integral
   }
   
   pub_error.publish( &error_msg );

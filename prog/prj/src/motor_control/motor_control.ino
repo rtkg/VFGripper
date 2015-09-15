@@ -902,8 +902,53 @@ float ForcePositionControl::forcePositionControl(const float pos, float force, c
   cs_.u_ += fc_.feedforward_term_;  // Compute control with feedforward term to make control faster
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   
-  // TODO cs_.u_ = (pc_.cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
   return cs_.u_;
+}
+
+/*! \brief Class defining MyControl.
+ * 
+ * Class defining MyControl.
+ * The idea is to keep steady force (current) independently of position.
+ * However, the position is always reached (if there is no coinstraint)
+ * due to non-zero desired force (current) value.
+ */ 
+class MyControl {
+public:
+  /*!
+   * \brief Parametrized constructor. 
+   *
+   * Parametrized constructor.
+   * 
+   * \param[in] cc - current control
+   * \param[in] cs - position control states of the control 
+   * \param[in] pid - controller
+   */ 
+  MyControl(const CurrentControl cc, const ControlStates& cs) :  
+  cc_(cc), cs_(cs), pid_(0.0, 0.0, 0.0, -PWM_MAX, PWM_MAX, 0.0) {};
+  
+  /*!
+   * \brief MyControl feedback.
+   * 
+   * MyControl feedback.
+   * \param[in] curr - current current
+   * \param[in] pos - current position
+   * \param[in] vel - current velocity
+   * \return control value 
+   */  
+  float myControl(const float curr, const float pos, const float vel);
+  
+  CurrentControl cc_; //! Force control
+  ControlStates cs_;  //! Position control states of the control
+  PIDController pid_; //! Controller
+};
+
+float MyControl::myControl(const float curr, const float pos, const float vel) {
+  cs_.r_ = cs_.minimumJerk(static_cast<float>(millis())); // Set a new desired position [rad] (filtered)
+  cs_.e_ = cs_.r_ - pos;
+  cs_.u_ = cc_.currentControl(curr, vel);     // Set a new control value
+  cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
+  cs_.u_ = (cs_.e_ >= 0 ? abs(cs_.u_) : -(abs(cs_.u_))); // Set movement direction to direction of desired position
+  return cs_.u_;    // Return CV
 }
 
 /*============================================================*/
@@ -928,6 +973,7 @@ public:
     FORCE_POSITION_REGULATOR_MODE = 5, //! Force/Position regulator
     IMPEDANCE_MODE = 6, //! Impedance controller
     FORCE_POSITION_MODE = 7, //! Force/Position regulator
+    MY_CONTROL_MODE = 8 //! My control
   };
   
   /*!
@@ -942,11 +988,12 @@ public:
    * \param[in] fpr - force/position regulator
    * \param[in] ic - impedance control
    * \param[in] fpc - force/position control
+   * \param[in] mc - my control
    */
   Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, 
           const VelocityControl& vc, const StiffnessControl& sc, 
           const ForcePositionRegulator& fpr, const ImpedanceControl& ic,
-          const ForcePositionControl& fpc);
+          const ForcePositionControl& fpc, const MyControl& mc);
   
   ControlMode mode_;    //! Position/current/velocity controller at the moment 
   CurrentControl cc_;   //! Current control
@@ -956,12 +1003,13 @@ public:
   ForcePositionRegulator fpr_; //! Force/Position Regulator
   ImpedanceControl ic_;        //! Impedance control
   ForcePositionControl fpc_;   //! Force/Position Control
+  MyControl mc_;               //! MyControl
 };
 
 Control::Control(ControlMode mode, const CurrentControl& cc, const PositionControl& pc, 
         const VelocityControl& vc, const StiffnessControl& sc, 
         const ForcePositionRegulator& fpr, const ImpedanceControl& ic,
-        const ForcePositionControl& fpc) :
+        const ForcePositionControl& fpc, const MyControl& mc) :
         mode_(mode), 
         cc_(cc), 
         pc_(pc), 
@@ -969,7 +1017,8 @@ Control::Control(ControlMode mode, const CurrentControl& cc, const PositionContr
         sc_(sc), 
         fpr_(fpr), 
         ic_(ic),
-        fpc_(fpc)
+        fpc_(fpc),
+        mc_(mc)
         {};
 
 /*============================================================*/
@@ -1527,6 +1576,9 @@ int Motor::control() {
   else if (c_.mode_ == Control::FORCE_POSITION_MODE) {
     return c_.fpc_.forcePositionControl(e_.p_, curr_s_.force_, e_.dp_);
   }
+  else if (c_.mode_ == Control::MY_CONTROL_MODE) {
+    return c_.mc_.myControl(curr_s_.filtered_current_, e_.p_, e_.dp_);
+  }
   return 0;
 }
 
@@ -1590,7 +1642,13 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                                       PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
                                                       PIDController(KP_FPC, KV_FPC, 0.0, -PWM_MAX, PWM_MAX, 0.0)
                                                       ) 
-                                     )
+                                     ),
+                 MyControl(CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
+                                          ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false),
+                                          PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
+                                          ),
+                           ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false)
+                          )
                )
          );
 
@@ -1610,7 +1668,6 @@ std_msgs::Float32 force_msg;
 ros::Publisher pub_force("force", &force_msg);
 std_msgs::Float32 feedforward_msg;
 ros::Publisher pub_feedforward("feedforward", &feedforward_msg);
-
 
 // Encoder
 std_msgs::Float32 enc_ddp_msg;
@@ -2032,6 +2089,10 @@ void setModeCallback( const std_msgs::Float32& mode_msg ) {
       m1.c_.fpr_.cs_.active_ = false;
       m1.c_.ic_.cs_.active_  = false;
       m1.c_.fpc_.cs_.active_ = true;
+      break;
+    case Control::MY_CONTROL_MODE : 
+      m1.c_.mode_ = Control::MY_CONTROL_MODE; 
+      // TODO
       break;
     default:
       m1.c_.mode_ = Control::NO_MODE;

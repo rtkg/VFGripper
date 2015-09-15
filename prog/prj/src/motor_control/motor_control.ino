@@ -44,44 +44,51 @@
 #include <std_srvs/Empty.h>
 */
 
+// CURRENT, POSITION, VELOCITY, STIFFNESS, FORCE_POSITION_REGULATOR, IMPEDANCE, FORCE_POSITION, NO_MODE
+#define SELECT_MODE Control::CURRENT_MODE //! Select default mode of control
+
 /*=============== Declarations of pins ===============*/
+// H-Bridge
 const int M1_IN1 = 6;  //! Motor input 1
 const int M1_IN2 = 7;  //! Motor input 2
 const int M1_SF  = 24; //! Motor status flag
 const int M1_FB  = A0; //! Analog input A0 for current sensing on Motor 1
 const int EN     = 25; //! Driver board enable pin
 const int M1_D2  = 8;  //! PWM pin to control output voltage
-
+// Encoder
 const int E1_CSn = 26;  //! Chip select pin
 const int E1_DO  = 27;  //! Sensor data output pin
 const int E1_CLK = 28;  //! Clock pin
-
+// Other
 const int LED_PIN = 13; //! LED pin to visualize  
 
 /*=============== Constants ===============*/
+// PWM
 const int BIT_RESOLUTION = 12; //! 12 => [0; 4095], analogWrite(pin, PWM value)
 const int PWM_MIN = 0;         //! PWM minimum value
 const int PWM_MAX = 4095;      //! PWM maximum value
-
-const int DELAY = 1; // Delay time [ms]
-
-const float ALPHA_CURRENT = 0.99;   //! Value for filtering current
-
-const float ALPHA_ENCODER = 0.1; //! Value for filtering position TODO FIXME
+// Filtering
+const float ALPHA_CURRENT = 0.99; //! Value for filtering current
+const float ALPHA_ENCODER = 0.1;  //! Value for filtering position TODO FIXME
+// Encoder
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
 const float SCALE_ENCODER_VFG_M3= 1.0/(2*44.0); //! One full revolution is 2pi radians
-
-const float T_JERK = 100.0;       //! Time for executing the loop [ms]
-
+// Motor
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
 const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
-
-const float R_MOTOR = 7.25; //! Terminal resistance of the motor
+const float R_MOTOR = 7.25;  //! Terminal resistance of the motor [ohm]
 const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor [A]
-const float K_TAU = 0.0452; //! Torque constant [Nm/A]
-const float K_EMF = K_TAU;  //! Speed constant [rpm/V -> rad/Vs]
-
+const float K_TAU = 0.0452;  //! Torque constant [Nm/A]
+const float K_EMF = K_TAU;   //! Speed constant [rpm/V -> rad/Vs]
+// Default desired values
+const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
+const float DESIRED_POSITION = 20.0; //! Desired position [rad]
+const float DESIRED_VELOCITY = 7.0; //! Desired velocity [rad/s]
+const float DESIRED_FORCE = DESIRED_CURRENT * K_TAU; //! Desired force [N]
+// Dead space
+const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
+// Control
 // Tuned :D
 const float KP_CURR = 9.0e5; //! PID value - can be bigger -> faster but oscilates
 const float KI_CURR = 120.0;  //! PID value 
@@ -114,14 +121,9 @@ const float KI_FPC = 45.0;   //! I Force
 const float KP_FPC = 60.0e0; //! P Position
 const float KV_FPC = 1.0e4;  //! D Position
 
-const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
-const float DESIRED_POSITION = 20.0; //! Desired position [rad]
-const float DESIRED_VELOCITY = 7.0; //! Desired velocity [rad/s]
-const float DESIRED_FORCE = DESIRED_CURRENT * K_TAU; //! Desired force [N]
-
-const float DEAD_SPACE_CURR = (1-ALPHA_CURRENT)*DESIRED_CURRENT; //! Deadband around setpoint
-
 /*=============== Time variables ===============*/
+const int DELAY = 1;            //! Delay time [ms]
+const float T_JERK = 100.0;     //! Time for executing the loop [ms]
 const int dt_serial = 75000;    //! Sample time for the serial connection [us]
 unsigned long t_old = 0;        //! Timer value for calculating time steps [us]
 unsigned long t_new = 0;        //! Timer value for calculating time steps [us]
@@ -129,7 +131,7 @@ unsigned long t_old_serial = 0; //! Timer value for calculating time steps [us]
 
 /*=============== Global variables ===============*/
 int pwm_duty_cycle = 0;   //! PWM duty cycle [%]
-int offset_motor   = 200; //OFFSET; //! Offset for PWM value to avoid the area where motor does not move at all TODO FIXME
+int offset_motor   = 200; //OFFSET; //! Offset for PWM value to avoid the area where motor does not move at all TODO
 
 /*=============== Functions ===============*/
 /*!
@@ -177,7 +179,7 @@ int pwmPercentToVal(const int pwm_percent) {
  */
 float mapFloat(const float x, const float in_min, const float in_max, 
                const float out_min, const float out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  return ( (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min );
 }
 
 /*============================================================*/
@@ -194,9 +196,9 @@ public:
    * 
    * Parametrized constructor.
    * \param[in] rf - final setpoint value
-   * \param[in] ri - initial setpoint value
-   * \param[in] ti - time when we initialized motion [s]
-   * \param[in] T - time for executing the loop
+   * \param[in] ri - initial setpoint value 
+   * \param[in] ti - time when we initialized motion [ms]
+   * \param[in] T - time for executing the loop [ms]
    * \param[in] active - flag indicating whether the corresponding controller is active or not
    */
   ControlStates(float ri, float rf, float ti, float T, bool active);
@@ -241,7 +243,7 @@ ControlStates::ControlStates(float ri, float rf, float ti, float T, bool active)
 
 float ControlStates::minimumJerk(float t) {
   if (t > ti_ + T_) {
-    t = T_ + ti_;       // Make sure the ouput stays at qf after T has passed
+    t = T_ + ti_;       // Make sure the ouput stays at rf after T has passed
   }
   // Return smoother value
   return ( T_ > 0 ? 
@@ -359,9 +361,9 @@ public:
   float senseCurrent(int FB_pin);
   
   /*!
-   * \brief Filters measured current.
+   * \brief Filters measured current and calculates a force value.
    * 
-   * Filters measured current.
+   * Filters measured current and calculates a force value.
    * \pre current_ has to be measured before
    * \post filtered_current_ has a new value
    * \post force_ has a new value 
@@ -426,7 +428,7 @@ public:
    * => V = RI + k_emf*w
    * \param[in] current - current current [A]
    * \param[in] w - angular velocity [rad/s]
-   * \return feedforward value in [V]
+   * \return feedforward value [V]
    */  
   float feedforward(const float current, const float w);  
     
@@ -448,6 +450,7 @@ class CurrentControl {
 public:
   /*!
    * \brief Parametrized constructor. 
+   * 
    * Parametrized constructor.
    * \param[in] fc - feedforward control
    * \param[in] cs - control states of the current control 
@@ -536,7 +539,7 @@ float PositionControl::positionControl(const float position) {
   cs_.e_ =  error;                  // Current error
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO FIXME
+  cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_));
  
   return cs_.u_;    // Return CV
@@ -581,7 +584,7 @@ float VelocityControl::velocityControl(const float velocity) {
   cs_.e_ =  error;                 // Current error
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO FIXME
+  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   return cs_.u_;    // Return CV
 }
@@ -625,12 +628,11 @@ float StiffnessControl::stiffnessControl(const float pos, const float vel) {
   
   cs_.e_ = cs_.r_ - pos;
   cs_.u_ = pd_.Kp_*cs_.e_ - pd_.Kd_*vel;     // Set a new control value
-  //cs_.u_ >= 0 ? cs_.u_ += offset_motor_ : cs_.u_ -= offset_motor_; // Add offset to overcome the motor inner resistance TODO FIXME
+  //cs_.u_ >= 0 ? cs_.u_ += offset_motor_ : cs_.u_ -= offset_motor_; // Add offset to overcome the motor inner resistance TODO
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pd_.u_min_), static_cast<int>(pd_.u_max_)); // Clamp
   return cs_.u_;    // Return CV
 }
 
-// FIXME TODO
 /*! \brief Class defining Force/Position Regulator.
  * 
  * Class defining Force/Position Regulator.
@@ -647,8 +649,8 @@ public:
    * \brief Parametrized constructor. 
    *
    * Parametrized constructor.
-   * \param[in] pc - position control  
-   * \param[in] fc - PD controller
+   * \param[in] pc - PI position control  
+   * \param[in] fc - PD force control
    */ 
   ForcePositionRegulator(const PositionControl& pc,
                          const CurrentControl& fc);
@@ -664,7 +666,6 @@ public:
    */  
   float forcePositionRegulator(const float pos, float force, const float vel);
   
-  //const float offset_motor_; // TODO
   PositionControl pc_;     //! Position control
   CurrentControl fc_;      //! Force control
   ControlStates cs_;    //! Parallel Force/Position Regulator states  
@@ -708,7 +709,6 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, float forc
   return cs_.u_;    // Return CV
 }
 
-// FIXME TODO
 /*============================================================*/
 /*!
  * \brief Class defining Impedance Control. 
@@ -801,7 +801,6 @@ ImpedanceControl::ImpedanceControl(const float pos_d, const float M, const float
                  {};
                  
 float ImpedanceControl::impedanceControl(const float pos, const float vel, const float acc, float force) {
-  //cs_.r_ = 0.0;              // Control which keeps ui = 0 will accomplish the desired impedance behavior 
   force_ = force = force*F_; // Scale force to achieve higher importance level of force
   // Do the control
   const float imp = M_*(acc_d_-acc) + B_*(vel_d_-vel) + K_*(pos_d_-pos) - force; // Calculate current impedance
@@ -830,8 +829,8 @@ public:
    *
    * Parametrized constructor.
    * \param[in] M - inertia [kg]
-   * \param[in] fc - force control
-   * \param[in] pc - position control
+   * \param[in] fc - PI force control
+   * \param[in] pc - PD position control
    */ 
   ForcePositionControl(const float M, const CurrentControl& fc,
                        const PositionControl& pc);
@@ -873,9 +872,7 @@ float ForcePositionControl::forcePositionControl(const float pos, float force, c
   unsigned long time = micros();
   unsigned long dt = time - time_;
   time_ = time;
-  
-  cs_.r_ = 0.0; // Control which keeps ui = 0 will accomplish the desired behavior 
-  
+   
   pc_.cs_.r_ = pc_.cs_.minimumJerk(time/1.0e3);     // Set a new desired position [rad] (filtered)
   float error    =  pc_.cs_.r_ - pos;
   float d_error  = (error - pc_.cs_.e_) / dt * 1e6 ;  // [us -> s]  
@@ -1376,9 +1373,8 @@ public:
   const float k_tau_;    //! Torque constant == k_emf; force = k_tau*current [Nm/A]
   const float k_emf_;    //! Back-emf constant (speed constant) == k_tau [rpm/V -> rad/Vs]
   const float r_motor_;  //! Motor terminal resistance [ohm]
-  
-  //w_max;    //! Maximum angular velocity 
-  // Add more if necessary TODO
+  // const float w_max;    //! Maximum angular velocity [rpm -> rad]
+  // Add more if necessary 
 };
 
 /*============================================================*/
@@ -1561,7 +1557,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          CurrentSensor(ALPHA_CURRENT),
          Encoder(ENCODER_RESOLUTION, SCALE_ENCODER_VFG_M3, ALPHA_ENCODER,
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
-         Control(Control::CURRENT_MODE, 
+         Control(SELECT_MODE, 
                  CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)

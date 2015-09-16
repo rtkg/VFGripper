@@ -44,7 +44,7 @@
 #include <std_srvs/Empty.h>
 */
 
-// CURRENT, POSITION, VELOCITY, STIFFNESS, FORCE_POSITION_REGULATOR, IMPEDANCE, FORCE_POSITION, NO_MODE
+// CURRENT, POSITION, VELOCITY, STIFFNESS, FORCE_POSITION_REGULATOR, IMPEDANCE, FORCE_POSITION, MY_CONTROL,  NO_MODE
 #define SELECT_MODE Control::CURRENT_MODE //! Select default mode of control
 
 /*=============== Declarations of pins ===============*/
@@ -75,8 +75,8 @@ const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 -
 const float SCALE_ENCODER_VFG_M3= 1.0/(2*44.0); //! One full revolution is 2pi radians
 // Motor
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
-const float V_MIN = 4.4;  //! Minimum value for our maxon motor to overcome inner resistance [V]
-const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
+const float V_MIN = 2.4;  //! Minimum value for our maxon motor to overcome inner resistance [V] TODO
+const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value TODO
 const float R_MOTOR = 7.25;  //! Terminal resistance of the motor [ohm]
 const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor [A]
 const float K_TAU = 0.0452;  //! Torque constant [Nm/A]
@@ -97,12 +97,12 @@ const float KD_CURR = 5.0e5; //! PID value
 const float KP_POS = 1.2e4; //! PID value
 const float KI_POS = 25.0;   //! PID value
 const float KD_POS = 1.0e4;  //! PID value
-// Tuned :|
-const float KP_VEL = 2000.0; //! PID value
-const float KI_VEL = 0.09;   //! PID value
-const float KD_VEL = 0.0;    //! PID value
-// Tuned
-const float KP_STIFF = 5000.0; //! Position
+// Tuned :D
+const float KP_VEL = 300.0; //! PID value
+const float KI_VEL = 10.0;   //! PID value
+const float KD_VEL = 100.0;    //! PID value
+// Tuned :D
+const float KP_STIFF = 400.0; //! Position
 const float KD_STIFF = 400.0;  //! Velocity
 // Tuned
 const float KP_FPR = 3.0e2; //! Position
@@ -584,7 +584,7 @@ float VelocityControl::velocityControl(const float velocity) {
   cs_.e_ =  error;                 // Current error
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);     // Set a new control value
-  //cs_.u_ >= 0 ? cs_.u_ += offset_motor : cs_.u_ -= offset_motor; // Add offset to overcome the motor inner resistance TODO
+  //cs_.u_ += (cs_.u_ >= 0 ? OFFSET/*offset_motor_*/ : -OFFSET/*offset_motor_*/); // Add offset to overcome the motor inner resistance TODO
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   return cs_.u_;    // Return CV
 }
@@ -628,7 +628,7 @@ float StiffnessControl::stiffnessControl(const float pos, const float vel) {
   
   cs_.e_ = cs_.r_ - pos;
   cs_.u_ = pd_.Kp_*cs_.e_ - pd_.Kd_*vel;     // Set a new control value
-  //cs_.u_ >= 0 ? cs_.u_ += offset_motor_ : cs_.u_ -= offset_motor_; // Add offset to overcome the motor inner resistance TODO
+  cs_.u_ += ( cs_.u_ >= 0 ? OFFSET/*offset_motor_*/ : -OFFSET/*offset_motor_*/ ); // Add offset to overcome the motor inner resistance TODO
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pd_.u_min_), static_cast<int>(pd_.u_max_)); // Clamp
   return cs_.u_;    // Return CV
 }

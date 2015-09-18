@@ -73,6 +73,7 @@ const float ALPHA_ENCODER = 0.1;  //! Value for filtering position TODO FIXME
 // Encoder
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
 const float SCALE_ENCODER_VFG_M3= 1.0/(2*44.0); //! One full revolution is 2pi radians
+const float SCALE_ENCODER_BASIC_SET_UP = 1.0; //! One full revolution is 2pi radians
 // Motor
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 2.4;  //! Minimum value for our maxon motor to overcome inner resistance [V] TODO
@@ -82,7 +83,7 @@ const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor 
 const float K_TAU = 0.0452;  //! Torque constant [Nm/A]
 const float K_EMF = K_TAU;   //! Speed constant [rpm/V -> rad/Vs]
 // Default desired values
-const float DESIRED_CURRENT = 0.03; //! Desired current (=> torque) [mA]
+const float DESIRED_CURRENT = 0.005; //! Desired current (=> torque) [mA]
 const float DESIRED_POSITION = 20.0; //! Desired position [rad]
 const float DESIRED_VELOCITY = 7.0; //! Desired velocity [rad/s]
 const float DESIRED_FORCE = DESIRED_CURRENT * K_TAU; //! Desired force [N]
@@ -108,7 +109,7 @@ const float KD_STIFF = 400.0;  //! Velocity
 const float KP_FPR = 3.0e2; //! Position
 const float KF_FPR = 5.0e5; //! P Force
 const float KI_FPR = 2.0e3; //! I Force
-const float KV_FPR = 3.0e3; //! Velocity
+const float KV_FPR = 3.0e2; //! Velocity
 // Tuned 
 const float M_IMP = 0.1;     //! Inertia
 const float B_IMP = 400.0;   //! Damping
@@ -1299,8 +1300,8 @@ int Encoder::getRawTicks() {
   // Return value or flag
   int a = -1;
   //Serial.println(checkReading(d1, d2, d3));
-  return ( a = checkReading(d1, d2, d3) >= 0 ? static_cast<int>(reading) : a );
-  //return static_cast<int>(reading);
+  //return ( a = checkReading(d1, d2, d3) >= 0 ? static_cast<int>(reading) : a ); // FIXME
+  return static_cast<int>(reading); // When there is a wrong encoder but we still want to get results FIXME
 }
 
 void Encoder::readEncoder() {
@@ -1607,7 +1608,7 @@ bool Motor::go() {
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          MotorData(CURR_MAX, K_TAU, K_EMF, R_MOTOR),
          CurrentSensor(ALPHA_CURRENT),
-         Encoder(ENCODER_RESOLUTION, SCALE_ENCODER_VFG_M3, ALPHA_ENCODER,
+         Encoder(ENCODER_RESOLUTION, /*SCALE_ENCODER_VFG_M3*/SCALE_ENCODER_BASIC_SET_UP, ALPHA_ENCODER, // FIXME Change scale for the correct motor
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
          Control(SELECT_MODE, 
                  CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),

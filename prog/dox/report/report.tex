@@ -1,0 +1,71 @@
+\documentclass[11pt, a4paper]{article}
+
+%Preambuła dokumentu
+\usepackage{graphicx} 
+\usepackage{rotating}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{epic}
+\usepackage{psfrag}
+\usepackage{curves}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{alltt}
+\usepackage{fp}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage[ampersand]{easylist}
+\usepackage{changepage}
+\usepackage{hyperref}
+\usepackage{url}
+%\usepackage{parskip}
+%\setlength{\parskip}{1ex}
+\usepackage[OT4]{fontenc}
+\usepackage[utf8]{inputenc} 
+\usepackage{color}
+\usepackage{xcolor}
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+% set the default code style
+\lstset{
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{greencomments}, % comment color
+    keywordstyle=\color{bluekeywords}, % keyword color
+    stringstyle=\color{redstrings} % string color
+}
+
+% Koniec preambuły dokumentu
+
+% Tekst dokumentu
+\begin{document}
+\input{title_page}
+\input{toc}
+\input{abstract}
+\clearpage
+\pagenumbering{arabic}% Arabic page numbers (and reset to 1)
+\input{introduction}
+\input{analysis} 
+\input{implementation}
+\input{case} 
+\input{conclusion} 
+
+\newpage
+\bibliographystyle{abbrv}
+\nocite{*}
+\bibliography{bibliography} 
+
+\end{document}

@@ -69,16 +69,20 @@ const int PWM_MIN = 0;         //! PWM minimum value
 const int PWM_MAX = 4095;      //! PWM maximum value
 // Filtering
 const float ALPHA_CURRENT = 0.99; //! Value for filtering current
-const float ALPHA_ENCODER = 0.1;  //! Value for filtering position TODO FIXME
+const float ALPHA_ENCODER = 0.98;//0.1;  //! Value for filtering position TODO FIXME
 // Encoder
+const float FEED_SCALE = 1.0;//80.0; // TODO FIXME
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
 const float SCALE_ENCODER_VFG_M3= 1.0/(2*44.0); //! One full revolution is 2pi radians
-const float SCALE_ENCODER_BASIC_SET_UP = 1.0; //! One full revolution is 2pi radians
+const float SCALE_ENCODER_BASIC_SET_UP = 0.5; //! One full revolution is 2pi radians TODO ok?
 // Motor
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 2.4;  //! Minimum value for our maxon motor to overcome inner resistance [V] TODO
 const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value TODO
 const float R_MOTOR = 7.25;  //! Terminal resistance of the motor [ohm]
+const float MU_MOTOR = 0.746e-3; //! Terminal inductance of the motor [H]
+const float J_ROTOR = 8.85*1e-7; //! Rotor inertia [gcm^2 -> kgm^2]
+const float J_GEARHEAD = 0.293*1e-7; //! Rotor inertia [gcm^2 -> kgm^2]
 const float CURR_MAX = 0.56; //! Maximum continuous current for our maxon motor [A]
 const float K_TAU = 0.0452;  //! Torque constant [Nm/A]
 const float K_EMF = K_TAU;   //! Speed constant [rpm/V -> rad/Vs]
@@ -414,10 +418,11 @@ public:
    *
    * Parametrized constructor.
    * \param[in] r_motor - terminal resistance of the motor [ohm]
+   * \param[in] j_motor - terminal inductance of the motor [H]
    * \param[in] k_emf - back-emf coefficient (torque constant) [Nm/A]
    */ 
-  FeedforwardControl(float r_motor, float k_emf) :  
-  r_motor_(r_motor), k_emf_(k_emf) {};
+  FeedforwardControl(float r_motor, float j_motor, float k_emf) :  
+  r_motor_(r_motor), j_motor_(j_motor), k_emf_(k_emf) {};
   
   /*!
    * \brief Calculates feedforward term.
@@ -434,6 +439,7 @@ public:
   float feedforward(const float current, const float w);  
     
   const float r_motor_; //! Terminal resistance of the motor [ohm]
+  const float j_motor_; //! Terminal inductance of the motor [H]
   const float k_emf_;   //! Back-emf coefficient (torque constant) [Nm/A]
 };
 
@@ -487,8 +493,8 @@ float CurrentControl::currentControl(float current, float vel) {
   cs_.e_ =  error;                // Current error
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);  // Set a new control value
-  feedforward_term_ = feedforward_.feedforward(current, vel); // Calculate feedforward term
-  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
+  feedforward_term_ = feedforward_.feedforward(current, FEED_SCALE*vel); // Calculate feedforward term
+  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range FIXME
   cs_.u_ += feedforward_term_;  // Compute control with feedforward term to make control faster
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   // We don't want it to rotate in the other direction
@@ -1608,10 +1614,10 @@ bool Motor::go() {
 Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
          MotorData(CURR_MAX, K_TAU, K_EMF, R_MOTOR),
          CurrentSensor(ALPHA_CURRENT),
-         Encoder(ENCODER_RESOLUTION, /*SCALE_ENCODER_VFG_M3*/SCALE_ENCODER_BASIC_SET_UP, ALPHA_ENCODER, // FIXME Change scale for the correct motor
+         Encoder(ENCODER_RESOLUTION, SCALE_ENCODER_VFG_M3/*SCALE_ENCODER_BASIC_SET_UP*/, ALPHA_ENCODER, // FIXME Change scale for the correct motor
                  SensorPins(E1_DO, E1_CLK, E1_CSn)), 
          Control(SELECT_MODE, 
-                 CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
+                 CurrentControl(FeedforwardControl(R_MOTOR, J_ROTOR+J_GEARHEAD, K_EMF),
                                 ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false), 
                                 PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                 ),
@@ -1627,7 +1633,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                  ForcePositionRegulator(PositionControl(ControlStates(0.0, DESIRED_POSITION, 0.0, T_JERK, false),
                                                         PIDController(KP_FPR, 0.0, KV_FPR, -PWM_MAX, PWM_MAX, 0.0)
                                                        ),
-                                        CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
+                                        CurrentControl(FeedforwardControl(R_MOTOR, J_ROTOR+J_GEARHEAD, K_EMF),
                                                        ControlStates(0.0, DESIRED_FORCE, 0.0, T_JERK, false),
                                                        PIDController(KF_FPR, KI_FPR, 0.0, -PWM_MAX, PWM_MAX, 0.0)
                                                       )                                        
@@ -1636,7 +1642,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                                   ControlStates(0.0, 0.0, 0.0, T_JERK, false)
                                  ),
                  ForcePositionControl(M_FPC,
-                                      CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
+                                      CurrentControl(FeedforwardControl(R_MOTOR, J_ROTOR+J_GEARHEAD, K_EMF),
                                                      ControlStates(0.0, DESIRED_FORCE, 0.0, T_JERK, false),
                                                      PIDController(KF_FPC, KI_FPC, 0.0, -PWM_MAX, PWM_MAX, 0.0)
                                                      ),
@@ -1644,7 +1650,7 @@ Motor m1(MotorControlPins(M1_IN1, M1_IN2, M1_SF, EN, M1_FB, M1_D2),
                                                       PIDController(KP_FPC, KV_FPC, 0.0, -PWM_MAX, PWM_MAX, 0.0)
                                                       ) 
                                      ),
-                 MyControl(CurrentControl(FeedforwardControl(R_MOTOR, K_EMF),
+                 MyControl(CurrentControl(FeedforwardControl(R_MOTOR, J_ROTOR+J_GEARHEAD, K_EMF),
                                           ControlStates(0.0, DESIRED_CURRENT, 0.0, T_JERK, false),
                                           PIDController(KP_CURR, KI_CURR, KD_CURR, -PWM_MAX, PWM_MAX, 0.0)
                                           ),

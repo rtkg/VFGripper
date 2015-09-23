@@ -1,0 +1,58 @@
+\begin{thebibliography}{1}
+
+\bibitem{246048}
+S.~Chiaverini and L.~Sciavicco.
+\newblock The parallel approach to force/position control of robotic
+  manipulators.
+\newblock {\em Robotics and Automation, IEEE Transactions on}, 9(4):361--373,
+  Aug 1993.
+
+\bibitem{789685}
+S.~Chiaverini, B.~Siciliano, and L.~Villani.
+\newblock A survey of robot interaction control schemes with experimental
+  comparison.
+\newblock {\em Mechatronics, IEEE/ASME Transactions on}, 4(3):273--285, Sep
+  1999.
+
+\bibitem{4788393}
+N.~Hogan.
+\newblock Impedance control: An approach to manipulation.
+\newblock In {\em American Control Conference, 1984}, pages 304--313, June
+  1984.
+
+\bibitem{hogan2005impedance}
+N.~Hogan and S.~P. Buerger.
+\newblock Impedance and interaction control, 2005.
+
+\bibitem{6907390}
+R.~Krug, T.~Stoyanov, M.~Bonilla, V.~Tincani, N.~Vaskevicius, G.~Fantoni,
+  A.~Birk, A.~Lilienthal, and A.~Bicchi.
+\newblock Velvet fingers: Grasp planning and execution for an underactuated
+  gripper with active surfaces.
+\newblock In {\em Robotics and Automation (ICRA), 2014 IEEE International
+  Conference on}, pages 3669--3675, May 2014.
+
+\bibitem{6385939}
+V.~Tincani, M.~Catalano, E.~Farnioli, M.~Garabini, G.~Grioli, G.~Fantoni, and
+  A.~Bicchi.
+\newblock Velvet fingers: A dexterous gripper with active surfaces.
+\newblock In {\em Intelligent Robots and Systems (IROS), 2012 IEEE/RSJ
+  International Conference on}, pages 1257--1263, Oct 2012.
+
+\bibitem{tincani2015sensitive}
+V.~Tincani, M.~Catalano, G.~Grioli, T.~Stoyanov, R.~Krug, A.~Lilienthal,
+  G.~Fantoni, and A.~Bicchi.
+\newblock Sensitive active surfaces on the velvet ii dexterous gripper.
+\newblock In {\em IEEE Int. Conf. on Robotics and Automation (ICRA) - Workshop
+  "Get in touch!" Tactile \& force sensing for autonomous, compliant,
+  intelligent robots}, 2015.
+
+\bibitem{6630955}
+V.~Tincani, G.~Grioli, M.~Catalano, M.~Garabini, S.~Grechi, G.~Fantoni, and
+  A.~Bicchi.
+\newblock Implementation and control of the velvet fingers: A dexterous gripper
+  with active surfaces.
+\newblock In {\em Robotics and Automation (ICRA), 2013 IEEE International
+  Conference on}, pages 2744--2750, May 2013.
+
+\end{thebibliography}

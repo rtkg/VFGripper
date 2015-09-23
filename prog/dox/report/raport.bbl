@@ -1,0 +1,57 @@
+\begin{thebibliography}{10}
+
+\bibitem{sensors}
+J.~Fraden.
+\newblock {\em Handbook of Modern Sensors}.
+\newblock Springer, 2010.
+
+\bibitem{KKZalPro}
+K.~Kwieciński.
+\newblock Stworzenie modelu wybranego robota w programie gazebo (założenia
+  projektowe), marzec 2015.
+
+\bibitem{website:orientus}
+\mbox{Advanced Navigation}.
+\newblock \url{http://www.advancednavigation.com.au/product/orientus},
+  kwiecień 2015.
+
+\bibitem{website:gazebosimyt}
+\mbox{Gazebo Sim}.
+\newblock \url{https://www.youtube.com/channel/UCJyqf9XJpDoM9XnpAwW6WxA/},
+  marzec 2015.
+
+\bibitem{website:dem}
+\mbox{Global Land Cover Facility}.
+\newblock \url{http://glcf.umd.edu/}, maj 2015.
+
+\bibitem{website:urg}
+\mbox{Hokuyo}.
+\newblock
+  \url{https://www.hokuyo-aut.jp/02sensor/07scanner/urg_04lx_ug01.html},
+  kwiecień 2015.
+
+\bibitem{website:kinect}
+\mbox{Microsoft}.
+\newblock
+  \url{https://www.microsoft.com/en-us/kinectforwindows/meetkinect/default.aspx},
+  kwiecień 2015.
+
+\bibitem{website:gazebo}
+\mbox{Open Source Robotics Foundation}.
+\newblock \textit{Gazebo}.
+\newblock \url{http://www.gazebosim.org/tutorials}, 2014.
+
+\bibitem{website:gazebo_api}
+\mbox{Open Source Robotics Foundation}.
+\newblock \textit{Gazebo API}.
+\newblock \url{http://gazebosim.org/api.html}, 2014.
+
+\bibitem{website:sdf}
+\mbox{SDFormat}.
+\newblock \url{http://sdformat.org/}, kwiecień 2015.
+
+\bibitem{website:sketchup}
+\mbox{SketchUp}.
+\newblock \url{http://www.sketchup.com/}, kwiecień 2015.
+
+\end{thebibliography}

@@ -1,0 +1,52 @@
+\section{Analysis}
+\subsection{DC Armature Model}
+A DC motor can be described by two equations:
+\begin{equation}
+\label{eq:electrical}
+	V(t) = L \frac{di(t)}{dt} + Ri(t) + E(t)
+\end{equation}
+\begin{equation}
+\label{eq:mechanical}
+	J \dot{\omega}(t) = k_{tau} i(t) - \mu \omega(t) - T_{L}(t),
+\end{equation}
+where \ref{eq:electrical} describes electrical and \ref{eq:mechanical} describes mechanical aspect of the motor.
+
+It is known that
+\begin{equation}
+\label{eq:back_emf}
+	E(t) = k_{emf} \omega(t),
+\end{equation}
+\begin{equation}
+\label{eq:curr_force}
+	T(t) = k_{tau} i(t).
+\end{equation}
+
+Combining the above equations and assuming that changes in current are instantaneous yields
+\begin{equation}
+\label{eq:feedforward_trans}
+	V(t) = \frac{R}{k_{tau}} (J \dot{\omega}(t) + \mu \omega(t) + T_{L}(t) ) + k_{emf} \omega(t)
+\end{equation}
+or simply
+\begin{equation}
+\label{eq:feedforward_trans_reduced}
+	V(t) = Ri(t) + k_{emf} \omega(t)
+\end{equation}
+if the current is measured. 
+
+Equations \ref{eq:feedforward_trans} and \ref{eq:feedforward_trans_reduced} hold for every state of the motor. However, since we want the gripper to hold an object firmly, desired $\omega$ and $\dot{\omega}$ are zero. That means the final feedforward equation when holding an object can be reduced to
+\begin{equation}
+\label{eq:feedforward_reduced}
+	V(t) = R \frac{T_{L}(t)}{k_{tau}} = R i(t).
+\end{equation}
+
+Nomenclature:
+$R$ - motor terminal resistance,
+$L$ - motor terminal inductance,
+$i$ - current,
+$E$ - back electromotive force,
+$J$ - rotor inertia moment,
+$\omega$ - rotor angular velocity,
+$\dot{\omega}$ - rotor angular acceleration,
+$k_{tau}$ - torque constant,
+$k_{emf}$ - speed constant,
+$T_{L}$ - load torque. 

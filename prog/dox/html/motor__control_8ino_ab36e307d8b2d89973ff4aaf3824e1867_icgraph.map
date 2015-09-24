@@ -1,0 +1,6 @@
+<map id="pub_enc_k" name="pub_enc_k">
+<area shape="rect" id="node2" href="$motor__control_8ino.html#af1aed4c9a6657871105ab596b6a02c5f" title="setUpRos" alt="" coords="161,5,242,32"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#af1c6bfff4cedb3e7cd5484d9593d4e00" title="Publishes interesting data from motor. " alt="" coords="139,56,264,83"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Sets up code after every reset of the Arduino Board. " alt="" coords="313,5,367,32"/>
+<area shape="rect" id="node5" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="317,56,363,83"/>
+</map>

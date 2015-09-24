@@ -1,0 +1,13 @@
+<map id="Control" name="Control">
+<area shape="rect" id="node2" href="$class_velocity_control.html" title="Class defining velocity control. " alt="" coords="278,7,389,33"/>
+<area shape="rect" id="node3" href="$class_control_states.html" title="Class defining Control Variables. " alt="" coords="22,244,125,271"/>
+<area shape="rect" id="node5" href="$class_position_control.html" title="Class defining position control. " alt="" coords="278,188,389,215"/>
+<area shape="rect" id="node6" href="$class_impedance_control.html" title="Class defining Impedance Control. " alt="" coords="269,57,397,84"/>
+<area shape="rect" id="node7" href="$class_force_position_control.html" title="Class defining Parallel Force/Position Control. " alt="" coords="480,311,624,337"/>
+<area shape="rect" id="node8" href="$class_current_control.html" title="Class defining current control. " alt="" coords="280,513,387,540"/>
+<area shape="rect" id="node10" href="$class_my_control.html" title="Class defining MyControl. " alt="" coords="511,584,593,611"/>
+<area shape="rect" id="node11" href="$class_stiffness_control.html" title="Class defining Stiffness Control. " alt="" coords="275,457,391,484"/>
+<area shape="rect" id="node12" href="$class_force_position_regulator.html" title="Class defining Force/Position Regulator. " alt="" coords="473,232,631,259"/>
+<area shape="rect" id="node4" href="$class_p_i_d_controller.html" title="Class defining PID Controller. " alt="" coords="23,361,124,388"/>
+<area shape="rect" id="node9" href="$class_feedforward_control.html" title="Class defining feedforward control. " alt="" coords="5,689,141,716"/>
+</map>

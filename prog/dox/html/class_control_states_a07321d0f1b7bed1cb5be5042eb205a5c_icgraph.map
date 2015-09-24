@@ -1,0 +1,12 @@
+<map id="ControlStates::minimumJerk" name="ControlStates::minimumJerk">
+<area shape="rect" id="node2" href="$class_current_control.html#ab09204fa56d4083c4d90c76ac0cc6a8c" title="Current control feedback. " alt="" coords="243,56,440,83"/>
+<area shape="rect" id="node3" href="$class_my_control.html#a67a9d4c8c1621e0a68eb7b232669b5de" title="MyControl feedback. " alt="" coords="501,5,651,32"/>
+<area shape="rect" id="node7" href="$class_position_control.html#af7fc24428bb1e72d0faec15297a07953" title="Position control feedback. " alt="" coords="494,107,658,149"/>
+<area shape="rect" id="node8" href="$class_velocity_control.html#af99f56fe41243c833de6bc003c09e1a0" title="Velocity control feedback. " alt="" coords="494,173,658,214"/>
+<area shape="rect" id="node9" href="$class_stiffness_control.html#a9daf49439e7d380876ee75b9e9b1c63b" title="Stiffness control feedback. " alt="" coords="489,238,663,279"/>
+<area shape="rect" id="node10" href="$class_force_position_regulator.html#af07e2dd914e5bc340fe482a862ccb821" title="Force/Position Regulator feedback. " alt="" coords="260,282,423,323"/>
+<area shape="rect" id="node11" href="$class_force_position_control.html#a5b4f8f343ade4a87db9075b66bee1e02" title="Parallel Force/Position control feedback. " alt="" coords="267,347,415,389"/>
+<area shape="rect" id="node4" href="$class_motor.html#aa45a5208771c83cb7c125edcc97c1058" title="Checks control method and does it. " alt="" coords="713,180,815,207"/>
+<area shape="rect" id="node5" href="$class_motor.html#adee4ac83394caf77d488f55fdf23d204" title="Runs sensing, checking, control and actuation. " alt="" coords="864,155,941,181"/>
+<area shape="rect" id="node6" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="879,205,926,232"/>
+</map>

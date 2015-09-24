@@ -1,0 +1,22 @@
+<map id="publishEverything" name="publishEverything">
+<area shape="rect" id="node2" href="$motor__control_8ino.html#a4fc3ea5e8d0c388539f9d48be8265062" title="pub_u" alt="" coords="218,5,275,32"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#a468f86fc63cec0f2ddee09f58238344e" title="pub_current" alt="" coords="201,56,292,83"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#adccfb3728da273dd6988fb4cf5886f0e" title="pub_filtered_current" alt="" coords="179,107,315,133"/>
+<area shape="rect" id="node5" href="$motor__control_8ino.html#a364742d38ed370534644fd3245119821" title="pub_error" alt="" coords="209,157,285,184"/>
+<area shape="rect" id="node6" href="$motor__control_8ino.html#a7babc9ecf4fdc24569edc9c47575f778" title="pub_ref" alt="" coords="214,208,279,235"/>
+<area shape="rect" id="node7" href="$motor__control_8ino.html#a785d1063afb3c2d423b907bee192e2d4" title="pub_integral" alt="" coords="201,259,293,285"/>
+<area shape="rect" id="node8" href="$motor__control_8ino.html#ab9892b3aac81eb48d15e2bc6fc9e83c6" title="pub_imp" alt="" coords="211,309,282,336"/>
+<area shape="rect" id="node9" href="$motor__control_8ino.html#aa2693732c96b26630c523eb9be47b73c" title="pub_force" alt="" coords="207,360,286,387"/>
+<area shape="rect" id="node10" href="$motor__control_8ino.html#afc292644fabe5f45b661ce764e6eac9e" title="pub_feedforward" alt="" coords="187,411,306,437"/>
+<area shape="rect" id="node11" href="$motor__control_8ino.html#a57b2230fa7340fed1732eca70756198e" title="pub_enc_ddp" alt="" coords="197,461,296,488"/>
+<area shape="rect" id="node12" href="$motor__control_8ino.html#a0052a5a67aaf91ae66b526992cf2543a" title="pub_enc_dp" alt="" coords="201,512,293,539"/>
+<area shape="rect" id="node13" href="$motor__control_8ino.html#aba499efbae590ac43aaf3eb9fd18a6c2" title="pub_enc_p" alt="" coords="204,563,289,589"/>
+<area shape="rect" id="node14" href="$motor__control_8ino.html#a0b00438fbfd144ffbdfa967da6f21125" title="pub_enc_raw_ticks" alt="" coords="179,613,314,640"/>
+<area shape="rect" id="node15" href="$motor__control_8ino.html#ab36e307d8b2d89973ff4aaf3824e1867" title="pub_enc_k" alt="" coords="204,664,289,691"/>
+<area shape="rect" id="node16" href="$motor__control_8ino.html#a876442e033ba1eed85148a3d9d3aef25" title="pub_enc_scale" alt="" coords="192,715,301,741"/>
+<area shape="rect" id="node17" href="$motor__control_8ino.html#a0b0e3cbd13751c5cec3a8c2c9f2fd724" title="pub_enc_alpha" alt="" coords="192,765,301,792"/>
+<area shape="rect" id="node18" href="$motor__control_8ino.html#a3452865aa1ebaad12677532e1ae732f4" title="pub_enc_offset" alt="" coords="191,816,302,843"/>
+<area shape="rect" id="node19" href="$motor__control_8ino.html#afbab1513af85fca051ae74d29f5b9f12" title="pub_enc_p_raw" alt="" coords="190,867,303,893"/>
+<area shape="rect" id="node20" href="$motor__control_8ino.html#afba7683f5e5dc0a88cfcbd0b8085fa9a" title="pub_enc_res" alt="" coords="199,917,295,944"/>
+<area shape="rect" id="node21" href="$motor__control_8ino.html#ac97599ec868205d050503b0b461c828e" title="pub_counter" alt="" coords="200,968,293,995"/>
+</map>

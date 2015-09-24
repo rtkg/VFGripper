@@ -1,0 +1,3 @@
+<map id="Encoder::readEncoderR" name="Encoder::readEncoderR">
+<area shape="rect" id="node2" href="$class_sensor_pins.html#aa20c60b374379ae00e4bd1bd304f2293" title="Read in a byte (or less bits) of data from the digital input corresponding to the given sensor..." alt="" coords="216,5,349,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="ForcePositionRegulator::forcePositionRegulator" name="ForcePositionRegulator::forcePositionRegulator">
+<area shape="rect" id="node2" href="$class_control_states.html#a07321d0f1b7bed1cb5be5042eb205a5c" title="Calculates minimum jerk trajectory point. " alt="" coords="217,5,405,32"/>
+<area shape="rect" id="node3" href="$class_feedforward_control.html#a28f94c2841e67f5309f9deed9bb8289d" title="Calculates feedforward term. " alt="" coords="243,57,379,98"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#aab718bf55de3efd7c6a76d4e16156a16" title="Maps float value from one range to another. " alt="" coords="273,123,349,149"/>
+</map>

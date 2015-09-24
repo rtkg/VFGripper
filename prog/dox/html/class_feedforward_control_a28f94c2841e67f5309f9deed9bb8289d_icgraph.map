@@ -1,0 +1,9 @@
+<map id="FeedforwardControl::feedforward" name="FeedforwardControl::feedforward">
+<area shape="rect" id="node2" href="$class_current_control.html#ab09204fa56d4083c4d90c76ac0cc6a8c" title="Current control feedback. " alt="" coords="189,56,387,83"/>
+<area shape="rect" id="node7" href="$class_force_position_regulator.html#af07e2dd914e5bc340fe482a862ccb821" title="Force/Position Regulator feedback. " alt="" coords="435,107,597,149"/>
+<area shape="rect" id="node8" href="$class_force_position_control.html#a5b4f8f343ade4a87db9075b66bee1e02" title="Parallel Force/Position control feedback. " alt="" coords="214,166,362,207"/>
+<area shape="rect" id="node3" href="$class_my_control.html#a67a9d4c8c1621e0a68eb7b232669b5de" title="MyControl feedback. " alt="" coords="441,5,591,32"/>
+<area shape="rect" id="node4" href="$class_motor.html#aa45a5208771c83cb7c125edcc97c1058" title="Checks control method and does it. " alt="" coords="646,85,749,112"/>
+<area shape="rect" id="node5" href="$class_motor.html#adee4ac83394caf77d488f55fdf23d204" title="Runs sensing, checking, control and actuation. " alt="" coords="797,60,875,87"/>
+<area shape="rect" id="node6" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="813,111,859,137"/>
+</map>

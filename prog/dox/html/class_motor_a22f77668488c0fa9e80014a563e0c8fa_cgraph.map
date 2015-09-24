@@ -1,0 +1,10 @@
+<map id="Motor::sense" name="Motor::sense">
+<area shape="rect" id="node2" href="$class_current_sensor.html#a4643ebcc84f4b9bd91c175a4af559318" title="Measure current. " alt="" coords="152,5,344,32"/>
+<area shape="rect" id="node4" href="$class_current_sensor.html#aca9c47fb5231da23f3be1405cf12a447" title="Filters measured current and calculates a force value. " alt="" coords="157,56,339,83"/>
+<area shape="rect" id="node5" href="$class_encoder.html#ac70612b4a6a5cf4d512b7b7aafa5bdf4" title="Converts the encoder readings and computes derivatives. " alt="" coords="160,107,336,133"/>
+<area shape="rect" id="node3" href="$motor__control_8ino.html#aab718bf55de3efd7c6a76d4e16156a16" title="Maps float value from one range to another. " alt="" coords="459,5,535,32"/>
+<area shape="rect" id="node6" href="$class_encoder.html#a4fab7c6d9f040036bb7aece3d38ecfbe" title="Read the current position from the sensor. " alt="" coords="422,81,573,108"/>
+<area shape="rect" id="node9" href="$class_encoder.html#a9b2d6908ce20623a2d789d2353b7b38e" title="Converts ticks to angle in radians multiplied by scaling factor. " alt="" coords="392,132,603,159"/>
+<area shape="rect" id="node7" href="$class_encoder.html#a2853dcfd3764b9657d4a422da8b49142" title="Check encoder raw ticks position. " alt="" coords="651,81,805,108"/>
+<area shape="rect" id="node8" href="$class_sensor_pins.html#aa20c60b374379ae00e4bd1bd304f2293" title="Read in a byte (or less bits) of data from the digital input corresponding to the given sensor..." alt="" coords="853,81,987,108"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="SensorPins::shiftIn" name="SensorPins::shiftIn">
+<area shape="rect" id="node2" href="$class_encoder.html#a2853dcfd3764b9657d4a422da8b49142" title="Check encoder raw ticks position. " alt="" coords="187,31,341,57"/>
+<area shape="rect" id="node3" href="$class_encoder.html#a276b48d49a60ba0a9e95c28a2006047f" title="Do the first reading and set offset. " alt="" coords="621,5,734,32"/>
+<area shape="rect" id="node5" href="$class_encoder.html#a4fab7c6d9f040036bb7aece3d38ecfbe" title="Read the current position from the sensor. " alt="" coords="390,56,541,83"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Sets up code after every reset of the Arduino Board. " alt="" coords="835,5,890,32"/>
+<area shape="rect" id="node6" href="$class_encoder.html#ac70612b4a6a5cf4d512b7b7aafa5bdf4" title="Converts the encoder readings and computes derivatives. " alt="" coords="589,56,765,83"/>
+<area shape="rect" id="node7" href="$class_motor.html#a22f77668488c0fa9e80014a563e0c8fa" title="Reads current sensor and encoder. " alt="" coords="813,56,912,83"/>
+<area shape="rect" id="node8" href="$class_motor.html#adee4ac83394caf77d488f55fdf23d204" title="Runs sensing, checking, control and actuation. " alt="" coords="960,31,1037,57"/>
+<area shape="rect" id="node9" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="975,81,1022,108"/>
+</map>

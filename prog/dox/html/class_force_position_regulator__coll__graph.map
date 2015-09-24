@@ -1,0 +1,7 @@
+<map id="ForcePositionRegulator" name="ForcePositionRegulator">
+<area shape="rect" id="node2" href="$class_position_control.html" title="Class defining position control. " alt="" coords="58,96,168,123"/>
+<area shape="rect" id="node3" href="$class_control_states.html" title="Class defining Control Variables. " alt="" coords="5,5,107,32"/>
+<area shape="rect" id="node5" href="$class_current_control.html" title="Class defining current control. " alt="" coords="271,96,377,123"/>
+<area shape="rect" id="node4" href="$class_p_i_d_controller.html" title="Class defining PID Controller. " alt="" coords="149,5,251,32"/>
+<area shape="rect" id="node6" href="$class_feedforward_control.html" title="Class defining feedforward control. " alt="" coords="275,5,409,32"/>
+</map>

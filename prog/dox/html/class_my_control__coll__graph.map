@@ -1,0 +1,6 @@
+<map id="MyControl" name="MyControl">
+<area shape="rect" id="node2" href="$class_control_states.html" title="Class defining Control Variables. " alt="" coords="5,5,107,32"/>
+<area shape="rect" id="node4" href="$class_current_control.html" title="Class defining current control. " alt="" coords="141,96,248,123"/>
+<area shape="rect" id="node3" href="$class_p_i_d_controller.html" title="Class defining PID Controller. " alt="" coords="296,5,397,32"/>
+<area shape="rect" id="node5" href="$class_feedforward_control.html" title="Class defining feedforward control. " alt="" coords="132,5,267,32"/>
+</map>

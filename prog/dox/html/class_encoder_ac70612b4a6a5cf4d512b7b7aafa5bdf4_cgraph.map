@@ -1,0 +1,6 @@
+<map id="Encoder::computeEncoder" name="Encoder::computeEncoder">
+<area shape="rect" id="node2" href="$class_encoder.html#a4fab7c6d9f040036bb7aece3d38ecfbe" title="Read the current position from the sensor. " alt="" coords="259,5,410,32"/>
+<area shape="rect" id="node5" href="$class_encoder.html#a9b2d6908ce20623a2d789d2353b7b38e" title="Converts ticks to angle in radians multiplied by scaling factor. " alt="" coords="229,56,440,83"/>
+<area shape="rect" id="node3" href="$class_encoder.html#a2853dcfd3764b9657d4a422da8b49142" title="Check encoder raw ticks position. " alt="" coords="488,5,643,32"/>
+<area shape="rect" id="node4" href="$class_sensor_pins.html#aa20c60b374379ae00e4bd1bd304f2293" title="Read in a byte (or less bits) of data from the digital input corresponding to the given sensor..." alt="" coords="691,5,824,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="VelocityControl::velocityControl" name="VelocityControl::velocityControl">
+<area shape="rect" id="node2" href="$class_control_states.html#a07321d0f1b7bed1cb5be5042eb205a5c" title="Calculates minimum jerk trajectory point. " alt="" coords="219,5,407,32"/>
+<area shape="rect" id="node3" href="$class_p_i_d_controller.html#a78c61c2fb20bc91ec27c7029a3e55798" title="Calculates PID control variable. " alt="" coords="250,56,377,83"/>
+</map>

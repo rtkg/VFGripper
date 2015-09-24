@@ -1,0 +1,4 @@
+<map id="Encoder::readEncoder" name="Encoder::readEncoder">
+<area shape="rect" id="node2" href="$class_encoder.html#a2853dcfd3764b9657d4a422da8b49142" title="Check encoder raw ticks position. " alt="" coords="205,5,360,32"/>
+<area shape="rect" id="node3" href="$class_sensor_pins.html#aa20c60b374379ae00e4bd1bd304f2293" title="Read in a byte (or less bits) of data from the digital input corresponding to the given sensor..." alt="" coords="408,5,541,32"/>
+</map>

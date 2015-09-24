@@ -1,0 +1,5 @@
+<map id="CurrentSensor::senseCurrent" name="CurrentSensor::senseCurrent">
+<area shape="rect" id="node2" href="$class_motor.html#a22f77668488c0fa9e80014a563e0c8fa" title="Reads current sensor and encoder. " alt="" coords="245,31,344,57"/>
+<area shape="rect" id="node3" href="$class_motor.html#adee4ac83394caf77d488f55fdf23d204" title="Runs sensing, checking, control and actuation. " alt="" coords="392,5,469,32"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="407,56,454,83"/>
+</map>

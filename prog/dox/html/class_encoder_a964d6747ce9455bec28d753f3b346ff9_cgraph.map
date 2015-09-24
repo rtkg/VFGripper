@@ -1,0 +1,5 @@
+<map id="Encoder::setupEncoderSensorR" name="Encoder::setupEncoderSensorR">
+<area shape="rect" id="node2" href="$class_encoder.html#a9610847c60a1de99b3a6040a3a69979d" title="Encoder::readEncoderR" alt="" coords="294,5,455,32"/>
+<area shape="rect" id="node4" href="$class_encoder.html#a8e87ccc5ed36c22b6334ef9c800e30c8" title="Sensor pins. " alt="" coords="265,56,485,83"/>
+<area shape="rect" id="node3" href="$class_sensor_pins.html#aa20c60b374379ae00e4bd1bd304f2293" title="Read in a byte (or less bits) of data from the digital input corresponding to the given sensor..." alt="" coords="533,5,667,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="CurrentControl::currentControl" name="CurrentControl::currentControl">
+<area shape="rect" id="node2" href="$class_control_states.html#a07321d0f1b7bed1cb5be5042eb205a5c" title="Calculates minimum jerk trajectory point. " alt="" coords="251,5,439,32"/>
+<area shape="rect" id="node3" href="$class_p_i_d_controller.html#a78c61c2fb20bc91ec27c7029a3e55798" title="Calculates PID control variable. " alt="" coords="282,56,409,83"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#aab718bf55de3efd7c6a76d4e16156a16" title="Maps float value from one range to another. " alt="" coords="307,107,383,133"/>
+</map>

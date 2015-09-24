@@ -1,0 +1,5 @@
+<map id="MyControl::myControl" name="MyControl::myControl">
+<area shape="rect" id="node2" href="$class_motor.html#aa45a5208771c83cb7c125edcc97c1058" title="Checks control method and does it. " alt="" coords="206,31,309,57"/>
+<area shape="rect" id="node3" href="$class_motor.html#adee4ac83394caf77d488f55fdf23d204" title="Runs sensing, checking, control and actuation. " alt="" coords="357,5,435,32"/>
+<area shape="rect" id="node4" href="$motor__control_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Runs repeatedly code in the loop. " alt="" coords="373,56,419,83"/>
+</map>

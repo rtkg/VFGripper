@@ -1,0 +1,7 @@
+<map id="MyControl::myControl" name="MyControl::myControl">
+<area shape="rect" id="node2" href="$class_control_states.html#a07321d0f1b7bed1cb5be5042eb205a5c" title="Calculates minimum jerk trajectory point. " alt="" coords="451,5,639,32"/>
+<area shape="rect" id="node3" href="$class_current_control.html#ab09204fa56d4083c4d90c76ac0cc6a8c" title="Current control feedback. " alt="" coords="205,56,403,83"/>
+<area shape="rect" id="node4" href="$class_p_i_d_controller.html#a78c61c2fb20bc91ec27c7029a3e55798" title="Calculates PID control variable. " alt="" coords="482,56,609,83"/>
+<area shape="rect" id="node5" href="$class_feedforward_control.html#a28f94c2841e67f5309f9deed9bb8289d" title="Calculates feedforward term. " alt="" coords="477,107,613,149"/>
+<area shape="rect" id="node6" href="$motor__control_8ino.html#aab718bf55de3efd7c6a76d4e16156a16" title="Maps float value from one range to another. " alt="" coords="507,173,583,200"/>
+</map>

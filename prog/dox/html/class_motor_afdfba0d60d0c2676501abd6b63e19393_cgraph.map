@@ -1,0 +1,5 @@
+<map id="Motor::actuate" name="Motor::actuate">
+<area shape="rect" id="node2" href="$class_motor.html#ae804085b9a09f64031558711bfd700ac" title="Drives motor in forward direction. " alt="" coords="163,5,269,32"/>
+<area shape="rect" id="node3" href="$class_motor.html#a1e1cfdd2808f7cb6a3816b8089e135db" title="Drives motor in reverse direction. " alt="" coords="163,56,269,83"/>
+<area shape="rect" id="node4" href="$class_motor.html#a796d663b03332952320f3500a68cca44" title="Sets PWM (=&gt; speed) for motor. " alt="" coords="161,107,271,133"/>
+</map>

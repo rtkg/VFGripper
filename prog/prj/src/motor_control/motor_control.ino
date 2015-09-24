@@ -69,16 +69,16 @@ const int PWM_MIN = 0;         //! PWM minimum value
 const int PWM_MAX = 4095;      //! PWM maximum value
 // Filtering
 const float ALPHA_CURRENT = 0.99; //! Value for filtering current
-const float ALPHA_ENCODER = 0.98;//0.1;  //! Value for filtering position TODO FIXME
+const float ALPHA_ENCODER = 0.98;//0.1;  //! Value for filtering position TODO 
 // Encoder
-const float FEED_SCALE = 1.0;//80.0; // TODO FIXME
+const float FEED_SCALE = 1.0;//80.0; // TODO 
 const float ENCODER_RESOLUTION = 4095; //! Encoder resolution: 12 bit, i.e., 0 - 4095 (=> 0.0879 deg)
 const float SCALE_ENCODER_VFG_M3= 1.0/(2*44.0); //! One full revolution is 2pi radians
-const float SCALE_ENCODER_BASIC_SET_UP = 0.5; //! One full revolution is 2pi radians TODO ok?
+const float SCALE_ENCODER_BASIC_SET_UP = 0.5; //! One full revolution is 2pi radians TODO okay?
 // Motor
 const int   V_MAX = 24;   //! Maximum value for our maxon motor [V] 
 const float V_MIN = 2.4;  //! Minimum value for our maxon motor to overcome inner resistance [V] TODO
-const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value TODO
+const int OFFSET  = static_cast<int>(mapFloat(V_MIN, 0.0, V_MAX, PWM_MIN, PWM_MAX)); //! V_MIN converted to PWM value
 const float R_MOTOR = 7.25;  //! Terminal resistance of the motor [ohm]
 const float MU_MOTOR = 0.746e-3; //! Terminal inductance of the motor [H]
 const float J_ROTOR = 8.85*1e-7; //! Rotor inertia [gcm^2 -> kgm^2]
@@ -102,7 +102,7 @@ const float KD_CURR = 5.0e5; //! PID value
 const float KP_POS = 1.2e4; //! PID value
 const float KI_POS = 25.0;   //! PID value
 const float KD_POS = 1.0e4;  //! PID value
-// Tuned :D
+// Tuned :D Depend on encoder alpha!
 const float KP_VEL = 300.0; //! PID value
 const float KI_VEL = 10.0;   //! PID value
 const float KD_VEL = 100.0;    //! PID value
@@ -111,9 +111,9 @@ const float KP_STIFF = 400.0; //! Position
 const float KD_STIFF = 400.0;  //! Velocity
 // Tuned
 const float KP_FPR = 3.0e2; //! Position
+const float KV_FPR = 3.0e2; //! Velocity
 const float KF_FPR = 5.0e5; //! P Force
 const float KI_FPR = 2.0e3; //! I Force
-const float KV_FPR = 3.0e2; //! Velocity
 // Tuned 
 const float M_IMP = 0.1;     //! Inertia
 const float B_IMP = 400.0;   //! Damping
@@ -212,7 +212,7 @@ public:
    * \brief Calculates minimum jerk trajectory point.
    * 
    * Calculates minimum jerk trajectory point. 
-   * Allows to avoid step response and hence to obtain smoother trajectory.
+   * Allows to avoid step response and hence obtaining smoother trajectory.
    * The smaller T, the more rapid response. 
    * Similar to step response achieved by higher order systems.
    * 
@@ -251,7 +251,7 @@ float ControlStates::minimumJerk(float t) {
     t = T_ + ti_;       // Make sure the ouput stays at rf after T has passed
   }
   // Return smoother value
-  return ( T_ > 0 ? 
+  return ( T_ > 0 ?    // It has to be a positive value
          ( ri_ + (rf_-ri_)*(10*pow((t-ti_)/T_, 3) - 15*pow((t-ti_)/T_, 4) + 6*pow((t-ti_)/T_, 5)) ) :
            rf_ );
 }
@@ -312,14 +312,13 @@ PIDController::PIDController(float Kp, float Ki, float Kd,
 float PIDController::pid(const float error, const float d_error) {
   float u;                          // Control variable
   I_ += error;                      // Update integral
-  /* TODO Add this part? Set boundaries for integral?
+  /* TODO Set boundaries for integral
   if (I_ > I_max_ || I < I_min_) {  
     I_ = constrain(I_, I_min_, I_max_);  // Keep the integral within some boundaries
   }*/ 
   if ( !(dead_space_> 0) ) {              // If there is no deadband
     u = Kp_*error + Ki_*I_ + Kd_*d_error; // Calculate control
   }
-  // TODO I don't fully understand this part 
   else {                             // If there is a deadband 
     if (abs(error) < dead_space_) {  // And process variable is inside it
       u = Ki_*I_ + Kd_*d_error;      // Then update control value without P-term (just ID) TODO why?
@@ -353,7 +352,7 @@ public:
    * Parametrized constructor.
    * \param[in] alpha - first order filter parameter, 0<=alpha<=1
    */ 
-  CurrentSensor(float alpha);
+  CurrentSensor(const float alpha);
   
   /*!
    * \brief Measure current.
@@ -363,7 +362,7 @@ public:
    * \post sensed_value_ and current_ have new values
    * \return measured raw current [A]
    */
-  float senseCurrent(int FB_pin);
+  float senseCurrent(const int FB_pin);
   
   /*!
    * \brief Filters measured current and calculates a force value.
@@ -380,11 +379,11 @@ public:
   int sensed_value_;        //! analogRead maps input voltages between 0 and 3.3 V into int [0; 4095].
   float current_;           //! Sensed current in [A].
   float filtered_current_;  //! Filtered current in [A].
-  float k_tau_;             //! Torque constant; force = k_tau*current
+  float k_tau_;             //! Torque constant [Nm/A]; force = k_tau*current
   float force_;             //! Force [N] == i*k_tau
 };
 
-CurrentSensor::CurrentSensor(float alpha) :
+CurrentSensor::CurrentSensor(const float alpha) :
   alpha_(alpha), 
   sensed_value_(0), 
   current_(0.0), 
@@ -393,7 +392,7 @@ CurrentSensor::CurrentSensor(float alpha) :
   force_(0.0)
   {};
 
-float CurrentSensor::senseCurrent(int FB_pin) {
+float CurrentSensor::senseCurrent(const int FB_pin) {
   sensed_value_ = analogRead(FB_pin); // Map input voltages between 0 and 3.3 V into int [0; 4095]
   // Output provides analog current-sense feedback of approximately 0.525 V per A.
   return current_ =  mapFloat(sensed_value_, PWM_MIN * 1.0, PWM_MAX * 1.0, 0, 3.3) / 0.525; // -> [A]
@@ -494,7 +493,7 @@ float CurrentControl::currentControl(float current, float vel) {
   
   cs_.u_ = pid_.pid(cs_.e_, cs_.de_);  // Set a new control value
   feedforward_term_ = feedforward_.feedforward(current, FEED_SCALE*vel); // Calculate feedforward term
-  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range FIXME
+  feedforward_term_ = mapFloat(feedforward_term_, 0, 1.0*V_MAX, 1.0*PWM_MIN, 1.0*PWM_MAX); // Map from Voltage to PWM range
   cs_.u_ += feedforward_term_;  // Compute control with feedforward term to make control faster
   cs_.u_ = constrain(cs_.u_, static_cast<int>(pid_.u_min_), static_cast<int>(pid_.u_max_)); // Clamp
   // We don't want it to rotate in the other direction
@@ -504,7 +503,7 @@ float CurrentControl::currentControl(float current, float vel) {
   else if (cs_.u_ < 0 && dir > 0) {
     cs_.u_ = 0;
   }
-  return cs_.u_;    // Return CV
+  return cs_.u_;    // Return the CV
 }
 
 /*============================================================*/
@@ -698,7 +697,7 @@ float ForcePositionRegulator::forcePositionRegulator(const float pos, float forc
   fc_.cs_.e_ = fc_.cs_.r_ - force;              // Calculate error
   fc_.pid_.I_ += fc_.cs_.e_;                    // Update integral
  
-  // TODO Add this part? Setting boundaries
+  // TODO Setting boundaries for integral
   //if (I_ > I_max_ || I < I_min_) {  
   //  I_ -= force_cs_.e_; // Recalculate the Integral term (the latter to avoid windup)
   //} 
@@ -876,8 +875,8 @@ ForcePositionControl::ForcePositionControl(const float M, const CurrentControl& 
   {};
 
 float ForcePositionControl::forcePositionControl(const float pos, float force, const float vel) {
-  unsigned long time = micros();
-  unsigned long dt = time - time_;
+  const unsigned long time = micros();
+  const unsigned long dt = time - time_;
   time_ = time;
    
   pc_.cs_.r_ = pc_.cs_.minimumJerk(time/1.0e3);     // Set a new desired position [rad] (filtered)
@@ -899,8 +898,8 @@ float ForcePositionControl::forcePositionControl(const float pos, float force, c
   fc_.pid_.I_ += fc_.cs_.e_;                    // Update integral
 
   // Do the control
-  float pos_cv = M_*pc_.cs_.dde_ + pc_.pid_.Kd_*pc_.cs_.de_ + pc_.pid_.Kp_*pc_.cs_.e_;
-  float force_cv = fc_.pid_.Kp_*fc_.cs_.e_ + fc_.pid_.Ki_*fc_.pid_.I_;
+  const float pos_cv = M_*pc_.cs_.dde_ + pc_.pid_.Kd_*pc_.cs_.de_ + pc_.pid_.Kp_*pc_.cs_.e_;
+  const float force_cv = fc_.pid_.Kp_*fc_.cs_.e_ + fc_.pid_.Ki_*fc_.pid_.I_;
   cv_ = pos_cv + force_cv;
   
   cs_.u_ = cv_;
